@@ -2,6 +2,7 @@ import psycopg2
 
 from fastapi import APIRouter
 from psycopg2.extras import DictCursor
+from typing import Optional
 
 from .. import config
 from osmstats.users import User, UsersResult
@@ -13,13 +14,12 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=UsersResult, response_model_exclude_unset=True)
-def get_users():
+def get_users(user_id: Optional[int] = None):
     db_params = dict(config.items("PG"))
     conn = psycopg2.connect(**db_params)
 
     cur = conn.cursor(cursor_factory=DictCursor)
-    cur.execute(
-        """
+    query = """
         with 
             t1 as (
                 select 
@@ -124,8 +124,12 @@ def get_users():
             )
             as user_deleted_highway_km
             on user_deleted_highway_km.user_id = t3.user_id
+            
         """
-    )
+    if user_id is not None:
+        query = f"{query} where t3.user_id = {user_id}"
+
+    cur.execute(query)
     result_dto = []
     result = cur.fetchall()
 
