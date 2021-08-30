@@ -7,13 +7,8 @@ class User(BaseModel):
     username: str = None
     gender: str = None
     osm_registration: str = None
-    total_user_changesets: int
-    added_highway: int
-    modified_highway: int
-    deleted_highway: int
-    added_highway_km: float
-    modified_highway_km: float
-    deleted_highway_km: float
-
-class UsersResult(BaseModel):
-    users: List[User] = []
+    total_user_changesets: int = None
+    filtered_osm_tag: str = 'highway'
+    added: float
+    modified: float
+    deleted: float

@@ -2,10 +2,10 @@ import psycopg2
 
 from fastapi import APIRouter
 from psycopg2.extras import DictCursor
-from typing import Optional
+from typing import Optional, List
 
 from .. import config
-from osmstats.users import User, UsersResult
+from osmstats.users import User
 
 router = APIRouter(
     prefix="/users", 
@@ -13,13 +13,13 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/", response_model=UsersResult, response_model_exclude_unset=True)
-def get_users(user_id: Optional[int] = None):
+@router.get("/", response_model=List[User], response_model_exclude_unset=True)
+def get_users(user_id: Optional[int] = None, tag: Optional[str] = None):
     db_params = dict(config.items("PG"))
     conn = psycopg2.connect(**db_params)
-
     cur = conn.cursor(cursor_factory=DictCursor)
-    query = """
+
+    subquery = """
         with 
             t1 as (
                 select 
@@ -48,96 +48,79 @@ def get_users(user_id: Optional[int] = None):
                 where x.user_id = y.user_id
                 group by x.user_id
             )
-            select 
-                t3.user_id,
-                t3.total_user_changesets,
-                coalesce(user_added_highway.added_total, 0) as added_highway,
-                coalesce(user_modified_highway.modified_total, 0) as modified_highway,
-                coalesce(user_deleted_highway.deleted_total, 0) as deleted_highway,
-                coalesce(user_added_highway_km.added_total, 0) as added_highway_km,
-                coalesce(user_modified_highway_km.modified_total, 0) as modified_highway_km,
-                coalesce(user_deleted_highway_km.deleted_total, 0) as deleted_highway_km
-            from t3
-            left join (
+        """ 
+
+    if tag is not None:
+        osm_tag = tag
+    else:
+        osm_tag = 'highway'
+
+    main_query = f"""
+        select 
+            t3.user_id,
+            t3.total_user_changesets,
+            coalesce(user_added_{osm_tag}.added_total, 0) as added_{osm_tag},
+            coalesce(user_modified_{osm_tag}.modified_total, 0) as modified_{osm_tag},
+            coalesce(user_deleted_{osm_tag}.deleted_total, 0) as deleted_{osm_tag}
+        from t3
+    """
+
+    filter_query = f"""
+        left join (
                 select 
                     user_id, 
                     added_key, 
                     sum(added_value) as added_total 
                 from t2
-                where added_key = 'highway'
+                where added_key = '{osm_tag}'
                 group by user_id, added_key
             )
-            as user_added_highway
-            on user_added_highway.user_id = t3.user_id
+            as user_added_{osm_tag}
+            on user_added_{osm_tag}.user_id = t3.user_id
             left join (
                 select 
                     user_id, 
                     modified_key, 
                     sum(modified_value) AS modified_total
                 from t2
-                where modified_key = 'highway'
+                where modified_key = '{osm_tag}'
                 group by user_id, modified_key
             )
-            as user_modified_highway
-            on user_modified_highway.user_id = t3.user_id
+            as user_modified_{osm_tag}
+            on user_modified_{osm_tag}.user_id = t3.user_id
             left join (
                 select 
                     user_id, 
                     deleted_key, 
                     sum(deleted_value) AS deleted_total
                 from t2
-                where modified_key = 'highway'
+                where modified_key = '{osm_tag}'
                 group by user_id, deleted_key
             )
-            as user_deleted_highway
-            on user_deleted_highway.user_id = t3.user_id
-            left join (
-                select 
-                    user_id, 
-                    added_key, 
-                    sum(added_value) / 1000 AS added_total
-                from t2
-                where added_key = 'highway_km'
-                group by user_id, added_key
-            )
-            as user_added_highway_km
-            on user_added_highway_km.user_id = t3.user_id
-            left join (
-                select 
-                    user_id, 
-                    modified_key, 
-                    sum(modified_value) / 1000 AS modified_total 
-                from t2
-                where modified_key = 'highway_km'
-                group by user_id, modified_key
-            )
-            as user_modified_highway_km
-            on user_modified_highway_km.user_id = t3.user_id
-            left join (
-                select 
-                    user_id, 
-                    deleted_key, 
-                    sum(deleted_value) / 1000 AS deleted_total
-                from t2
-                where modified_key = 'highway_km'
-                group by user_id, deleted_key
-            )
-            as user_deleted_highway_km
-            on user_deleted_highway_km.user_id = t3.user_id
-            
-        """
+            as user_deleted_{osm_tag}
+            on user_deleted_{osm_tag}.user_id = t3.user_id
+    """
+
+    query = f"{subquery} {main_query} {filter_query}"
+    
     if user_id is not None:
         query = f"{query} where t3.user_id = {user_id}"
-
+    
     cur.execute(query)
     result_dto = []
     result = cur.fetchall()
 
-    for row in result:
-        user_dto = User(**dict(row))
+    for row in result:  
+        user_dto = User(
+            **dict(row), 
+            filtered_osm_tag=osm_tag, 
+            added=float(row[f'added_{osm_tag}']), 
+            modified=float(row[f'modified_{osm_tag}']), 
+            deleted=float(row[f'deleted_{osm_tag}'])
+        )
         result_dto.append(user_dto)
 
-    return {"users": result_dto}
+    return result_dto
 
  
 # subquery to extract changeset-keys/osm-tags
@@ -154,6 +137,3 @@ def get_users(user_id: Optional[int] = None):
 #                 DISTINCT((EACH(z.deleted)).key)
 #             FROM changesets z
 #             ;
-
-
-
