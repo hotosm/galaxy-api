@@ -1,4 +1,5 @@
 import psycopg2
+import datetime
 
 from fastapi import APIRouter
 from psycopg2.extras import DictCursor
@@ -14,32 +15,56 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[User], response_model_exclude_unset=True)
-def get_users(user_id: Optional[int] = None, tag: Optional[str] = None):
+def get_users(user_id: Optional[int] = None, 
+    tag: Optional[str] = None, 
+    start_date: Optional[datetime.date] = None,
+    end_date: Optional[datetime.date] = None,
+    ):
     db_params = dict(config.items("PG"))
     conn = psycopg2.connect(**db_params)
     cur = conn.cursor(cursor_factory=DictCursor)
 
-    subquery = """
+    t2 = f"""
+            select
+                user_id, 
+                (each(added)).key as added_key,
+                (each(added)).value::numeric as added_value,
+                (each(modified)).key AS modified_key,
+                (each(modified)).value::numeric as modified_value,
+                (each(deleted)).key as deleted_key,
+                (each(deleted)).value::numeric as deleted_value
+            from t1
+        """
+
+    filters = []
+    if start_date is not None:
+        start_date_filter = f"created_at > '{start_date.isoformat()}'"
+        filters.append(start_date_filter)
+    if end_date is not None:
+        end_date_filter = f"created_at < '{end_date.isoformat()}'"
+        filters.append(end_date_filter)
+
+    if len(filters) > 0:
+        sq = " and ".join(filters)
+        t2 = f"{t2} where {sq}"
+
+    if tag is not None:
+        osm_tag = tag
+    else:
+        osm_tag = 'highway'
+
+    query = f"""
         with 
             t1 as (
                 select 
                     cs.user_id,
+                    cs.created_at,
                     coalesce(cs.added, hstore('none', '0')) AS added,
                     coalesce(cs.modified, hstore('none', '0')) AS modified,
                     coalesce(cs.deleted, hstore('none', '0')) AS deleted
                 from changesets as cs
             ),
-            t2 as (
-                select
-                    user_id, 
-                    (each(added)).key as added_key,
-                    (each(added)).value::numeric as added_value,
-                    (each(modified)).key AS modified_key,
-                    (each(modified)).value::numeric as modified_value,
-                    (each(deleted)).key as deleted_key,
-                    (each(deleted)).value::numeric as deleted_value
-                from t1
-            ),
+            t2 as ({t2}),
             t3 as (
                 select 
                     x.user_id, 
@@ -48,24 +73,16 @@ def get_users(user_id: Optional[int] = None, tag: Optional[str] = None):
                 where x.user_id = y.user_id
                 group by x.user_id
             )
-        """ 
-
-    if tag is not None:
-        osm_tag = tag
-    else:
-        osm_tag = 'highway'
-
-    main_query = f"""
-        select 
+            select 
             t3.user_id,
             t3.total_user_changesets,
             coalesce(user_added_{osm_tag}.added_total, 0) as added_{osm_tag},
             coalesce(user_modified_{osm_tag}.modified_total, 0) as modified_{osm_tag},
             coalesce(user_deleted_{osm_tag}.deleted_total, 0) as deleted_{osm_tag}
         from t3
-    """
+    """ 
 
-    filter_query = f"""
+    tag_query = f"""
         left join (
                 select 
                     user_id, 
@@ -99,13 +116,13 @@ def get_users(user_id: Optional[int] = None, tag: Optional[str] = None):
             )
             as user_deleted_{osm_tag}
             on user_deleted_{osm_tag}.user_id = t3.user_id
-    """
+        """
 
-    query = f"{subquery} {main_query} {filter_query}"
-    
+    query = f"{query} {tag_query}"
+
     if user_id is not None:
         query = f"{query} where t3.user_id = {user_id}"
-    
+
     cur.execute(query)
     result_dto = []
     result = cur.fetchall()
@@ -121,19 +138,3 @@ def get_users(user_id: Optional[int] = None, tag: Optional[str] = None):
         result_dto.append(user_dto)
 
     return result_dto
-
- 
-# subquery to extract changeset-keys/osm-tags
-# t4 AS (
-#             SELECT 
-#                 DISTINCT((EACH(x.added)).key) AS "changeset_keys" 
-#             FROM changesets x
-#             UNION
-#              SELECT 
-#                 DISTINCT((EACH(y.modified)).key)
-#             FROM changesets y
-#             UNION
-#              SELECT 
-#                 DISTINCT((EACH(z.deleted)).key)
-#             FROM changesets z
-#             ;

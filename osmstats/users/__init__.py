@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from typing import List
 
-
 class User(BaseModel):
     user_id: int
     username: str = None
