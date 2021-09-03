@@ -67,14 +67,17 @@ def get_users(user_id: Optional[int] = None,
             t2 as ({t2}),
             t3 as (
                 select 
-                    x.user_id, 
-                    count(distinct(x.id)) as total_user_changesets
-                from changesets as x, changesets as y
-                where x.user_id = y.user_id
-                group by x.user_id
+                    x.user_id,
+                    u.username,
+                    count(x.id) as total_user_changesets
+                from changesets as x
+                left join users as u 
+                    on x.user_id = u.id 
+                group by x.user_id, u.username 
             )
             select 
             t3.user_id,
+            t3.username,
             t3.total_user_changesets,
             coalesce(user_added_{osm_tag}.added_total, 0) as added_{osm_tag},
             coalesce(user_modified_{osm_tag}.modified_total, 0) as modified_{osm_tag},
