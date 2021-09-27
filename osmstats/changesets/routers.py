@@ -64,7 +64,7 @@ def count_features(params: InsightsParams):
     changeset_query = f"SELECT id FROM osm_changeset WHERE {timestamp_filter} AND ({hashtag_filter})"
 
     # OSM element history query.
-    osm_history_query = f"SELECT (each({hstore_column})).key AS feature, action, count(distinct id) AS count FROM osm_element_history where changeset in ({changeset_query}) group by feature, action ORDER BY feature;"
+    osm_history_query = f"SELECT (each({hstore_column})).key AS feature, action, count(distinct id) AS count FROM osm_element_history where changeset in ({changeset_query}) group by feature, action ORDER BY count desc;"
 
     cur.execute(osm_history_query)
     result = cur.fetchall()
