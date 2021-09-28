@@ -1,20 +1,16 @@
-from fastapi import Request, APIRouter, Depends, Header, HTTPException, status
+from fastapi import APIRouter
 
 import psycopg2
 
 from psycopg2 import sql
 from psycopg2.extras import DictCursor
-from typing import Optional
 
 from .. import config
 
-from . import (
-    MappedFeature,
-    MapathonSummary,
-    MapathonRequestParams
-)
+from . import MappedFeature, MapathonSummary, MapathonRequestParams
 
 router = APIRouter(prefix="/mapathon")
+
 
 @router.post("/summary", response_model=MapathonSummary)
 def count_features(params: MapathonRequestParams):
@@ -81,5 +77,3 @@ def count_features(params: MapathonRequestParams):
     )
 
     return report
-
-

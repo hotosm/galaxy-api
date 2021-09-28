@@ -7,6 +7,7 @@ from datetime import datetime, date, timedelta
 
 from .. import BaseModel
 
+
 class PolygonFilter(Enum):
     iso3 = "iso3"
     geojson = "geojson"

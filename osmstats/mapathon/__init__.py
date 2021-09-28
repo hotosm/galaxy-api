@@ -1,7 +1,8 @@
 from typing import List, Union
-from pydantic import ValidationError, validator
+from pydantic import validator
 from .. import BaseModel
 from datetime import datetime, date, timedelta
+
 
 class MappedFeature(BaseModel):
     feature: str
