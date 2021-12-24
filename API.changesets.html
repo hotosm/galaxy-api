@@ -50,13 +50,13 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="API.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="API.html#api-data-quality-module">API.data_quality module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="API.html#api-main-module">API.main module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="API.html#api-mapathon-module">API.mapathon module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="API.html#api-organization-module">API.organization module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="API.html#api-osm-users-module">API.osm_users module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="API.html#api-trainings-module">API.trainings module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="API.html#module-contents">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="API.html#module-API.data_quality">API.data_quality module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="API.html#module-API.main">API.main module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="API.html#module-API.mapathon">API.mapathon module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="API.html#module-API.organization">API.organization module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="API.html#module-API.osm_users">API.osm_users module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="API.html#module-API.trainings">API.trainings module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="API.html#module-API">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -94,14 +94,128 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
 </section>
-<section id="api-changesets-routers-module">
-<h2>API.changesets.routers module<a class="headerlink" href="#api-changesets-routers-module" title="Permalink to this headline"></a></h2>
+<section id="module-API.changesets.routers">
+<span id="api-changesets-routers-module"></span><h2>API.changesets.routers module<a class="headerlink" href="#module-API.changesets.routers" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="API.changesets.routers.get_changesets">
+<span class="sig-prename descclassname"><span class="pre">API.changesets.routers.</span></span><span class="sig-name descname"><span class="pre">get_changesets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#API.changesets.FilterParams" title="API.changesets.FilterParams"><span class="pre">API.changesets.FilterParams</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.changesets.routers.get_changesets" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
-<section id="api-changesets-utils-module">
-<h2>API.changesets.utils module<a class="headerlink" href="#api-changesets-utils-module" title="Permalink to this headline"></a></h2>
+<section id="module-API.changesets.utils">
+<span id="api-changesets-utils-module"></span><h2>API.changesets.utils module<a class="headerlink" href="#module-API.changesets.utils" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="API.changesets.utils.geom_filter_subquery">
+<span class="sig-prename descclassname"><span class="pre">API.changesets.utils.</span></span><span class="sig-name descname"><span class="pre">geom_filter_subquery</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.changesets.utils.geom_filter_subquery" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
-<section id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline"></a></h2>
+<section id="module-API.changesets">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-API.changesets" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="API.changesets.ChangesetResult">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">API.changesets.</span></span><span class="sig-name descname"><span class="pre">ChangesetResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalChangesets</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributors</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addedHighway</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modifiedHighway</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deletedHighway</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addedHighwayKm</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modifiedHighwayKm</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deletedHighwayKm</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.changesets.ChangesetResult" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="API.html#API.BaseModel" title="API.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">API.BaseModel</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.changesets.ChangesetResult.added_highway">
+<span class="sig-name descname"><span class="pre">added_highway</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#API.changesets.ChangesetResult.added_highway" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.changesets.ChangesetResult.added_highway_km">
+<span class="sig-name descname"><span class="pre">added_highway_km</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#API.changesets.ChangesetResult.added_highway_km" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.changesets.ChangesetResult.contributors">
+<span class="sig-name descname"><span class="pre">contributors</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#API.changesets.ChangesetResult.contributors" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.changesets.ChangesetResult.deleted_highway">
+<span class="sig-name descname"><span class="pre">deleted_highway</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#API.changesets.ChangesetResult.deleted_highway" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.changesets.ChangesetResult.deleted_highway_km">
+<span class="sig-name descname"><span class="pre">deleted_highway_km</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#API.changesets.ChangesetResult.deleted_highway_km" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.changesets.ChangesetResult.modified_highway">
+<span class="sig-name descname"><span class="pre">modified_highway</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#API.changesets.ChangesetResult.modified_highway" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.changesets.ChangesetResult.modified_highway_km">
+<span class="sig-name descname"><span class="pre">modified_highway_km</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#API.changesets.ChangesetResult.modified_highway_km" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.changesets.ChangesetResult.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#API.changesets.ChangesetResult.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.changesets.ChangesetResult.total_changesets">
+<span class="sig-name descname"><span class="pre">total_changesets</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#API.changesets.ChangesetResult.total_changesets" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="API.changesets.FilterParams">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">API.changesets.</span></span><span class="sig-name descname"><span class="pre">FilterParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#API.changesets.PolygonFilter" title="API.changesets.PolygonFilter"><span class="pre">API.changesets.PolygonFilter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">geojson_pydantic.geometries.Polygon</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hashtag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startDatetime</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">,</span> </span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endDatetime</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">,</span> </span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.changesets.FilterParams" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="API.html#API.BaseModel" title="API.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">API.BaseModel</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.changesets.FilterParams.end_datetime">
+<span class="sig-name descname"><span class="pre">end_datetime</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">,</span> </span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#API.changesets.FilterParams.end_datetime" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.changesets.FilterParams.hashtag">
+<span class="sig-name descname"><span class="pre">hashtag</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#API.changesets.FilterParams.hashtag" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="API.changesets.FilterParams.matching_types">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">matching_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.changesets.FilterParams.matching_types" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.changesets.FilterParams.start_datetime">
+<span class="sig-name descname"><span class="pre">start_datetime</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">,</span> </span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#API.changesets.FilterParams.start_datetime" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.changesets.FilterParams.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="#API.changesets.PolygonFilter" title="API.changesets.PolygonFilter"><span class="pre">API.changesets.PolygonFilter</span></a></em><a class="headerlink" href="#API.changesets.FilterParams.type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.changesets.FilterParams.value">
+<span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="pre">:</span> <span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">geojson_pydantic.geometries.Polygon</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#API.changesets.FilterParams.value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="API.changesets.PolygonFilter">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">API.changesets.</span></span><span class="sig-name descname"><span class="pre">PolygonFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.changesets.PolygonFilter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.changesets.PolygonFilter.geojson">
+<span class="sig-name descname"><span class="pre">geojson</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'geojson'</span></em><a class="headerlink" href="#API.changesets.PolygonFilter.geojson" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.changesets.PolygonFilter.iso3">
+<span class="sig-name descname"><span class="pre">iso3</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'iso3'</span></em><a class="headerlink" href="#API.changesets.PolygonFilter.iso3" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 

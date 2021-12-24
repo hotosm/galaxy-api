@@ -47,9 +47,9 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="galaxy.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="galaxy.html#galaxy-app-module">galaxy.app module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="galaxy.html#galaxy-config-module">galaxy.config module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="galaxy.html#module-contents">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="galaxy.html#module-galaxy.app">galaxy.app module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="galaxy.html#module-galaxy.config">galaxy.config module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="galaxy.html#module-galaxy">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="API.html">API package</a></li>
@@ -88,11 +88,101 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
 </section>
-<section id="galaxy-query-builder-builder-module">
-<h2>galaxy.query_builder.builder module<a class="headerlink" href="#galaxy-query-builder-builder-module" title="Permalink to this headline"></a></h2>
+<section id="module-galaxy.query_builder.builder">
+<span id="galaxy-query-builder-builder-module"></span><h2>galaxy.query_builder.builder module<a class="headerlink" href="#module-galaxy.query_builder.builder" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="galaxy.query_builder.builder.create_UserStats_get_statistics_query">
+<span class="sig-prename descclassname"><span class="pre">galaxy.query_builder.builder.</span></span><span class="sig-name descname"><span class="pre">create_UserStats_get_statistics_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">con</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.query_builder.builder.create_UserStats_get_statistics_query" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="galaxy.query_builder.builder.create_changeset_query">
+<span class="sig-prename descclassname"><span class="pre">galaxy.query_builder.builder.</span></span><span class="sig-name descname"><span class="pre">create_changeset_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.query_builder.builder.create_changeset_query" title="Permalink to this definition"></a></dt>
+<dd><p>returns the changeset query</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="galaxy.query_builder.builder.create_hashtag_filter_query">
+<span class="sig-prename descclassname"><span class="pre">galaxy.query_builder.builder.</span></span><span class="sig-name descname"><span class="pre">create_hashtag_filter_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hashtags</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conn</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.query_builder.builder.create_hashtag_filter_query" title="Permalink to this definition"></a></dt>
+<dd><p>returns hastag filter query</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="galaxy.query_builder.builder.create_hashtagfilter_underpass">
+<span class="sig-prename descclassname"><span class="pre">galaxy.query_builder.builder.</span></span><span class="sig-name descname"><span class="pre">create_hashtagfilter_underpass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hashtags</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columnname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.query_builder.builder.create_hashtagfilter_underpass" title="Permalink to this definition"></a></dt>
+<dd><p>Generates hashtag filter query on the basis of list of hastags.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="galaxy.query_builder.builder.create_osm_history_query">
+<span class="sig-prename descclassname"><span class="pre">galaxy.query_builder.builder.</span></span><span class="sig-name descname"><span class="pre">create_osm_history_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">changeset_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_username</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.query_builder.builder.create_osm_history_query" title="Permalink to this definition"></a></dt>
+<dd><p>returns osm history query</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="galaxy.query_builder.builder.create_timestamp_filter_query">
+<span class="sig-prename descclassname"><span class="pre">galaxy.query_builder.builder.</span></span><span class="sig-name descname"><span class="pre">create_timestamp_filter_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.query_builder.builder.create_timestamp_filter_query" title="Permalink to this definition"></a></dt>
+<dd><p>returns timestamp filter query</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="galaxy.query_builder.builder.create_users_contributions_query">
+<span class="sig-prename descclassname"><span class="pre">galaxy.query_builder.builder.</span></span><span class="sig-name descname"><span class="pre">create_users_contributions_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">changeset_query</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.query_builder.builder.create_users_contributions_query" title="Permalink to this definition"></a></dt>
+<dd><p>returns user contribution query</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="galaxy.query_builder.builder.create_userstats_get_statistics_with_hashtags_query">
+<span class="sig-prename descclassname"><span class="pre">galaxy.query_builder.builder.</span></span><span class="sig-name descname"><span class="pre">create_userstats_get_statistics_with_hashtags_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">con</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.query_builder.builder.create_userstats_get_statistics_with_hashtags_query" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="galaxy.query_builder.builder.generate_data_quality_TM_query">
+<span class="sig-prename descclassname"><span class="pre">galaxy.query_builder.builder.</span></span><span class="sig-name descname"><span class="pre">generate_data_quality_TM_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.query_builder.builder.generate_data_quality_TM_query" title="Permalink to this definition"></a></dt>
+<dd><p>returns data quality TM query with filters and parameteres provided</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="galaxy.query_builder.builder.generate_data_quality_hashtag_reports">
+<span class="sig-prename descclassname"><span class="pre">galaxy.query_builder.builder.</span></span><span class="sig-name descname"><span class="pre">generate_data_quality_hashtag_reports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.query_builder.builder.generate_data_quality_hashtag_reports" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="galaxy.query_builder.builder.generate_data_quality_username_query">
+<span class="sig-prename descclassname"><span class="pre">galaxy.query_builder.builder.</span></span><span class="sig-name descname"><span class="pre">generate_data_quality_username_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.query_builder.builder.generate_data_quality_username_query" title="Permalink to this definition"></a></dt>
+<dd><p>returns data quality username query with filters and parameteres provided</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="galaxy.query_builder.builder.generate_filter_training_query">
+<span class="sig-prename descclassname"><span class="pre">galaxy.query_builder.builder.</span></span><span class="sig-name descname"><span class="pre">generate_filter_training_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.query_builder.builder.generate_filter_training_query" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="galaxy.query_builder.builder.generate_mapathon_summary_underpass_query">
+<span class="sig-prename descclassname"><span class="pre">galaxy.query_builder.builder.</span></span><span class="sig-name descname"><span class="pre">generate_mapathon_summary_underpass_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.query_builder.builder.generate_mapathon_summary_underpass_query" title="Permalink to this definition"></a></dt>
+<dd><p>Generates mapathon query from underpass</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="galaxy.query_builder.builder.generate_organization_hashtag_reports">
+<span class="sig-prename descclassname"><span class="pre">galaxy.query_builder.builder.</span></span><span class="sig-name descname"><span class="pre">generate_organization_hashtag_reports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.query_builder.builder.generate_organization_hashtag_reports" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="galaxy.query_builder.builder.generate_training_organisations_query">
+<span class="sig-prename descclassname"><span class="pre">galaxy.query_builder.builder.</span></span><span class="sig-name descname"><span class="pre">generate_training_organisations_query</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.query_builder.builder.generate_training_organisations_query" title="Permalink to this definition"></a></dt>
+<dd><p>Generates query for listing out all the organisations listed in training table from underpass</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="galaxy.query_builder.builder.generate_training_query">
+<span class="sig-prename descclassname"><span class="pre">galaxy.query_builder.builder.</span></span><span class="sig-name descname"><span class="pre">generate_training_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_query</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.query_builder.builder.generate_training_query" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
-<section id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline"></a></h2>
+<section id="module-galaxy.query_builder">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-galaxy.query_builder" title="Permalink to this headline"></a></h2>
 </section>
 </section>
 
