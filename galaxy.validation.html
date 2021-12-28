@@ -324,8 +324,33 @@ from_timestamp and to_timestamp</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.IssueType.COMPLETE">
+<span class="sig-name descname"><span class="pre">COMPLETE</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'complete'</span></em><a class="headerlink" href="#galaxy.validation.models.IssueType.COMPLETE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.IssueType.DUPLICATE">
+<span class="sig-name descname"><span class="pre">DUPLICATE</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'duplicate'</span></em><a class="headerlink" href="#galaxy.validation.models.IssueType.DUPLICATE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="galaxy.validation.models.IssueType.INCOMPLETE">
-<span class="sig-name descname"><span class="pre">INCOMPLETE</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'incomplete_tags'</span></em><a class="headerlink" href="#galaxy.validation.models.IssueType.INCOMPLETE" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">INCOMPLETE</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'incomplete'</span></em><a class="headerlink" href="#galaxy.validation.models.IssueType.INCOMPLETE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.IssueType.NO_TAGS">
+<span class="sig-name descname"><span class="pre">NO_TAGS</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'notags'</span></em><a class="headerlink" href="#galaxy.validation.models.IssueType.NO_TAGS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.IssueType.ORPHAN">
+<span class="sig-name descname"><span class="pre">ORPHAN</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'orphan'</span></em><a class="headerlink" href="#galaxy.validation.models.IssueType.ORPHAN" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.IssueType.OVERLAPPING">
+<span class="sig-name descname"><span class="pre">OVERLAPPING</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'overlaping'</span></em><a class="headerlink" href="#galaxy.validation.models.IssueType.OVERLAPPING" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -466,7 +491,7 @@ from_timestamp and to_timestamp</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="galaxy.validation.models.OrganizationHashtag">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">OrganizationHashtag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hashtag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startDate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">datetime.date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endDate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">datetime.date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalNewBuildings</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalUniqueContributors</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalNewRoadMeters</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.OrganizationHashtag" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">OrganizationHashtag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hashtag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startDate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">datetime.date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endDate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">datetime.date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalNewBuildings</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalUniqueContributors</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalNewRoadKm</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.OrganizationHashtag" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#galaxy.validation.models.BaseModel" title="galaxy.validation.models.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">galaxy.validation.models.BaseModel</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="galaxy.validation.models.OrganizationHashtag.end_date">
@@ -494,8 +519,8 @@ from_timestamp and to_timestamp</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="galaxy.validation.models.OrganizationHashtag.total_new_road_meters">
-<span class="sig-name descname"><span class="pre">total_new_road_meters</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#galaxy.validation.models.OrganizationHashtag.total_new_road_meters" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="galaxy.validation.models.OrganizationHashtag.total_new_road_km">
+<span class="sig-name descname"><span class="pre">total_new_road_km</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#galaxy.validation.models.OrganizationHashtag.total_new_road_km" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
