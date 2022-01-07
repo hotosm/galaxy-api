@@ -282,6 +282,33 @@ from_timestamp and to_timestamp</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="galaxy.validation.models.FeatureTypeRawData">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">FeatureTypeRawData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.FeatureTypeRawData" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.FeatureTypeRawData.BUILDING">
+<span class="sig-name descname"><span class="pre">BUILDING</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'building'</span></em><a class="headerlink" href="#galaxy.validation.models.FeatureTypeRawData.BUILDING" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.FeatureTypeRawData.HIGHWAY">
+<span class="sig-name descname"><span class="pre">HIGHWAY</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'highway'</span></em><a class="headerlink" href="#galaxy.validation.models.FeatureTypeRawData.HIGHWAY" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.FeatureTypeRawData.LANDUSE">
+<span class="sig-name descname"><span class="pre">LANDUSE</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'landuse'</span></em><a class="headerlink" href="#galaxy.validation.models.FeatureTypeRawData.LANDUSE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.FeatureTypeRawData.WATERWAY">
+<span class="sig-name descname"><span class="pre">WATERWAY</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'waterway'</span></em><a class="headerlink" href="#galaxy.validation.models.FeatureTypeRawData.WATERWAY" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="galaxy.validation.models.Frequency">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">Frequency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.Frequency" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
@@ -304,6 +331,22 @@ from_timestamp and to_timestamp</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="galaxy.validation.models.Frequency.YEARLY">
 <span class="sig-name descname"><span class="pre">YEARLY</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'y'</span></em><a class="headerlink" href="#galaxy.validation.models.Frequency.YEARLY" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="galaxy.validation.models.HashtagParams">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">HashtagParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hashtags</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.HashtagParams" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#galaxy.validation.models.BaseModel" title="galaxy.validation.models.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">galaxy.validation.models.BaseModel</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="galaxy.validation.models.HashtagParams.check_hashtag_string">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">check_hashtag_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.HashtagParams.check_hashtag_string" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.HashtagParams.hashtags">
+<span class="sig-name descname"><span class="pre">hashtags</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#galaxy.validation.models.HashtagParams.hashtags" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -606,6 +649,95 @@ from_timestamp and to_timestamp</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataCurrentParams">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">RawDataCurrentParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">geojson_pydantic.geometries.MultiPolygon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputType</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#galaxy.validation.models.RawDataOutputType" title="galaxy.validation.models.RawDataOutputType"><span class="pre">galaxy.validation.models.RawDataOutputType</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">featureType</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.FeatureTypeRawData" title="galaxy.validation.models.FeatureTypeRawData"><span class="pre">galaxy.validation.models.FeatureTypeRawData</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.RawDataCurrentParams" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#galaxy.validation.models.BaseModel" title="galaxy.validation.models.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">galaxy.validation.models.BaseModel</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataCurrentParams.check_geometry_area">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">check_geometry_area</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.RawDataCurrentParams.check_geometry_area" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataCurrentParams.feature_type">
+<span class="sig-name descname"><span class="pre">feature_type</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.FeatureTypeRawData" title="galaxy.validation.models.FeatureTypeRawData"><span class="pre">galaxy.validation.models.FeatureTypeRawData</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#galaxy.validation.models.RawDataCurrentParams.feature_type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataCurrentParams.geometry">
+<span class="sig-name descname"><span class="pre">geometry</span></span><em class="property"><span class="pre">:</span> <span class="pre">geojson_pydantic.geometries.MultiPolygon</span></em><a class="headerlink" href="#galaxy.validation.models.RawDataCurrentParams.geometry" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataCurrentParams.output_type">
+<span class="sig-name descname"><span class="pre">output_type</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.RawDataOutputType" title="galaxy.validation.models.RawDataOutputType"><span class="pre">galaxy.validation.models.RawDataOutputType</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#galaxy.validation.models.RawDataCurrentParams.output_type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataHistoricalParams">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">RawDataHistoricalParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hashtags</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fromTimestamp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">toTimestamp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">geojson_pydantic.geometries.MultiPolygon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputType</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#galaxy.validation.models.RawDataOutputType" title="galaxy.validation.models.RawDataOutputType"><span class="pre">galaxy.validation.models.RawDataOutputType</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">featureType</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.FeatureTypeRawData" title="galaxy.validation.models.FeatureTypeRawData"><span class="pre">galaxy.validation.models.FeatureTypeRawData</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.RawDataHistoricalParams" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#galaxy.validation.models.HashtagParams" title="galaxy.validation.models.HashtagParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">galaxy.validation.models.HashtagParams</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataHistoricalParams.check_date_difference">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">check_date_difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.RawDataHistoricalParams.check_date_difference" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataHistoricalParams.check_geometry_area">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">check_geometry_area</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.RawDataHistoricalParams.check_geometry_area" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataHistoricalParams.feature_type">
+<span class="sig-name descname"><span class="pre">feature_type</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.FeatureTypeRawData" title="galaxy.validation.models.FeatureTypeRawData"><span class="pre">galaxy.validation.models.FeatureTypeRawData</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#galaxy.validation.models.RawDataHistoricalParams.feature_type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataHistoricalParams.from_timestamp">
+<span class="sig-name descname"><span class="pre">from_timestamp</span></span><em class="property"><span class="pre">:</span> <span class="pre">datetime.datetime</span></em><a class="headerlink" href="#galaxy.validation.models.RawDataHistoricalParams.from_timestamp" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataHistoricalParams.geometry">
+<span class="sig-name descname"><span class="pre">geometry</span></span><em class="property"><span class="pre">:</span> <span class="pre">geojson_pydantic.geometries.MultiPolygon</span></em><a class="headerlink" href="#galaxy.validation.models.RawDataHistoricalParams.geometry" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataHistoricalParams.output_type">
+<span class="sig-name descname"><span class="pre">output_type</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.RawDataOutputType" title="galaxy.validation.models.RawDataOutputType"><span class="pre">galaxy.validation.models.RawDataOutputType</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#galaxy.validation.models.RawDataHistoricalParams.output_type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataHistoricalParams.to_timestamp">
+<span class="sig-name descname"><span class="pre">to_timestamp</span></span><em class="property"><span class="pre">:</span> <span class="pre">datetime.datetime</span></em><a class="headerlink" href="#galaxy.validation.models.RawDataHistoricalParams.to_timestamp" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataOutputType">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">RawDataOutputType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.RawDataOutputType" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataOutputType.GEOJSON">
+<span class="sig-name descname"><span class="pre">GEOJSON</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'geojson'</span></em><a class="headerlink" href="#galaxy.validation.models.RawDataOutputType.GEOJSON" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataOutputType.KML">
+<span class="sig-name descname"><span class="pre">KML</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'kml'</span></em><a class="headerlink" href="#galaxy.validation.models.RawDataOutputType.KML" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.RawDataOutputType.SHAPEFILE">
+<span class="sig-name descname"><span class="pre">SHAPEFILE</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'shp'</span></em><a class="headerlink" href="#galaxy.validation.models.RawDataOutputType.SHAPEFILE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="galaxy.validation.models.Source">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">Source</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.Source" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
@@ -799,7 +931,18 @@ Unprocessable Entity: [If any skill type or event type is out of predefined Enum
 <dl class="py class">
 <dt class="sig sig-object py" id="galaxy.validation.models.UserStatsParams">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">UserStatsParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fromTimestamp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">,</span> </span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">toTimestamp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">,</span> </span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">userId</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hashtags</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projectIds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.UserStatsParams" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#galaxy.validation.models.TimeStampParams" title="galaxy.validation.models.TimeStampParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">galaxy.validation.models.TimeStampParams</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#galaxy.validation.models.BaseModel" title="galaxy.validation.models.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">galaxy.validation.models.BaseModel</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserStatsParams.check_timestamp_diffs">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">check_timestamp_diffs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.UserStatsParams.check_timestamp_diffs" title="Permalink to this definition"></a></dt>
+<dd><p>checks the timestap difference</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserStatsParams.from_timestamp">
+<span class="sig-name descname"><span class="pre">from_timestamp</span></span><em class="property"><span class="pre">:</span> <span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">,</span> </span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#galaxy.validation.models.UserStatsParams.from_timestamp" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="galaxy.validation.models.UserStatsParams.hashtags">
 <span class="sig-name descname"><span class="pre">hashtags</span></span><em class="property"><span class="pre">:</span> <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#galaxy.validation.models.UserStatsParams.hashtags" title="Permalink to this definition"></a></dt>
@@ -808,6 +951,11 @@ Unprocessable Entity: [If any skill type or event type is out of predefined Enum
 <dl class="py attribute">
 <dt class="sig sig-object py" id="galaxy.validation.models.UserStatsParams.project_ids">
 <span class="sig-name descname"><span class="pre">project_ids</span></span><em class="property"><span class="pre">:</span> <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#galaxy.validation.models.UserStatsParams.project_ids" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserStatsParams.to_timestamp">
+<span class="sig-name descname"><span class="pre">to_timestamp</span></span><em class="property"><span class="pre">:</span> <span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">,</span> </span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#galaxy.validation.models.UserStatsParams.to_timestamp" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
