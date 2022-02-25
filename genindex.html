@@ -300,10 +300,10 @@
         <li><a href="galaxy.html#galaxy.Database.close_conn">(galaxy.Database method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="galaxy.validation.html#galaxy.validation.models.IssueType.COMPLETE">COMPLETE (galaxy.validation.models.IssueType attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="galaxy.html#galaxy.app.Database.connect">connect() (galaxy.app.Database method)</a>
 
       <ul>
@@ -327,6 +327,10 @@
       <li><a href="galaxy.query_builder.html#galaxy.query_builder.builder.create_osm_history_query">create_osm_history_query() (in module galaxy.query_builder.builder)</a>
 </li>
       <li><a href="galaxy.query_builder.html#galaxy.query_builder.builder.create_timestamp_filter_query">create_timestamp_filter_query() (in module galaxy.query_builder.builder)</a>
+</li>
+      <li><a href="galaxy.query_builder.html#galaxy.query_builder.builder.create_user_tasks_mapped_and_validated_query">create_user_tasks_mapped_and_validated_query() (in module galaxy.query_builder.builder)</a>
+</li>
+      <li><a href="galaxy.query_builder.html#galaxy.query_builder.builder.create_user_time_spent_mapping_and_validating_query">create_user_time_spent_mapping_and_validating_query() (in module galaxy.query_builder.builder)</a>
 </li>
       <li><a href="galaxy.query_builder.html#galaxy.query_builder.builder.create_users_contributions_query">create_users_contributions_query() (in module galaxy.query_builder.builder)</a>
 </li>
@@ -595,6 +599,10 @@
         <li><a href="galaxy.html#galaxy.Mapathon.get_summary">(galaxy.Mapathon method)</a>
 </li>
       </ul></li>
+      <li><a href="galaxy.html#galaxy.app.TaskingManager.get_tasks_mapped_and_validated_per_user">get_tasks_mapped_and_validated_per_user() (galaxy.app.TaskingManager method)</a>
+</li>
+      <li><a href="galaxy.html#galaxy.app.TaskingManager.get_time_spent_mapping_and_validating_per_user">get_time_spent_mapping_and_validating_per_user() (galaxy.app.TaskingManager method)</a>
+</li>
       <li><a href="API.html#API.trainings.get_trainings_list">get_trainings_list() (in module API.trainings)</a>
 </li>
       <li><a href="galaxy.html#galaxy.app.Training.get_trainingslist">get_trainingslist() (galaxy.app.Training method)</a>
@@ -723,7 +731,7 @@
         <li><a href="galaxy.validation.html#galaxy.validation.models.MapathonSummary.mapped_features">(galaxy.validation.models.MapathonSummary attribute)</a>
 </li>
       </ul></li>
-      <li><a href="galaxy.validation.html#galaxy.validation.models.MapathonContributor.mapped_tasks">mapped_tasks (galaxy.validation.models.MapathonContributor attribute)</a>
+      <li><a href="galaxy.validation.html#galaxy.validation.models.UserTaskStats.mapped_task_count">mapped_task_count (galaxy.validation.models.UserTaskStats attribute)</a>
 </li>
       <li><a href="galaxy.validation.html#galaxy.validation.models.MappedFeature">MappedFeature (class in galaxy.validation.models)</a>
 </li>
@@ -922,9 +930,23 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="galaxy.validation.html#galaxy.validation.models.TMUserStats.task_stats">task_stats (galaxy.validation.models.TMUserStats attribute)</a>
+</li>
+      <li><a href="galaxy.html#galaxy.app.TaskingManager">TaskingManager (class in galaxy.app)</a>
+</li>
       <li><a href="galaxy.validation.html#galaxy.validation.models.Trainings.tid">tid (galaxy.validation.models.Trainings attribute)</a>
 </li>
+      <li><a href="galaxy.validation.html#galaxy.validation.models.UserTimeStats.time_spent_mapping">time_spent_mapping (galaxy.validation.models.UserTimeStats attribute)</a>
+</li>
+      <li><a href="galaxy.validation.html#galaxy.validation.models.UserTimeStats.time_spent_validating">time_spent_validating (galaxy.validation.models.UserTimeStats attribute)</a>
+</li>
+      <li><a href="galaxy.validation.html#galaxy.validation.models.TMUserStats.time_stats">time_stats (galaxy.validation.models.TMUserStats attribute)</a>
+</li>
       <li><a href="galaxy.validation.html#galaxy.validation.models.TimeStampParams">TimeStampParams (class in galaxy.validation.models)</a>
+</li>
+      <li><a href="galaxy.validation.html#galaxy.validation.models.MapathonDetail.tm_stats">tm_stats (galaxy.validation.models.MapathonDetail attribute)</a>
+</li>
+      <li><a href="galaxy.validation.html#galaxy.validation.models.TMUserStats">TMUserStats (class in galaxy.validation.models)</a>
 </li>
       <li><a href="API.html#API.to_camel">to_camel() (in module API)</a>
 
@@ -962,6 +984,8 @@
         <li><a href="galaxy.html#galaxy.Output.to_JSON">(galaxy.Output method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="galaxy.html#galaxy.app.Output.to_list">to_list() (galaxy.app.Output method)</a>
 
       <ul>
@@ -976,8 +1000,6 @@
         <li><a href="galaxy.validation.html#galaxy.validation.models.UsersListParams.to_timestamp">(galaxy.validation.models.UsersListParams attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="API.auth.html#API.auth.Token">Token (class in API.auth)</a>
 </li>
       <li><a href="galaxy.validation.html#galaxy.validation.models.TrainingParams.topic_type">topic_type (galaxy.validation.models.TrainingParams attribute)</a>
@@ -1035,6 +1057,10 @@
 </li>
         <li><a href="galaxy.validation.html#galaxy.validation.models.UserStatsParams.user_id">(galaxy.validation.models.UserStatsParams attribute)</a>
 </li>
+        <li><a href="galaxy.validation.html#galaxy.validation.models.UserTaskStats.user_id">(galaxy.validation.models.UserTaskStats attribute)</a>
+</li>
+        <li><a href="galaxy.validation.html#galaxy.validation.models.UserTimeStats.user_id">(galaxy.validation.models.UserTimeStats attribute)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -1058,13 +1084,17 @@
 </li>
       <li><a href="galaxy.validation.html#galaxy.validation.models.UserStatsParams">UserStatsParams (class in galaxy.validation.models)</a>
 </li>
+      <li><a href="galaxy.validation.html#galaxy.validation.models.UserTaskStats">UserTaskStats (class in galaxy.validation.models)</a>
+</li>
+      <li><a href="galaxy.validation.html#galaxy.validation.models.UserTimeStats">UserTimeStats (class in galaxy.validation.models)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="galaxy.validation.html#galaxy.validation.models.MapathonContributor.validated_tasks">validated_tasks (galaxy.validation.models.MapathonContributor attribute)</a>
+      <li><a href="galaxy.validation.html#galaxy.validation.models.UserTaskStats.validated_task_count">validated_task_count (galaxy.validation.models.UserTaskStats attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
