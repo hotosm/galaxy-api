@@ -379,16 +379,11 @@ from_timestamp and to_timestamp</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="galaxy.validation.models.MapathonContributor">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">MapathonContributor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">userId</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalBuildings</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappedTasks</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validatedTasks</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">editors</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.MapathonContributor" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">MapathonContributor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">userId</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalBuildings</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">editors</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.MapathonContributor" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#galaxy.validation.models.BaseModel" title="galaxy.validation.models.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">galaxy.validation.models.BaseModel</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="galaxy.validation.models.MapathonContributor.editors">
-<span class="sig-name descname"><span class="pre">editors</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#galaxy.validation.models.MapathonContributor.editors" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="galaxy.validation.models.MapathonContributor.mapped_tasks">
-<span class="sig-name descname"><span class="pre">mapped_tasks</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#galaxy.validation.models.MapathonContributor.mapped_tasks" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">editors</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#galaxy.validation.models.MapathonContributor.editors" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -406,16 +401,11 @@ from_timestamp and to_timestamp</p>
 <span class="sig-name descname"><span class="pre">username</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#galaxy.validation.models.MapathonContributor.username" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="galaxy.validation.models.MapathonContributor.validated_tasks">
-<span class="sig-name descname"><span class="pre">validated_tasks</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#galaxy.validation.models.MapathonContributor.validated_tasks" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="galaxy.validation.models.MapathonDetail">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">MapathonDetail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappedFeatures</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.MappedFeatureWithUser" title="galaxy.validation.models.MappedFeatureWithUser"><span class="pre">galaxy.validation.models.MappedFeatureWithUser</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributors</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.MapathonContributor" title="galaxy.validation.models.MapathonContributor"><span class="pre">galaxy.validation.models.MapathonContributor</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.MapathonDetail" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">MapathonDetail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappedFeatures</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.MappedFeatureWithUser" title="galaxy.validation.models.MappedFeatureWithUser"><span class="pre">galaxy.validation.models.MappedFeatureWithUser</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributors</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.MapathonContributor" title="galaxy.validation.models.MapathonContributor"><span class="pre">galaxy.validation.models.MapathonContributor</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmStats</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.TMUserStats" title="galaxy.validation.models.TMUserStats"><span class="pre">galaxy.validation.models.TMUserStats</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.MapathonDetail" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#galaxy.validation.models.BaseModel" title="galaxy.validation.models.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">galaxy.validation.models.BaseModel</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="galaxy.validation.models.MapathonDetail.contributors">
@@ -425,6 +415,11 @@ from_timestamp and to_timestamp</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="galaxy.validation.models.MapathonDetail.mapped_features">
 <span class="sig-name descname"><span class="pre">mapped_features</span></span><em class="property"><span class="pre">:</span> <span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.MappedFeatureWithUser" title="galaxy.validation.models.MappedFeatureWithUser"><span class="pre">galaxy.validation.models.MappedFeatureWithUser</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#galaxy.validation.models.MapathonDetail.mapped_features" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.MapathonDetail.tm_stats">
+<span class="sig-name descname"><span class="pre">tm_stats</span></span><em class="property"><span class="pre">:</span> <span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.TMUserStats" title="galaxy.validation.models.TMUserStats"><span class="pre">galaxy.validation.models.TMUserStats</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#galaxy.validation.models.MapathonDetail.tm_stats" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -645,6 +640,22 @@ from_timestamp and to_timestamp</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="galaxy.validation.models.TMUserStats">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">TMUserStats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taskStats</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.UserTaskStats" title="galaxy.validation.models.UserTaskStats"><span class="pre">galaxy.validation.models.UserTaskStats</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeStats</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.UserTimeStats" title="galaxy.validation.models.UserTimeStats"><span class="pre">galaxy.validation.models.UserTimeStats</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.TMUserStats" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#galaxy.validation.models.BaseModel" title="galaxy.validation.models.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">galaxy.validation.models.BaseModel</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.TMUserStats.task_stats">
+<span class="sig-name descname"><span class="pre">task_stats</span></span><em class="property"><span class="pre">:</span> <span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.UserTaskStats" title="galaxy.validation.models.UserTaskStats"><span class="pre">galaxy.validation.models.UserTaskStats</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#galaxy.validation.models.TMUserStats.task_stats" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.TMUserStats.time_stats">
+<span class="sig-name descname"><span class="pre">time_stats</span></span><em class="property"><span class="pre">:</span> <span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#galaxy.validation.models.UserTimeStats" title="galaxy.validation.models.UserTimeStats"><span class="pre">galaxy.validation.models.UserTimeStats</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#galaxy.validation.models.TMUserStats.time_stats" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="galaxy.validation.models.TimeStampParams">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">TimeStampParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fromTimestamp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">,</span> </span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">toTimestamp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">,</span> </span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.TimeStampParams" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#galaxy.validation.models.BaseModel" title="galaxy.validation.models.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">galaxy.validation.models.BaseModel</span></code></a></p>
@@ -835,6 +846,48 @@ Unprocessable Entity: [If any skill type or event type is out of predefined Enum
 <dl class="py attribute">
 <dt class="sig sig-object py" id="galaxy.validation.models.UserStatsParams.user_id">
 <span class="sig-name descname"><span class="pre">user_id</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#galaxy.validation.models.UserStatsParams.user_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserTaskStats">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">UserTaskStats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">userId</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappedTaskCount</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validatedTaskCount</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.UserTaskStats" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#galaxy.validation.models.BaseModel" title="galaxy.validation.models.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">galaxy.validation.models.BaseModel</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserTaskStats.mapped_task_count">
+<span class="sig-name descname"><span class="pre">mapped_task_count</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#galaxy.validation.models.UserTaskStats.mapped_task_count" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserTaskStats.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#galaxy.validation.models.UserTaskStats.user_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserTaskStats.validated_task_count">
+<span class="sig-name descname"><span class="pre">validated_task_count</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#galaxy.validation.models.UserTaskStats.validated_task_count" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserTimeStats">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">UserTimeStats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">userId</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeSpentMapping</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeSpentValidating</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.UserTimeStats" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#galaxy.validation.models.BaseModel" title="galaxy.validation.models.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">galaxy.validation.models.BaseModel</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserTimeStats.time_spent_mapping">
+<span class="sig-name descname"><span class="pre">time_spent_mapping</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#galaxy.validation.models.UserTimeStats.time_spent_mapping" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserTimeStats.time_spent_validating">
+<span class="sig-name descname"><span class="pre">time_spent_validating</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#galaxy.validation.models.UserTimeStats.time_spent_validating" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserTimeStats.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#galaxy.validation.models.UserTimeStats.user_id" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
