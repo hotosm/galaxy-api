@@ -245,6 +245,11 @@
 </dd>
 </dl>
 <dl class="py method">
+<dt class="sig sig-object py" id="galaxy.app.Output.get_dataframe">
+<span class="sig-name descname"><span class="pre">get_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.app.Output.get_dataframe" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="galaxy.app.Output.to_CSV">
 <span class="sig-name descname"><span class="pre">to_CSV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.app.Output.to_CSV" title="Permalink to this definition"></a></dt>
 <dd><p>Function to return CSV data , takes output location string as input</p>
@@ -272,6 +277,53 @@
 <dt class="sig sig-object py" id="galaxy.app.Output.to_list">
 <span class="sig-name descname"><span class="pre">to_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.app.Output.to_list" title="Permalink to this definition"></a></dt>
 <dd><p>Function to convert query result to list, Returns list</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="galaxy.app.RawData">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.app.</span></span><span class="sig-name descname"><span class="pre">RawData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="galaxy.validation.html#galaxy.validation.models.HashtagParams" title="galaxy.validation.models.HashtagParams"><span class="pre">galaxy.validation.models.HashtagParams</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.app.RawData" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class responsible for the Rawdata Extraction from available sources , Currently Works for Underpass source Current Snapshot
+Returns:
+Geojson Zip file 
+Supports:
+-Any Key value pair of osm tags 
+-A Polygon
+-Osm element type (Optional)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="galaxy.app.RawData.extract_current_data">
+<span class="sig-name descname"><span class="pre">extract_current_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exportname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.app.RawData.extract_current_data" title="Permalink to this definition"></a></dt>
+<dd><p>Responsible for Extracting rawdata current snapshot, Initially it creates a geojson file , Generates query , run it with 1000 chunk size and writes it directly to the geojson file and closes the file after dump</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>exportname: takes filename as argument to create geojson file passed from routers</p>
+</dd>
+<dt>Returns:</dt><dd><p>_file_path_: geojson file location path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="galaxy.app.RawData.extract_historical_data">
+<span class="sig-name descname"><span class="pre">extract_historical_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.app.RawData.extract_historical_data" title="Permalink to this definition"></a></dt>
+<dd><p>Idea is to extract historical data , Currently not maintained</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>_type_: geojson featurecollection</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="galaxy.app.RawData.to_geojson">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">to_geojson</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.app.RawData.to_geojson" title="Permalink to this definition"></a></dt>
+<dd><p>Responsible for converting query result to featurecollection</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>results (_type_): Query Result geojson per feature string</p>
+</dd>
+<dt>Returns:</dt><dd><p>_type_: featurecollection</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -453,6 +505,11 @@
 <dt>Returns:</dt><dd><p>json,csv,dict,list,dataframe</p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="galaxy.Output.get_dataframe">
+<span class="sig-name descname"><span class="pre">get_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.Output.get_dataframe" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="galaxy.Output.to_CSV">
 <span class="sig-name descname"><span class="pre">to_CSV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.Output.to_CSV" title="Permalink to this definition"></a></dt>
