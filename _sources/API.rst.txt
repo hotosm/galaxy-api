@@ -55,14 +55,6 @@ API.osm\_users module
    :undoc-members:
    :show-inheritance:
 
-API.raw\_data module
---------------------
-
-.. automodule:: API.raw_data
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 API.trainings module
 --------------------
 

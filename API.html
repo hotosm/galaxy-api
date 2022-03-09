@@ -55,7 +55,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#module-API.mapathon">API.mapathon module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-API.organization">API.organization module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-API.osm_users">API.osm_users module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-API.raw_data">API.raw_data module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-API.trainings">API.trainings module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-API">Module contents</a></li>
 </ul>
@@ -175,21 +174,6 @@
 <dt class="sig sig-object py" id="API.osm_users.user_statistics">
 <span class="sig-prename descclassname"><span class="pre">API.osm_users.</span></span><span class="sig-name descname"><span class="pre">user_statistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">src.galaxy.validation.models.UserStatsParams</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.osm_users.user_statistics" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
-
-</section>
-<section id="module-API.raw_data">
-<span id="api-raw-data-module"></span><h2>API.raw_data module<a class="headerlink" href="#module-API.raw_data" title="Permalink to this headline"></a></h2>
-<p>[Router Responsible for Raw data API ]</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="API.raw_data.get_current_data">
-<span class="sig-prename descclassname"><span class="pre">API.raw_data.</span></span><span class="sig-name descname"><span class="pre">get_current_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">src.galaxy.validation.models.RawDataCurrentParams</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background_tasks</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">starlette.background.BackgroundTasks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(login_required)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.raw_data.get_current_data" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="API.raw_data.remove_file">
-<span class="sig-prename descclassname"><span class="pre">API.raw_data.</span></span><span class="sig-name descname"><span class="pre">remove_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#API.raw_data.remove_file" title="Permalink to this definition"></a></dt>
-<dd><p>Used for removing temp file after zip file is delivered to user</p>
-</dd></dl>
 
 </section>
 <section id="module-API.trainings">
