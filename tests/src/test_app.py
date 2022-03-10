@@ -24,6 +24,7 @@ from src.galaxy.validation import models as mapathon_validation
 from src.galaxy.query_builder import builder as mapathon_query_builder
 from src.galaxy.query_builder.builder import generate_organization_hashtag_reports,create_UserStats_get_statistics_query,create_userstats_get_statistics_with_hashtags_query,generate_data_quality_TM_query,generate_data_quality_username_query,generate_data_quality_hashtag_reports
 from src.galaxy.validation.models import OrganizationHashtagParams, UserStatsParams,DataQuality_TM_RequestParams,DataQuality_username_RequestParams,DataQualityHashtagParams
+from src.galaxy.tasking_manager.models import ValidatorStatsRequest, DbQuery, ListTeamsRequest
 from src.galaxy import Output
 import os.path
 from pydantic import ValidationError as PydanticError
@@ -263,6 +264,50 @@ def test_mapathon_summary():
     # print(result)
     expected_report=[['building', 'create', 827], ['natural', 'create', 117], ['building', 'modify', 27], ['highway', 'modify', 19], ['highway', 'create', 17], ['name', 'modify', 15], ['landuse', 'modify', 9], ['surface', 'modify', 8], ['addr:street', 'modify', 6], ['plinthlevel:height', 'modify', 6], ['roof:material', 'modify', 6], ['visual:condition', 'modify', 6], ['building:form', 'modify', 6], ['building:levels', 'modify', 6], ['building:material', 'modify', 6], ['landuse', 'create', 5], ['water', 'create', 4], ['natural', 'modify', 4], ['maxspeed', 'modify', 2], ['source', 'modify', 2], ['water', 'modify', 1], ['damage:event', 'modify', 1], ['ford', 'create', 1], ['ford', 'modify', 1], ['idp:camp_site', 'modify', 1], ['int_ref', 'modify', 1], ['man_made', 'modify', 1], ['name:en', 'modify', 1], ['name:ne', 'modify', 1], ['ref', 'modify', 1], ['shop', 'modify', 1], ['source:geometry', 'modify', 1], ['addr:housenumber', 'modify', 1]]
     assert result == expected_report
+
+
+def test_tm_validators_stats_query():
+    test_params = {
+        "year": 2012
+    }
+
+    request = ValidatorStatsRequest(**test_params)
+    query = f"""WITH projects AS (select id, country from projects WHERE date_part('year', created) > 2012)\n            SELECT th.project_id,\n                th.user_id,\n                users.username,\n                date_part('year', th.action_date) AS year,\n                array_to_string(projects.country, ',') AS countries,\n                count(th.action_text) AS validated_count\n            FROM projects, task_history AS th, users\n            WHERE th.project_id = projects.id AND\n                th.action_text = 'VALIDATED' AND\n                users.id = th.user_id\n            GROUP BY th.project_id, th.user_id, users.username, year, projects.country\n            ORDER BY year ASC, th.project_id;"""
+
+    request_query = request.build_query(cur)
+    assert query == request_query
+
+    test_params = {
+        "year": 2012,
+        "country": "Mozambique"
+    }
+
+    request = ValidatorStatsRequest(**test_params)
+
+
+    query = f"""WITH projects AS (select id, country from projects WHERE date_part('year', created) > 2012 AND 'Mozambique' = ANY(country))\n            SELECT th.project_id,\n                th.user_id,\n                users.username,\n                date_part('year', th.action_date) AS year,\n                array_to_string(projects.country, ',') AS countries,\n                count(th.action_text) AS validated_count\n            FROM projects, task_history AS th, users\n            WHERE th.project_id = projects.id AND\n                th.action_text = 'VALIDATED' AND\n                users.id = th.user_id\n            GROUP BY th.project_id, th.user_id, users.username, year, projects.country\n            ORDER BY year ASC, th.project_id;"""
+
+    request_query = request.build_query(cur)
+    assert query == request_query
+
+    test_params = {
+        "year": 2012,
+        "country": "Mozambique",
+        "organisation": "OSM Peru"
+    }
+
+    request = ValidatorStatsRequest(**test_params)
+    query = f"""WITH projects AS (select id, country from projects WHERE date_part('year', created) > 2012 AND organisation_id in (SELECT id from organisations where name = 'OSM Peru') AND 'Mozambique' = ANY(country))\n            SELECT th.project_id,\n                th.user_id,\n                users.username,\n                date_part('year', th.action_date) AS year,\n                array_to_string(projects.country, ',') AS countries,\n                count(th.action_text) AS validated_count\n            FROM projects, task_history AS th, users\n            WHERE th.project_id = projects.id AND\n                th.action_text = 'VALIDATED' AND\n                users.id = th.user_id\n            GROUP BY th.project_id, th.user_id, users.username, year, projects.country\n            ORDER BY year ASC, th.project_id;"""
+
+    request_query = request.build_query(cur)
+    assert query == request_query
+
+
+def test_tm_list_teams_query():
+    request_query = ListTeamsRequest.build_query()
+    query = "with vt AS (SELECT distinct team_id as id from project_teams where role = 1 order by id),\n            mu AS (SELECT tm.team_id, ARRAY_AGG(users.username) AS managers from team_members AS tm, vt, users WHERE users.id = tm.user_id AND tm.team_id = vt.id AND tm.function = 1 GROUP BY tm.team_id),\n            uc AS (SELECT tm.team_id, count(tm.user_id) AS members_count from team_members AS tm, vt WHERE tm.team_id = vt.id GROUP BY tm.team_id)\n            SELECT t.id, t.organisation_id, orgs.name AS organisation_name, t.name AS team_name, mu.managers, uc.members_count from teams AS t, mu, uc, organisations AS orgs where orgs.id = t.organisation_id AND t.id = mu.team_id AND t.id = uc.team_id"
+    assert query == request_query
+
 
 def test_output_JSON():
     """Function to test to_json functionality of Output Class """
