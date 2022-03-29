@@ -54,3 +54,11 @@ Or you can export it in other supported formats by Sphinx
 ``` make html ```
 
 All exported html files are inside build/html 
+
+## Docker Setup
+
+Requires the following envvars
+
+```
+GALAXY_API_CONFIG_FILE=<config_file_contents>
+```
