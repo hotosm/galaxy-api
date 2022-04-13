@@ -148,31 +148,13 @@ def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTas
                   (round(inside_file_size/1000000), response_time_str,params.file_name,geom_area,params.output_type))
     return {"download_url": download_url, "file_name": exportname, "response_time": response_time_str, "query_area": f"""{geom_area} Sq Km """, "binded_file_size": f"""{round(inside_file_size/1000000)} MB""", "zip_file_size_bytes": {zip_file_size}}
 
-# @router.get("/status/")
-# def check_current_db_status():
-#     """Gives status about DB update, Substracts with current time and last db update time"""
-#     result = RawData().check_status()
-#     if int(result) == 0:
-#         response = "Less than a Minute ago"
-#     else:
-#         response = f"""{int(result)} Minute ago"""
-#     return {"last_updated": response}
-
 @router.get("/status/")
-async def check_current_db_status(request: Request):
+def check_current_db_status():
     """Gives status about DB update, Substracts with current time and last db update time"""
-    status_query = check_last_updated_rawdata()
-    # result=await request.app.state.db.fetch_rows(status_query)
-    # print(result)
-    # for r in result : 
-    #     print(r)
+    result = RawData().check_status()
+    response = f"""{result} ago"""
+    return {"last_updated": response}
 
-    result = await RawData(request=request).check_status()
-    # if int(result) == 0:
-    #     response = "Less than a Minute ago"
-    # else:
-    #     response = f"""{int(result)} Minute ago"""
-    return {"last_updated": f"""{result} ago"""}
 
 
 

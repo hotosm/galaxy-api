@@ -765,7 +765,7 @@ class RawData:
         if not dbdict:
             #if database credentials directly from class is not passed grab from pool
             pool_conn=LOCAL_CON_POOL.get_conn_from_pool()
-            self.con,self.cur= pool_conn,pool_conn.cursor()
+            self.con,self.cur= pool_conn,pool_conn.cursor(cursor_factory=DictCursor)
         else : 
             #else use our default db class 
             self.db = Database(dict(dbdict))
@@ -997,7 +997,7 @@ class RawData:
         #only apply grid in the logic if it exceeds the 5000 Sqkm
         if geom_area > 5000:
             # this will be applied only when polygon gets bigger we will be slicing index size to search
-            cur.executequery(
+            cur.execute(
                 get_grid_id_query(geometry_dump))
             grid_id = cur.fetchall()
         else:
@@ -1052,13 +1052,12 @@ class RawData:
             
         return [dump_temp_file_path], geom_area
 
-    async def check_status(self,request):
+    def check_status(self):
         """Gives status about DB update, Substracts with current time and last db update time"""
         status_query = check_last_updated_rawdata()
-        self.cur.executequery(status_query)
+        self.cur.execute(status_query)
         behind_time=self.cur.fetchall()
-        behind_time_min = behind_time[0][0].total_seconds()/60
-        return behind_time_min
+        return str(behind_time[0][0])
 
 def run_ogr2ogr_cmd(cmd,dump_temp_file_path,binding_file_dir):
     """Runs command and monitors the file size until the process runs
