@@ -876,20 +876,12 @@ class RawData:
     @staticmethod
     def query2geojson(con, extraction_query, dump_temp_file_path):
         """Function written from scratch without being dependent on any library, Provides better performance for geojson binding"""
-<<<<<<< HEAD
         #creating geojson file 
         pre_geojson = """{"type": "FeatureCollection","features": ["""
         post_geojson = """]}"""
         #writing to the file 
         with open(dump_temp_file_path, 'a', encoding='utf-8') as f:  # directly writing query result to the file one by one without holding them in object so that it will not eat up our memory
             f.write(pre_geojson)
-=======
-        print(extraction_query)
-        pre_geojson="""{"type": "FeatureCollection","features": ["""
-        post_geojson= """]}"""
-        with open(dump_temp_file_path, 'a',encoding = 'utf-8') as f: # directly writing query result to the file one by one without holding them in object so that it will not eat up our memory
-            f.write(pre_geojson)            
->>>>>>> added nodes filter , ways filter and relation filter
             logging.debug('Server side Cursor Query Sent with 1000 Chunk Size')
             with con.cursor(name='fetch_raw') as cursor:  # using server side cursor
                 cursor.itersize = 1000  # chunk size to get 1000 row at a time in client side
