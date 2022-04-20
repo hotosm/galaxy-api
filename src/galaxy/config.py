@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from configparser import ConfigParser
+import logging
 
 CONFIG_FILE_PATH = "src/config.txt"
 
@@ -25,7 +26,9 @@ def get_db_connection_params(dbIdentifier: str) -> dict:
     if dbIdentifier not in ALLOWED_SECTION_NAMES:
         print(f"Invalid dbIdentifier. Pick one of {ALLOWED_SECTION_NAMES}")
         return None
-
-    connection_params = dict(config.items(dbIdentifier))
-
-    return connection_params
+    try:
+        connection_params = dict(config.items(dbIdentifier))
+        return connection_params
+    except Exception as ex :
+        logging.error(f"""Can't find DB credentials on config :{dbIdentifier}""")
+        return None
