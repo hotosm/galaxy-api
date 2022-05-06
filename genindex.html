@@ -161,8 +161,6 @@
         <li><a href="API.changesets.html#module-API.changesets.utils">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     API.countries
 
@@ -170,6 +168,8 @@
         <li><a href="API.countries.html#module-API.countries">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     API.countries.routers
 
@@ -231,6 +231,13 @@
 
       <ul>
         <li><a href="API.html#module-API.raw_data">module</a>
+</li>
+      </ul></li>
+      <li>
+    API.tasking_manager
+
+      <ul>
+        <li><a href="API.html#module-API.tasking_manager">module</a>
 </li>
       </ul></li>
       <li>
@@ -573,9 +580,15 @@
 </li>
       <li><a href="galaxy.query_builder.html#galaxy.query_builder.builder.generate_filter_training_query">generate_filter_training_query() (in module galaxy.query_builder.builder)</a>
 </li>
+      <li><a href="galaxy.query_builder.html#galaxy.query_builder.builder.generate_list_teams_metadata">generate_list_teams_metadata() (in module galaxy.query_builder.builder)</a>
+</li>
       <li><a href="galaxy.query_builder.html#galaxy.query_builder.builder.generate_mapathon_summary_underpass_query">generate_mapathon_summary_underpass_query() (in module galaxy.query_builder.builder)</a>
 </li>
       <li><a href="galaxy.query_builder.html#galaxy.query_builder.builder.generate_organization_hashtag_reports">generate_organization_hashtag_reports() (in module galaxy.query_builder.builder)</a>
+</li>
+      <li><a href="galaxy.query_builder.html#galaxy.query_builder.builder.generate_tm_teams_list">generate_tm_teams_list() (in module galaxy.query_builder.builder)</a>
+</li>
+      <li><a href="galaxy.query_builder.html#galaxy.query_builder.builder.generate_tm_validators_stats_query">generate_tm_validators_stats_query() (in module galaxy.query_builder.builder)</a>
 </li>
       <li><a href="galaxy.query_builder.html#galaxy.query_builder.builder.generate_training_organisations_query">generate_training_organisations_query() (in module galaxy.query_builder.builder)</a>
 </li>
@@ -677,6 +690,8 @@
       </ul></li>
       <li><a href="galaxy.html#galaxy.app.TaskingManager.get_tasks_mapped_and_validated_per_user">get_tasks_mapped_and_validated_per_user() (galaxy.app.TaskingManager method)</a>
 </li>
+      <li><a href="API.html#API.tasking_manager.get_teams">get_teams() (in module API.tasking_manager)</a>
+</li>
       <li><a href="galaxy.html#galaxy.app.TaskingManager.get_time_spent_mapping_and_validating_per_user">get_time_spent_mapping_and_validating_per_user() (galaxy.app.TaskingManager method)</a>
 </li>
       <li><a href="API.html#API.trainings.get_trainings_list">get_trainings_list() (in module API.trainings)</a>
@@ -684,6 +699,10 @@
       <li><a href="galaxy.html#galaxy.app.Training.get_trainingslist">get_trainingslist() (galaxy.app.Training method)</a>
 </li>
       <li><a href="galaxy.html#galaxy.app.Underpass.get_user_role">get_user_role() (galaxy.app.Underpass method)</a>
+</li>
+      <li><a href="API.html#API.tasking_manager.get_validator_stats">get_validator_stats() (in module API.tasking_manager)</a>
+</li>
+      <li><a href="galaxy.html#galaxy.app.TaskingManager.get_validators_stats">get_validators_stats() (galaxy.app.TaskingManager method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -779,16 +798,20 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="galaxy.validation.html#galaxy.validation.models.GeometryTypeRawData.LINESTRING">LINESTRING (galaxy.validation.models.GeometryTypeRawData attribute)</a>
 </li>
+      <li><a href="galaxy.html#galaxy.app.TaskingManager.list_teams">list_teams() (galaxy.app.TaskingManager method)</a>
+</li>
+      <li><a href="galaxy.html#galaxy.app.TaskingManager.list_teams_metadata">list_teams_metadata() (galaxy.app.TaskingManager method)</a>
+</li>
       <li><a href="galaxy.html#galaxy.app.UserStats.list_users">list_users() (galaxy.app.UserStats method)</a>
 
       <ul>
         <li><a href="API.html#API.osm_users.list_users">(in module API.osm_users)</a>
 </li>
       </ul></li>
-      <li><a href="galaxy.validation.html#galaxy.validation.models.Trainings.location">location (galaxy.validation.models.Trainings attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="galaxy.validation.html#galaxy.validation.models.Trainings.location">location (galaxy.validation.models.Trainings attribute)</a>
+</li>
       <li><a href="API.auth.html#API.auth.Login">Login (class in API.auth)</a>
 </li>
       <li><a href="API.auth.html#API.auth.login_required">login_required() (in module API.auth)</a>
@@ -805,6 +828,8 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="galaxy.validation.html#galaxy.validation.models.TeamMemberFunction.MANAGER">MANAGER (galaxy.validation.models.TeamMemberFunction attribute)</a>
+</li>
       <li><a href="galaxy.html#galaxy.Mapathon">Mapathon (class in galaxy)</a>
 
       <ul>
@@ -834,6 +859,8 @@
       <li><a href="API.changesets.html#API.changesets.FilterParams.matching_types">matching_types() (API.changesets.FilterParams class method)</a>
 </li>
       <li><a href="galaxy.validation.html#galaxy.validation.models.RawDataOutputType.MBTILES">MBTILES (galaxy.validation.models.RawDataOutputType attribute)</a>
+</li>
+      <li><a href="galaxy.validation.html#galaxy.validation.models.TeamMemberFunction.MEMBER">MEMBER (galaxy.validation.models.TeamMemberFunction attribute)</a>
 </li>
       <li><a href="API.changesets.html#API.changesets.ChangesetResult.modified_highway">modified_highway (API.changesets.ChangesetResult attribute)</a>
 </li>
@@ -874,6 +901,8 @@
         <li><a href="API.html#module-API.osm_users">API.osm_users</a>
 </li>
         <li><a href="API.html#module-API.raw_data">API.raw_data</a>
+</li>
+        <li><a href="API.html#module-API.tasking_manager">API.tasking_manager</a>
 </li>
         <li><a href="API.html#module-API.trainings">API.trainings</a>
 </li>
@@ -1092,6 +1121,8 @@
         <li><a href="galaxy.validation.html#galaxy.validation.models.ValidatedTaskStats.tasks_validated">(galaxy.validation.models.ValidatedTaskStats attribute)</a>
 </li>
       </ul></li>
+      <li><a href="galaxy.validation.html#galaxy.validation.models.TeamMemberFunction">TeamMemberFunction (class in galaxy.validation.models)</a>
+</li>
       <li><a href="galaxy.validation.html#galaxy.validation.models.Trainings.tid">tid (galaxy.validation.models.Trainings attribute)</a>
 </li>
       <li><a href="galaxy.validation.html#galaxy.validation.models.TimeSpentMapping.time_spent_mapping">time_spent_mapping (galaxy.validation.models.TimeSpentMapping attribute)</a>
@@ -1142,10 +1173,10 @@
 </li>
       <li><a href="galaxy.html#galaxy.app.Output.to_GeoJSON">to_GeoJSON() (galaxy.app.Output method)</a>
 </li>
-      <li><a href="galaxy.html#galaxy.app.RawData.to_geojson">to_geojson() (galaxy.app.RawData static method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="galaxy.html#galaxy.app.RawData.to_geojson">to_geojson() (galaxy.app.RawData static method)</a>
+</li>
       <li><a href="galaxy.html#galaxy.Output.to_GeoJSON">to_GeoJSON() (galaxy.Output method)</a>
 </li>
       <li><a href="galaxy.html#galaxy.app.Output.to_JSON">to_JSON() (galaxy.app.Output method)</a>

@@ -63,6 +63,14 @@ API.raw\_data module
    :undoc-members:
    :show-inheritance:
 
+API.tasking\_manager module
+---------------------------
+
+.. automodule:: API.tasking_manager
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 API.trainings module
 --------------------
 

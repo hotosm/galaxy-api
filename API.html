@@ -56,6 +56,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#module-API.organization">API.organization module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-API.osm_users">API.osm_users module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-API.raw_data">API.raw_data module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-API.tasking_manager">API.tasking_manager module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-API.trainings">API.trainings module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-API">Module contents</a></li>
 </ul>
@@ -203,6 +204,20 @@ Returns zip file if it is present on our server if not returns null</p>
 <span class="sig-prename descclassname"><span class="pre">API.raw_data.</span></span><span class="sig-name descname"><span class="pre">remove_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#API.raw_data.remove_file" title="Permalink to this definition"></a></dt>
 <dd><p>Used for removing temp file after zip file is delivered to user</p>
 </dd></dl>
+
+</section>
+<section id="module-API.tasking_manager">
+<span id="api-tasking-manager-module"></span><h2>API.tasking_manager module<a class="headerlink" href="#module-API.tasking_manager" title="Permalink to this headline"></a></h2>
+<p>[Router Responsible for Organizational data API ]</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="API.tasking_manager.get_teams">
+<span class="sig-prename descclassname"><span class="pre">API.tasking_manager.</span></span><span class="sig-name descname"><span class="pre">get_teams</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#API.tasking_manager.get_teams" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="API.tasking_manager.get_validator_stats">
+<span class="sig-prename descclassname"><span class="pre">API.tasking_manager.</span></span><span class="sig-name descname"><span class="pre">get_validator_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">src.galaxy.tasking_manager.models.ValidatorStatsRequest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.tasking_manager.get_validator_stats" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </section>
 <section id="module-API.trainings">
