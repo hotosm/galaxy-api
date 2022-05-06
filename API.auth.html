@@ -109,7 +109,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="API.auth.routers.my_data">
-<span class="sig-prename descclassname"><span class="pre">API.auth.routers.</span></span><span class="sig-name descname"><span class="pre">my_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#API.auth.AuthUser" title="API.auth.AuthUser"><span class="pre">API.auth.AuthUser</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">Depends(login_required)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.auth.routers.my_data" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">API.auth.routers.</span></span><span class="sig-name descname"><span class="pre">my_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#API.auth.AuthUser" title="API.auth.AuthUser"><span class="pre">API.auth.AuthUser</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">Depends(is_staff_member)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.auth.routers.my_data" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -117,7 +117,7 @@
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-API.auth" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="API.auth.AuthUser">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">API.auth.</span></span><span class="sig-name descname"><span class="pre">AuthUser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_url</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.auth.AuthUser" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">API.auth.</span></span><span class="sig-name descname"><span class="pre">AuthUser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_url</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.auth.AuthUser" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pydantic.main.BaseModel</span></code></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="API.auth.AuthUser.id">
@@ -127,6 +127,11 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="API.auth.AuthUser.img_url">
 <span class="sig-name descname"><span class="pre">img_url</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#API.auth.AuthUser.img_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="API.auth.AuthUser.role">
+<span class="sig-name descname"><span class="pre">role</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#API.auth.AuthUser.role" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -157,6 +162,16 @@
 <dd></dd></dl>
 
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="API.auth.deserialize_access_token">
+<span class="sig-prename descclassname"><span class="pre">API.auth.</span></span><span class="sig-name descname"><span class="pre">deserialize_access_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">access_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.auth.deserialize_access_token" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="API.auth.is_staff_member">
+<span class="sig-prename descclassname"><span class="pre">API.auth.</span></span><span class="sig-name descname"><span class="pre">is_staff_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">access_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">Header(Ellipsis)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.auth.is_staff_member" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="API.auth.login_required">
