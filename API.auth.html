@@ -101,17 +101,34 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="API.auth.routers.callback">
 <span class="sig-prename descclassname"><span class="pre">API.auth.routers.</span></span><span class="sig-name descname"><span class="pre">callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">starlette.requests.Request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.auth.routers.callback" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Performs token exchange between OpenStreetMap and Galaxy API</p>
+<p>Core will use Oauth secret key from configuration while deserializing token, 
+provides access token that can be used on authorized endpoint</p>
+<p>Parameters: None</p>
+<p>Returns:
+- access_token (string)</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="API.auth.routers.login_url">
 <span class="sig-prename descclassname"><span class="pre">API.auth.routers.</span></span><span class="sig-name descname"><span class="pre">login_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">starlette.requests.Request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.auth.routers.login_url" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Generate Login URL for authentication using OAuth2 Application registered to OpenStreetMap</p>
+<p>Parameters: None</p>
+<p>Returns:
+- login_url (string) - URL to authorize user to the application via. Openstreetmap</p>
+<blockquote>
+<div><p>OAuth2 with client_id, redirect_uri, and permission scope as query_string parameters</p>
+</div></blockquote>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="API.auth.routers.my_data">
 <span class="sig-prename descclassname"><span class="pre">API.auth.routers.</span></span><span class="sig-name descname"><span class="pre">my_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#API.auth.AuthUser" title="API.auth.AuthUser"><span class="pre">API.auth.AuthUser</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">Depends(is_staff_member)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.auth.routers.my_data" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Read the access token and provide  user details from OSM user’s API endpoint,
+also integrated with underpass .</p>
+<p>Parameters:None</p>
+<p>Returns: user_data</p>
+</dd></dl>
 
 </section>
 <section id="module-API.auth">
