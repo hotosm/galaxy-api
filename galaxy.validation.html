@@ -1111,6 +1111,42 @@ Unprocessable Entity: [If any skill type or event type is out of predefined Enum
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserStatistics">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">UserStatistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addedBuildings</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modifiedBuildings</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addedHighway</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modifiedHighway</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addedHighwayMeters</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modifiedHighwayMeters</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.UserStatistics" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#galaxy.validation.models.BaseModel" title="galaxy.validation.models.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">galaxy.validation.models.BaseModel</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserStatistics.added_buildings">
+<span class="sig-name descname"><span class="pre">added_buildings</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#galaxy.validation.models.UserStatistics.added_buildings" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserStatistics.added_highway">
+<span class="sig-name descname"><span class="pre">added_highway</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#galaxy.validation.models.UserStatistics.added_highway" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserStatistics.added_highway_meters">
+<span class="sig-name descname"><span class="pre">added_highway_meters</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#galaxy.validation.models.UserStatistics.added_highway_meters" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserStatistics.modified_buildings">
+<span class="sig-name descname"><span class="pre">modified_buildings</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#galaxy.validation.models.UserStatistics.modified_buildings" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserStatistics.modified_highway">
+<span class="sig-name descname"><span class="pre">modified_highway</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#galaxy.validation.models.UserStatistics.modified_highway" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="galaxy.validation.models.UserStatistics.modified_highway_meters">
+<span class="sig-name descname"><span class="pre">modified_highway_meters</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#galaxy.validation.models.UserStatistics.modified_highway_meters" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="galaxy.validation.models.UserStatsParams">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">galaxy.validation.models.</span></span><span class="sig-name descname"><span class="pre">UserStatsParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fromTimestamp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">,</span> </span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">toTimestamp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">,</span> </span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">userId</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hashtags</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projectIds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#galaxy.validation.models.UserStatsParams" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#galaxy.validation.models.DateStampParams" title="galaxy.validation.models.DateStampParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">galaxy.validation.models.DateStampParams</span></code></a></p>
