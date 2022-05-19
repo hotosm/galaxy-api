@@ -51,7 +51,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-API.data_quality">API.data_quality module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#api-main-module">API.main module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-API.main">API.main module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-API.mapathon">API.mapathon module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-API.organization">API.organization module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-API.osm_users">API.osm_users module</a></li>
@@ -140,8 +140,8 @@
 <dd></dd></dl>
 
 </section>
-<section id="api-main-module">
-<h2>API.main module<a class="headerlink" href="#api-main-module" title="Permalink to this headline"></a></h2>
+<section id="module-API.main">
+<span id="api-main-module"></span><h2>API.main module<a class="headerlink" href="#module-API.main" title="Permalink to this headline"></a></h2>
 </section>
 <section id="module-API.mapathon">
 <span id="api-mapathon-module"></span><h2>API.mapathon module<a class="headerlink" href="#module-API.mapathon" title="Permalink to this headline"></a></h2>
@@ -196,7 +196,7 @@ Returns zip file if it is present on our server if not returns null</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="API.raw_data.get_current_data">
-<span class="sig-prename descclassname"><span class="pre">API.raw_data.</span></span><span class="sig-name descname"><span class="pre">get_current_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">src.galaxy.validation.models.RawDataCurrentParams</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background_tasks</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">starlette.background.BackgroundTasks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.raw_data.get_current_data" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">API.raw_data.</span></span><span class="sig-name descname"><span class="pre">get_current_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">src.galaxy.validation.models.RawDataCurrentParams</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background_tasks</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">starlette.background.BackgroundTasks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(login_required)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#API.raw_data.get_current_data" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
