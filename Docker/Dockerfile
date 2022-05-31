@@ -6,7 +6,6 @@ COPY . /app
 
 WORKDIR /app
 
-RUN apt-get -y update && apt-get -y upgrade && apt-get -y autoremove && apt-get -y autoclean && apt-get -y clean
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 RUN pip install -e .
