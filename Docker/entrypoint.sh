@@ -5,5 +5,5 @@ if [[ -z "${GALAXY_API_CONFIG_FILE}" ]]; then
     exit 1
 fi
 
-echo ${GALAXY_API_CONFIG_FILE} | base64 -d | gzip -d | tee /app/src/config.txt
+echo ${GALAXY_API_CONFIG_FILE} | base64 -d | tee /app/src/config.txt
 uvicorn API.main:app --reload --host 0.0.0.0 --port 8000 --log-level error --no-use-colors --proxy-headers
