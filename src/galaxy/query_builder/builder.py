@@ -649,13 +649,12 @@ def raw_historical_data_extraction_query(cur,conn,params):
 def get_country_id_query(geometry_dump):
     
     base_query=f"""select
-                        b.id
+                        b.poly_id
                     from
-                        boundaries b
+                        grid b
                     where
                         ST_Intersects(ST_GEOMFROMGEOJSON('{geometry_dump}') ,
-                        ST_SetSRID(b.boundary,
-                        4326))"""
+                        b.geom)"""
     return base_query
                         
 
