@@ -631,7 +631,7 @@ def raw_historical_data_extraction_query(cur,conn,params):
             t2.uid as user_id,
             t2."version" ,
             t2."action" ,
-            t2.country ,
+            t2.grid ,
             t2.geometry
         from
             t2"""
@@ -722,7 +722,7 @@ def raw_currentdata_extraction_query(params,c_id,geometry_dump,geom_area,ogr_exp
 
         if geomtype.POLYGON.value in params.geometry_type and OsmElementRawData.WAYS.value in params.osm_elements:
             if geom_area > 100000 : # country logic will be only used when area is larger because for smaller area normal gist indexes performes better job when area gets larger we need to limit the index size to look for 
-                country_filter_base=[f"""country = {ind[0]}""" for ind in c_id]
+                country_filter_base=[f"""grid = {ind[0]}""" for ind in c_id]
                 country_filter=" OR ".join(country_filter_base)
                 where_clause=f"""({country_filter}) and {geom_filter}"""
             else:
@@ -764,7 +764,7 @@ def raw_currentdata_extraction_query(params,c_id,geometry_dump,geom_area,ogr_exp
 
             for type in params.osm_elements:
                 if type == 'ways_poly' and  geom_area > 100000 :
-                    country_filter_base=[f"""country = {ind[0]}""" for ind in c_id]
+                    country_filter_base=[f"""grid = {ind[0]}""" for ind in c_id]
                     country_filter=" OR ".join(country_filter_base)
                     where_clause=f"""({country_filter}) and {geom_filter}"""
                 else :
@@ -807,7 +807,7 @@ def raw_currentdata_extraction_query(params,c_id,geometry_dump,geom_area,ogr_exp
                 else:
                     if type is geomtype.POLYGON.value : 
                         if geom_area > 100000 : # country logic will be only used when area is larger because for smaller area normal gist indexes performes better job when area gets larger we need to limit the index size to look for 
-                            country_filter_base=[f"""country = {ind[0]}""" for ind in c_id]
+                            country_filter_base=[f"""grid = {ind[0]}""" for ind in c_id]
                             country_filter=" OR ".join(country_filter_base)
                             where_clause=f"""({country_filter}) and {geom_filter}"""
                         else:
