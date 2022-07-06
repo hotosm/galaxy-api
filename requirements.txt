@@ -1,3 +1,4 @@
+asyncpg
 aiofiles==0.7.0
 asgiref==3.3.4
 click==8.0.1
