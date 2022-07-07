@@ -159,13 +159,13 @@ def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTas
 #     return {"last_updated": response}
 
 @router.get("/status/")
-def check_current_db_status(request: Request):
+async def check_current_db_status(request: Request):
     """Gives status about DB update, Substracts with current time and last db update time"""
     status_query = check_last_updated_rawdata()
-    result=request.app.state.db.fetch_rows(status_query)
+    result=await request.app.state.db.fetch_rows(status_query)
     print(result)
-    for r in result : 
-        print(r)
+    # for r in result : 
+    #     print(r)
 
     # result = RawData().check_status()
     # if int(result) == 0:

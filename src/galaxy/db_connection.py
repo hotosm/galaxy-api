@@ -19,11 +19,13 @@ class Database:
                     max_size=10,
                     **self.db_params
                 )
+                print("connection pooling has been established")
 
             except Exception as e:
                 print(e)
 
     async def fetch_rows(self, query: str):
+        print("fetch rows has been called")
         if not self._connection_pool:
             await self.connect()
         else:
