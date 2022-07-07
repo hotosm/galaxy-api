@@ -1026,12 +1026,14 @@ class RawData:
             
         return [dump_temp_file_path], geom_area
 
-    def check_status(self):
+    async def check_status(self,request):
         """Gives status about DB update, Substracts with current time and last db update time"""
         status_query = check_last_updated_rawdata()
-        behind_time = self.db.executequery(status_query)
-        behind_time_min = behind_time[0][0].total_seconds()/60
-        return behind_time_min
+        result=await request.app.state.db.fetch_rows(status_query)
+        behind_time=dict(result[0]).get('last_updated')
+        # behind_time = self.db.executequery(status_query)
+        # behind_time_min = behind_time[0][0].total_seconds()/60
+        return str(behind_time)
 
 def run_ogr2ogr_cmd(cmd,dump_temp_file_path,binding_file_dir):
     """Runs command and monitors the file size until the process runs
