@@ -162,17 +162,17 @@ def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTas
 async def check_current_db_status(request: Request):
     """Gives status about DB update, Substracts with current time and last db update time"""
     status_query = check_last_updated_rawdata()
-    result=await request.app.state.db.fetch_rows(status_query)
-    print(result)
+    # result=await request.app.state.db.fetch_rows(status_query)
+    # print(result)
     # for r in result : 
     #     print(r)
 
-    # result = RawData().check_status()
+    result = await RawData().check_status(request)
     # if int(result) == 0:
     #     response = "Less than a Minute ago"
     # else:
     #     response = f"""{int(result)} Minute ago"""
-    return {"last_updated": "not known"}
+    return {"last_updated": f"""{result} ago"""}
 
 
 

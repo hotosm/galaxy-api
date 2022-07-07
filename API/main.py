@@ -37,6 +37,7 @@ from fastapi import  Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from src.galaxy.db_session import database_instance
+import logging
 
 if config.get("SENTRY","url", fallback=None): # only use sentry if it is specified in config blocks
     sentry_sdk.init(
@@ -63,7 +64,6 @@ async def value_error_exception_handler(request: Request, exc: ValueError):
     )
 
 
-
 origins = ["*"]
 
 app.add_middleware(
@@ -76,12 +76,12 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def on_startup():
-    print("starting pool connection")
     await database_instance.connect()
     app.state.db = database_instance
 
 @app.on_event("shutdown")
 def on_shutdown():
+    logging.debug("Shutting down connection pool")
     app.state.db.shutdown()
 
 
