@@ -45,17 +45,25 @@ import subprocess
 from json import dumps
 import fiona
 from fiona.crs import from_epsg
-
 import time
-
 import logging
 import shutil
-# logging.getLogger("imported_module").setLevel(logging.WARNING)
+from src.galaxy.db_session import database_instance
+
+logging.getLogger("imported_module").setLevel(logging.DEBUG)
 logging.getLogger("fiona").propagate = False  # disable fiona logging
+
+#assigning global variable of pooling so that it will be accessible from any function within this script
+global LOCAL_CON_POOL
+
+#getting the pool instance which was fireup when API is started
+LOCAL_CON_POOL = database_instance
+
+
 
 def print_psycopg2_exception(err):
     """ 
-    function that handles and parses psycopg2 exceptions
+    Function that handles and parses Psycopg2 exceptions
     """
     '''details_exception'''
     err_type, err_obj, traceback = sys.exc_info()
@@ -751,12 +759,13 @@ class RawData:
             else :
                 self.params=parameters
 
-        if dbdict is None :
-            self.db = Database(dict(config.items("RAW_DATA")))
-        else :
-            self.db = Database(dict(dbdict))
-
-        self.con, self.cur = self.db.connect()
+        # if dbdict is None :
+        #     self.db = Database(dict(config.items("RAW_DATA")))
+        # else :
+        #     self.db = Database(dict(dbdict))
+        pool_conn=LOCAL_CON_POOL.get_conn_from_pool()
+        self.con,self.cur= pool_conn,pool_conn.cursor()
+        # self.con, self.cur = self.db.connect()
 
     def get_query_con(self):
         """Provides Query and connection to user so that they can perform query by themselves"""
@@ -886,7 +895,7 @@ class RawData:
                         f.write(',')
                         f.write(row[0])
                 cursor.close()  # closing connection to avoid memory issues
-                con.close()
+                database_instance.release_conn_from_pool(con)
             f.write(post_geojson)
         f.close()
         logging.debug(f"""Server side Query Result  Post Processing Done""")
@@ -964,18 +973,19 @@ class RawData:
             file_paths.append(f"""{dump_temp_file_path}_poly.dbf""")
             file_paths.append(f"""{dump_temp_file_path}_poly.prj""")
 
-        con.close()
+        database_instance.release_conn_from_pool(con)
 
         return file_paths
     
     @staticmethod
-    def get_grid_id(geom,db):
+    def get_grid_id(geom,cur):
         geometry_dump = dumps(dict(geom))
         geom_area = int(area(json.loads(geom.json())) * 1E-6)
         if geom_area > 5000:
             # this will be applied only when polygon gets bigger we will be slicing index size to search
-            grid_id = db.executequery(
+            cur.executequery(
                 get_grid_id_query(geometry_dump))
+            grid_id = cur.fetchall()
         else:
             grid_id = None
         return grid_id, geometry_dump,geom_area
@@ -988,7 +998,7 @@ class RawData:
         Returns:
             _file_path_: geojson file location path
         """
-        grid_id,geometry_dump,geom_area=RawData.get_grid_id(self.params.geometry,self.db)
+        grid_id,geometry_dump,geom_area=RawData.get_grid_id(self.params.geometry,self.cur)
         if self.params.output_type is None:
             # if nothing is supplied then default output type will be geojson
             output_type = RawDataOutputType.GEOJSON.value
@@ -1070,5 +1080,3 @@ def run_ogr2ogr_cmd(cmd,dump_temp_file_path,binding_file_dir):
         process.kill()
         shutil.rmtree(binding_file_dir)
         raise ValueError("Shapefile binding failed")     
-
-        

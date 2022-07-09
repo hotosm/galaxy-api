@@ -167,7 +167,7 @@ async def check_current_db_status(request: Request):
     # for r in result : 
     #     print(r)
 
-    result = await RawData().check_status(request)
+    result = await RawData(request=request).check_status()
     # if int(result) == 0:
     #     response = "Less than a Minute ago"
     # else:
