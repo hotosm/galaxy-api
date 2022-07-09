@@ -55,7 +55,7 @@ class Database:
             pool_conn = self.threaded_postgreSQL_pool.getconn()
             return pool_conn
 
-    async def release_conn_from_pool(self,pool_con):
+    def release_conn_from_pool(self,pool_con):
         """Can be used to release specific connection after its use from the pool , so that it can be used by another process
 
         Args:
@@ -66,7 +66,7 @@ class Database:
         """
         try:
             # Use this method to release the connection object and send back ti connection pool
-            await self.threaded_postgreSQL_pool.putconn(pool_con)
+            self.threaded_postgreSQL_pool.putconn(pool_con)
             logging.debug("Throwing away postgresql connection from thread")
 
         except Exception as ex:
