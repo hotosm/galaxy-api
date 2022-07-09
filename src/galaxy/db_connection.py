@@ -37,7 +37,7 @@ class Database:
         if not self.threaded_postgreSQL_pool :
             try:
                 #creating pool through psycopg2 with threaded connection so that there will support minimum 5 users to 20 users 
-                self.threaded_postgreSQL_pool = psycopg2.pool.ThreadedConnectionPool(5, 20,**self.db_params)
+                self.threaded_postgreSQL_pool = psycopg2.pool.ThreadedConnectionPool(3, 20,**self.db_params)
                 logging.debug("Connection pooling has been established")
                 if (self.threaded_postgreSQL_pool):
                     logging.debug("Connection pool created successfully using ThreadedConnectionPool")
