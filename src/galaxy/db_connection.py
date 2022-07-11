@@ -69,11 +69,9 @@ class Database:
         try:
             # Use this method to release the connection object and send back ti connection pool
             self.threaded_postgreSQL_pool.putconn(pool_con)
-            logging.debug("Throwing away postgresql connection from thread")
-
-        except Exception as ex:
-            logging.error(ex)
-            raise ex
+            logging.debug("Putting back postgresql connection to thread")
+        except :
+            logging.debug("Connection doesn't exist in Pool")
     
     async def close_all_connection_pool(self):
         """Closes the connection thread created by thread pooling all at once 

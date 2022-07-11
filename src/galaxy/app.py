@@ -766,8 +766,8 @@ class RawData:
                 self.params = RawDataCurrentParams(**parameters)
             else :
                 self.params=parameters
-        # only use connection pooling if it is configured in config file and it is of geojson output type because for other output type we are dependent on ogr2ogr
-        if use_connection_pooling and self.params.outputtype is RawDataOutputType.GEOJSON.value:
+        # only use connection pooling if it is configured in config file 
+        if use_connection_pooling :
             #if database credentials directly from class is not passed grab from pool
             pool_conn=LOCAL_CON_POOL.get_conn_from_pool()
             self.con,self.cur= pool_conn,pool_conn.cursor(cursor_factory=DictCursor)
@@ -777,16 +777,15 @@ class RawData:
                 dbdict=get_db_connection_params("RAW_DATA")
             self.db = Database(dict(dbdict))
             self.con, self.cur = self.db.connect()
-
-    def get_query_con(self):
-        """Provides Query and connection to user so that they can perform query by themselves"""
-        #options="-c search_path=schema_name" can be used for defining schema in dict
-      
-        g_id,geom_dump,geom_area=RawData.get_grid_id(self.params.geometry,self.db)
-        
-        extraction_query=raw_currentdata_extraction_query(self.params, g_id, geom_dump,ogr_export=True)
-        
-        return self.con,extraction_query
+    @staticmethod
+    def close_con(con):
+        """Closes connection if exists"""
+        if con : 
+            if use_connection_pooling:
+                #release connection from pool
+                database_instance.release_conn_from_pool(con)
+            else:
+                con.close()
 
 
     @staticmethod
@@ -902,11 +901,6 @@ class RawData:
                         f.write(',')
                         f.write(row[0])
                 cursor.close()  # closing connection to avoid memory issues
-                #release connection from pool
-                if use_connection_pooling:
-                    database_instance.release_conn_from_pool(con)
-                else:
-                    con.close()
                 #close the writing geojson with last part 
             f.write(post_geojson)
             #close the file
@@ -985,11 +979,6 @@ class RawData:
             file_paths.append(f"""{dump_temp_file_path}_poly.cpg""")
             file_paths.append(f"""{dump_temp_file_path}_poly.dbf""")
             file_paths.append(f"""{dump_temp_file_path}_poly.prj""")
-        if use_connection_pooling:
-            database_instance.release_conn_from_pool(con)
-        else:
-            con.close()
-
         return file_paths
     
     @staticmethod
@@ -1048,22 +1037,28 @@ class RawData:
         os.makedirs(path)
         #create file path with respect to of output type 
         dump_temp_file_path = f"""{path}{exportname}.{output_type.lower()}"""
+        try :
+            # currently we have only geojson binding function written other than that we have depend on ogr
+            if output_type is RawDataOutputType.GEOJSON.value:
+                RawData.query2geojson(self.con, raw_currentdata_extraction_query(
+                    self.params, g_id=grid_id, geometry_dump=geometry_dump), dump_temp_file_path)  # uses own conversion class
+            elif output_type is RawDataOutputType.SHAPEFILE.value:
+                point_query, line_query, poly_query, point_schema, line_schema, poly_schema = extract_geometry_type_query(
+                    self.params,ogr_export=True)
+                dump_temp_file_path = f"""{path}{exportname}"""
+                filepaths = RawData.ogr_export(outputtype=output_type,point_query=point_query, line_query=line_query, poly_query=poly_query,dump_temp_file_path=dump_temp_file_path,binding_file_dir=path) #using ogr2ogr
+                # filepaths = RawData.query2shapefile(self.con, point_query, line_query, poly_query, point_schema, line_schema, poly_schema, dump_temp_file_path) #using fiona
+                return filepaths, geom_area
+            else:
+                filepaths=RawData.ogr_export(query=raw_currentdata_extraction_query(self.params, grid_id, geometry_dump, ogr_export=True), export_path=dump_temp_file_path, outputtype=output_type,binding_file_dir=path)  # uses ogr export to export
+            return [dump_temp_file_path], geom_area
+        except Exception as ex :
+            logging.Error(ex)
+            raise ex
+        finally :
+            #closing connection before leaving class
+            RawData.close_con(self.con)
 
-        # currently we have only geojson binding function written other than that we have depend on ogr
-        if output_type is RawDataOutputType.GEOJSON.value:
-            RawData.query2geojson(self.con, raw_currentdata_extraction_query(
-                self.params, g_id=grid_id, geometry_dump=geometry_dump), dump_temp_file_path)  # uses own conversion class
-        elif output_type is RawDataOutputType.SHAPEFILE.value:
-            point_query, line_query, poly_query, point_schema, line_schema, poly_schema = extract_geometry_type_query(
-                self.params,ogr_export=True)
-            dump_temp_file_path = f"""{path}{exportname}"""
-            filepaths = RawData.ogr_export(outputtype=output_type,point_query=point_query, line_query=line_query, poly_query=poly_query,dump_temp_file_path=dump_temp_file_path,binding_file_dir=path) #using ogr2ogr
-            # filepaths = RawData.query2shapefile(self.con, point_query, line_query, poly_query, point_schema, line_schema, poly_schema, dump_temp_file_path) #using fiona
-            return filepaths, geom_area
-        else:
-            filepaths=RawData.ogr_export(query=raw_currentdata_extraction_query(self.params, grid_id, geometry_dump, ogr_export=True), export_path=dump_temp_file_path, outputtype=output_type,binding_file_dir=path)  # uses ogr export to export
-            
-        return [dump_temp_file_path], geom_area
 
     def check_status(self):
         """Gives status about DB update, Substracts with current time and last db update time"""
@@ -1071,6 +1066,8 @@ class RawData:
         self.cur.execute(status_query)
         behind_time=self.cur.fetchall()
         self.cur.close()
+        #closing connection before leaving class
+        RawData.close_con(self.con)
         return str(behind_time[0][0])
 
 def run_ogr2ogr_cmd(cmd,dump_temp_file_path,binding_file_dir):
