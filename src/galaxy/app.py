@@ -37,7 +37,7 @@ from json import loads as json_loads
 from geojson import Feature, FeatureCollection, Point
 from io import StringIO
 from csv import DictWriter
-from .config import config
+from .config import config,use_connection_pooling
 import logging
 import orjson
 from area import area
@@ -50,7 +50,10 @@ import logging
 import shutil
 
 #import instance for pooling 
-from src.galaxy.db_session import database_instance
+if use_connection_pooling:
+    from src.galaxy.db_session import database_instance
+else:
+    database_instance=None
 
 logging.getLogger("imported_module").setLevel(logging.DEBUG)
 logging.getLogger("fiona").propagate = False  # disable fiona logging
@@ -137,6 +140,8 @@ class Database:
                             return self.cursor.statusmessage
                     except Exception as err:
                         print_psycopg2_exception(err)
+                    finally:
+                        self.cursor.close()
                 else:
                     raise ValueError("Query is Null")
 
@@ -761,13 +766,15 @@ class RawData:
                 self.params = RawDataCurrentParams(**parameters)
             else :
                 self.params=parameters
-
-        if not dbdict:
+        # only use connection pooling if it is configured in config file and it is of geojson output type because for other output type we are dependent on ogr2ogr
+        if use_connection_pooling and self.params.outputtype is RawDataOutputType.GEOJSON.value:
             #if database credentials directly from class is not passed grab from pool
             pool_conn=LOCAL_CON_POOL.get_conn_from_pool()
             self.con,self.cur= pool_conn,pool_conn.cursor(cursor_factory=DictCursor)
         else : 
             #else use our default db class 
+            if not dbdict:
+                dbdict=get_db_connection_params("RAW_DATA")
             self.db = Database(dict(dbdict))
             self.con, self.cur = self.db.connect()
 
@@ -896,7 +903,10 @@ class RawData:
                         f.write(row[0])
                 cursor.close()  # closing connection to avoid memory issues
                 #release connection from pool
-                database_instance.release_conn_from_pool(con)
+                if use_connection_pooling:
+                    database_instance.release_conn_from_pool(con)
+                else:
+                    con.close()
                 #close the writing geojson with last part 
             f.write(post_geojson)
             #close the file
@@ -975,8 +985,10 @@ class RawData:
             file_paths.append(f"""{dump_temp_file_path}_poly.cpg""")
             file_paths.append(f"""{dump_temp_file_path}_poly.dbf""")
             file_paths.append(f"""{dump_temp_file_path}_poly.prj""")
-
-        database_instance.release_conn_from_pool(con)
+        if use_connection_pooling:
+            database_instance.release_conn_from_pool(con)
+        else:
+            con.close()
 
         return file_paths
     
@@ -1000,6 +1012,7 @@ class RawData:
             cur.execute(
                 get_grid_id_query(geometry_dump))
             grid_id = cur.fetchall()
+            cur.close()
         else:
             grid_id = None
         return grid_id, geometry_dump,geom_area
@@ -1057,6 +1070,7 @@ class RawData:
         status_query = check_last_updated_rawdata()
         self.cur.execute(status_query)
         behind_time=self.cur.fetchall()
+        self.cur.close()
         return str(behind_time[0][0])
 
 def run_ogr2ogr_cmd(cmd,dump_temp_file_path,binding_file_dir):

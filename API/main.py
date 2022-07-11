@@ -39,6 +39,7 @@ from fastapi.staticfiles import StaticFiles
 import time
 import logging
 from src.galaxy.db_session import database_instance
+from src.galaxy.config import use_connection_pooling
 
 
 if config.get("SENTRY","url", fallback=None): # only use sentry if it is specified in config blocks
@@ -51,8 +52,8 @@ if config.get("SENTRY","url", fallback=None): # only use sentry if it is specifi
     )
 
 # This is used for local setup for auth login
-# import os
-# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] ='1'
+import os
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] ='1'
 
 app = FastAPI()
 
@@ -101,7 +102,8 @@ async def on_startup():
         e: if connection is rejected to database
     """
     try:
-        database_instance.connect()
+        if use_connection_pooling:
+            database_instance.connect()
     except Exception as e:
         logging.error(e)
         raise e
@@ -110,8 +112,9 @@ async def on_startup():
 async def on_shutdown():
     """Closing all the threads connection from pooling before shuting down the api 
     """
-    logging.debug("Shutting down connection pool")
-    await database_instance.close_all_connection_pool()
+    if use_connection_pooling:
+        logging.debug("Shutting down connection pool")
+        await database_instance.close_all_connection_pool()
 
 
 app.include_router(countries_router)
