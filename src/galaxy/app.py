@@ -140,8 +140,6 @@ class Database:
                             return self.cursor.statusmessage
                     except Exception as err:
                         print_psycopg2_exception(err)
-                    finally:
-                        self.cursor.close()
                 else:
                     raise ValueError("Query is Null")
 
