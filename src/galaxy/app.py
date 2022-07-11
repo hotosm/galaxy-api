@@ -48,6 +48,8 @@ from fiona.crs import from_epsg
 import time
 import logging
 import shutil
+
+#import instance for pooling 
 from src.galaxy.db_session import database_instance
 
 logging.getLogger("imported_module").setLevel(logging.DEBUG)
@@ -754,18 +756,20 @@ class RawData:
 
     def __init__(self, parameters=None,dbdict=None):
         if parameters:
+            #validation for the parameters if it is already validated with pydantic model or not , people coming from package they will not have api valdiation so to make sure they will be validated before accessing the class
             if type(parameters) is not RawDataCurrentParams:
                 self.params = RawDataCurrentParams(**parameters)
             else :
                 self.params=parameters
 
-        # if dbdict is None :
-        #     self.db = Database(dict(config.items("RAW_DATA")))
-        # else :
-        #     self.db = Database(dict(dbdict))
-        pool_conn=LOCAL_CON_POOL.get_conn_from_pool()
-        self.con,self.cur= pool_conn,pool_conn.cursor()
-        # self.con, self.cur = self.db.connect()
+        if not dbdict:
+            #if database credentials directly from class is not passed grab from pool
+            pool_conn=LOCAL_CON_POOL.get_conn_from_pool()
+            self.con,self.cur= pool_conn,pool_conn.cursor()
+        else : 
+            #else use our default db class 
+            self.db = Database(dict(dbdict))
+            self.con, self.cur = self.db.connect()
 
     def get_query_con(self):
         """Provides Query and connection to user so that they can perform query by themselves"""
@@ -808,7 +812,8 @@ class RawData:
     @staticmethod
     def ogr_export(outputtype,query=None, export_path=None ,point_query=None, line_query=None, poly_query=None,dump_temp_file_path=None,binding_file_dir=None):
         """Function written to support ogr type extractions as well , In this way we will be able to support all file formats supported by Ogr , Currently it is slow when dataset gets bigger as compared to our own conversion method but rich in feature and data types even though it is slow"""
-        db_items = dict(config.items("RAW_DATA"))
+        db_items = get_db_connection_params("RAW_DATA")
+        #format query if it has " in string"
         if query:
             formatted_query = query.replace('"', '\\"')
         # for mbtiles we need additional input as well i.e. minzoom and maxzoom , setting default at max=22 and min=10
@@ -817,19 +822,20 @@ class RawData:
                 outputtype=outputtype, export_path=export_path, host=db_items.get('host'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=formatted_query)
 
         elif outputtype is RawDataOutputType.SHAPEFILE.value: 
+            #if it is shapefile it needs different logic for point,line and polygon
             file_paths = []
             outputtype="ESRI Shapefile"
-            # print(point_query)
             if point_query:
                 formatted_query = point_query.replace('"', '\\"')
+                #standard file path for the generation
                 point_file_path = f"""{dump_temp_file_path}_point.shp"""
+                #command for ogr2ogr to generate file 
                 cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" {export_path} PG:"host={host} user={username} dbname={db} password={password}" -sql "{pg_sql_select}" -progress'''.format(
                     outputtype=outputtype, export_path=point_file_path, host=db_items.get('host'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=formatted_query)
                 logging.debug("Calling ogr2ogr-Point Shapefile")
                 run_ogr2ogr_cmd(cmd,dump_temp_file_path,binding_file_dir)
-                # run = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-                # logging.debug(run.stdout.read())
                 file_paths.append(point_file_path)
+                #need filepath to zip in to file and clear them after zipping 
                 file_paths.append(f"""{dump_temp_file_path}_point.shx""")
                 # file_paths.append(f"""{dump_temp_file_path}_point.cpg""")
                 file_paths.append(f"""{dump_temp_file_path}_point.dbf""")
@@ -842,8 +848,6 @@ class RawData:
                     outputtype=outputtype, export_path=line_file_path, host=db_items.get('host'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=formatted_query)
                 logging.debug("Calling ogr2ogr-Line Shapefile")
                 run_ogr2ogr_cmd(cmd,dump_temp_file_path,binding_file_dir)
-                # run = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-                # logging.debug(run.stdout.read())
                 file_paths.append(line_file_path)
                 file_paths.append(f"""{dump_temp_file_path}_line.shx""")
                 # file_paths.append(f"""{dump_temp_file_path}_line.cpg""")
@@ -851,14 +855,11 @@ class RawData:
                 file_paths.append(f"""{dump_temp_file_path}_line.prj""")
             if poly_query:
                 formatted_query = poly_query.replace('"', '\\"')
-                # print(poly_query)
                 poly_file_path = f"""{dump_temp_file_path}_poly.shp"""
                 cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" {export_path} PG:"host={host} user={username} dbname={db} password={password}" -sql "{pg_sql_select}" -progress'''.format(
                     outputtype=outputtype, export_path=poly_file_path, host=db_items.get('host'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=formatted_query)
                 logging.debug("Calling ogr2ogr-Poly Shapefile")
                 run_ogr2ogr_cmd(cmd,dump_temp_file_path,binding_file_dir)
-                # run = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-                # logging.debug(run.stdout.read())
                 file_paths.append(poly_file_path)
                 file_paths.append(f"""{dump_temp_file_path}_poly.shx""")
                 # file_paths.append(f"""{dump_temp_file_path}_poly.cpg""")
@@ -866,20 +867,19 @@ class RawData:
                 file_paths.append(f"""{dump_temp_file_path}_poly.prj""")
             return file_paths
         else:
+            #if it is not shapefile use standard ogr2ogr with their output format , will be useful for kml 
             cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" {export_path} PG:"host={host} user={username} dbname={db} password={password}" -sql "{pg_sql_select}" -progress'''.format(
                 outputtype=outputtype, export_path=export_path, host=db_items.get('host'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=formatted_query)
-        # print(cmd)
         run_ogr2ogr_cmd(cmd,dump_temp_file_path,binding_file_dir)
-        # run = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-        # logging.debug(run.stdout.read())
         return export_path
 
     @staticmethod
     def query2geojson(con, extraction_query, dump_temp_file_path):
         """Function written from scratch without being dependent on any library, Provides better performance for geojson binding"""
-        # print(extraction_query)
+        #creating geojson file 
         pre_geojson = """{"type": "FeatureCollection","features": ["""
         post_geojson = """]}"""
+        #writing to the file 
         with open(dump_temp_file_path, 'a', encoding='utf-8') as f:  # directly writing query result to the file one by one without holding them in object so that it will not eat up our memory
             f.write(pre_geojson)
             logging.debug('Server side Cursor Query Sent with 1000 Chunk Size')
@@ -895,8 +895,11 @@ class RawData:
                         f.write(',')
                         f.write(row[0])
                 cursor.close()  # closing connection to avoid memory issues
+                #release connection from pool
                 database_instance.release_conn_from_pool(con)
+                #close the writing geojson with last part 
             f.write(post_geojson)
+            #close the file
         f.close()
         logging.debug(f"""Server side Query Result  Post Processing Done""")
 
@@ -979,8 +982,19 @@ class RawData:
     
     @staticmethod
     def get_grid_id(geom,cur):
+        """Gets the intersecting related grid id for the geometry that is passed 
+
+        Args:
+            geom (_type_): _description_
+            cur (_type_): _description_
+
+        Returns:
+            _type_: grid id , geometry dump and the area of geometry
+        """
         geometry_dump = dumps(dict(geom))
+        #generating geometry area in sqkm
         geom_area = int(area(json.loads(geom.json())) * 1E-6)
+        #only apply grid in the logic if it exceeds the 5000 Sqkm
         if geom_area > 5000:
             # this will be applied only when polygon gets bigger we will be slicing index size to search
             cur.executequery(
@@ -998,6 +1012,7 @@ class RawData:
         Returns:
             _file_path_: geojson file location path
         """
+        #first check either geometry needs grid or not for querying 
         grid_id,geometry_dump,geom_area=RawData.get_grid_id(self.params.geometry,self.cur)
         if self.params.output_type is None:
             # if nothing is supplied then default output type will be geojson
@@ -1005,11 +1020,12 @@ class RawData:
         else:
             output_type = self.params.output_type
         try:
+            # first try to get configuration from config if it is available or not 
             path = config.get("EXPORT_CONFIG", "path")
         except : 
+            # if not create default path 
             path = 'exports/' # first tries to import from config, if not defined creates exports in home directory 
         
-        # print(path)
         # Check whether the export path exists or not
         isExist = os.path.exists(path)
         if not isExist:
@@ -1017,7 +1033,7 @@ class RawData:
             os.makedirs(path)
         path=f"""{path}{exportname}/"""
         os.makedirs(path)
-        
+        #create file path with respect to of output type 
         dump_temp_file_path = f"""{path}{exportname}.{output_type.lower()}"""
 
         # currently we have only geojson binding function written other than that we have depend on ogr
@@ -1039,11 +1055,10 @@ class RawData:
     async def check_status(self,request):
         """Gives status about DB update, Substracts with current time and last db update time"""
         status_query = check_last_updated_rawdata()
-        result=await request.app.state.db.fetch_rows(status_query)
-        behind_time=dict(result[0]).get('last_updated')
-        # behind_time = self.db.executequery(status_query)
-        # behind_time_min = behind_time[0][0].total_seconds()/60
-        return str(behind_time)
+        self.cur.executequery(status_query)
+        behind_time=self.cur.fetchall()
+        behind_time_min = behind_time[0][0].total_seconds()/60
+        return behind_time_min
 
 def run_ogr2ogr_cmd(cmd,dump_temp_file_path,binding_file_dir):
     """Runs command and monitors the file size until the process runs

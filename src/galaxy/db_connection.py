@@ -21,12 +21,14 @@ from .config import config
 import logging
 import psycopg2
 from psycopg2 import pool
+from .config import get_db_connection_params
+
 
 class Database:
     """Handles the all work related to connection pooling
     """
     def __init__(self):
-        self.db_params = dict(config.items("RAW_DATA"))
+        self.db_params = get_db_connection_params("RAW_DATA")
         self._cursor = None
         self.threaded_postgreSQL_pool  = None
         self.con = None

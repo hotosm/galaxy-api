@@ -20,7 +20,7 @@ def get_db_connection_params(dbIdentifier: str) -> dict:
 
     """
 
-    ALLOWED_SECTION_NAMES = ('INSIGHTS', 'TM', 'UNDERPASS')
+    ALLOWED_SECTION_NAMES = ('INSIGHTS', 'TM', 'UNDERPASS' , 'RAW_DATA')
 
     if dbIdentifier not in ALLOWED_SECTION_NAMES:
         print(f"Invalid dbIdentifier. Pick one of {ALLOWED_SECTION_NAMES}")
