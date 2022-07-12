@@ -18,6 +18,7 @@
 # <info@hotosm.org>
 '''Main page contains class for database mapathon and funtion for error printing  '''
 
+from threading import excepthook
 from .config import get_db_connection_params,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,BUCKET_NAME
 from .validation.models import Source
 import sys
@@ -48,6 +49,7 @@ from fiona.crs import from_epsg
 import time
 import logging
 import shutil
+import boto3
 
 #import instance for pooling 
 if use_connection_pooling:
@@ -1104,41 +1106,45 @@ def run_ogr2ogr_cmd(cmd,dump_temp_file_path,binding_file_dir):
         shutil.rmtree(binding_file_dir)
         raise ValueError("Shapefile binding failed")     
 
- class S3FileTransfer :
+class S3FileTransfer :
     """Responsible for the file transfer to s3 from API maachine """
     def __init__(self):
-      #responsible for the connection 
-      self.aws_session = boto3.Session(
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-      )
-      self.s3 = self.aws_session.client('s3')
-      
-
+        #responsible for the connection 
+        try:
+            self.aws_session = boto3.Session(
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+            )
+        except Exception as ex:
+            logging.ERROR(ex)
+            raise ex
+        self.s3 = self.aws_session.client('s3')
+        logging.debug("Connection has been successful to s3")
+        
     def list_buckets(self):
-      """used to list all the buckets available on s3"""
-      buckets=self.s3.list_buckets()
-      return buckets 
+        """used to list all the buckets available on s3"""
+        buckets=self.s3.list_buckets()
+        return buckets 
 
     @staticmethod
     def get_bucket_location(self,bucket_name):
-    """Provides the bucket location on aws, takes bucket_name as string -- name of repo on s3"""
-      bucket_location = self.s3.get_bucket_location(Bucket=bucket_name)
-      return bucket_location['LocationConstraint'] or "us-east-1"
-  
+        """Provides the bucket location on aws, takes bucket_name as string -- name of repo on s3"""
+        bucket_location = self.s3.get_bucket_location(Bucket=bucket_name)
+        return bucket_location['LocationConstraint'] or "us-east-1"
+
     def upload(self,file_path, file_prefix):
-      """Used for transferring file to s3 after reading path from the user , It will only start the upload but doesn't wait for upload to complete
-      Parameters :file_path --- your local file path to upload , file_prefix -- prefix for the filename which is stored
-      sample function call : S3FileTransfer.transfer(file_path="exports",file_prefix="upload_test") """
-      self.file_path = file_path
-      self.file_prefix = file_prefix
-      self.file_name=f"{self.file_prefix}.zip"
-      #instatiate upload 
-      file_obj=self.s3.upload_file(self.file_path, 
+        """Used for transferring file to s3 after reading path from the user , It will only start the upload but doesn't wait for upload to complete
+        Parameters :file_path --- your local file path to upload , file_prefix -- prefix for the filename which is stored
+        sample function call : S3FileTransfer.transfer(file_path="exports",file_prefix="upload_test") """
+        self.file_path = file_path
+        self.file_prefix = file_prefix
+        file_name=f"{self.file_prefix}.zip"
+        #instantiate upload 
+        self.s3.upload_file(self.file_path, 
             BUCKET_NAME, 
             self.file_name
             )
         #generate the download url that will be available after upload is done 
-      bucket_location = S3FileTransfer.get_bucket_location(BUCKET_NAME)
-      self.object_url = f"""https://s3.{bucket_location}.amazonaws.com/{BUCKET_NAME}/{self.file_name}"""
-      return self.object_url 
+        bucket_location = S3FileTransfer.get_bucket_location(BUCKET_NAME)
+        object_url = f"""https://s3.{bucket_location}.amazonaws.com/{BUCKET_NAME}/{file_name}"""
+        return object_url 

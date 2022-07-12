@@ -32,7 +32,7 @@ from fastapi import APIRouter, Depends, Request
 from src.galaxy.query_builder.builder import remove_spaces
 from src.galaxy.validation.models import RawDataHistoricalParams, RawDataCurrentParams
 from .auth import login_required
-from src.galaxy.app import RawData
+from src.galaxy.app import RawData,S3FileTransfer
 from fastapi.responses import FileResponse, StreamingResponse
 from datetime import datetime
 import time
@@ -51,7 +51,7 @@ from .auth import login_required
 import pathlib
 import shutil
 from src.galaxy.query_builder.builder import check_last_updated_rawdata
-
+from src.galaxy.config import use_s3_to_upload
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
 
 # @router.post("/historical-snapshot/")
@@ -105,21 +105,26 @@ def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTas
         # clearing tmp geojson file since it is already dumped to zip file we don't need it anymore
         if os.path.exists(temp_file):      
             inside_file_size += os.path.getsize(temp_file)
-    
+    #remove the file taht are just finded to zip file
     background_tasks.add_task(remove_file, path)
-    try:
-        client_host = config.get("EXPORT_CONFIG", "api_host")  # getting from config in case api and frontend is not hosted on same url
-    except:
-        client_host = f"""{request.url.scheme}://{request.client.host}"""  # getting client host
-    
-    try :
-        client_port = config.get("EXPORT_CONFIG", "api_port")
-    except:
-        client_port = None
-    if client_port :
-        download_url = f"""{client_host}:{client_port}/exports/{exportname}.zip"""  # disconnected download portion from this endpoint because when there will be multiple hits at a same time we don't want function to get stuck waiting for user to download the file and deliver the response , we want to reduce waiting time and free function !
-    else :
-        download_url = f"""{client_host}/exports/{exportname}.zip"""  # disconnected download portion from this endpoint because when there will be multiple hits at a same time we don't want function to get stuck waiting for user to download the file and deliver the response , we want to reduce waiting time and free function !
+
+    #check if download url will be generated from s3 or not from config
+    if use_s3_to_upload :
+        download_url=S3FileTransfer.upload(f"""exports/{exportname}.zip""",exportname)
+    else:
+        try:
+            client_host = config.get("EXPORT_CONFIG", "api_host")  # getting from config in case api and frontend is not hosted on same url
+        except:
+            client_host = f"""{request.url.scheme}://{request.client.host}"""  # getting client host
+        
+        try :
+            client_port = config.get("EXPORT_CONFIG", "api_port")
+        except:
+            client_port = None
+        if client_port :
+            download_url = f"""{client_host}:{client_port}/exports/{exportname}.zip"""  # disconnected download portion from this endpoint because when there will be multiple hits at a same time we don't want function to get stuck waiting for user to download the file and deliver the response , we want to reduce waiting time and free function !
+        else :
+            download_url = f"""{client_host}/exports/{exportname}.zip"""  # disconnected download portion from this endpoint because when there will be multiple hits at a same time we don't want function to get stuck waiting for user to download the file and deliver the response , we want to reduce waiting time and free function !
 
     response_time = time.time() - start_time
     # getting file size of zip , units are in bytes converted to mb in response
