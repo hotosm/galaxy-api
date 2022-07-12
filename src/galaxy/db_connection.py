@@ -18,7 +18,7 @@
 # <info@hotosm.org>
 
 from .config import config
-import logging
+from .config import logger as logging
 import psycopg2
 from psycopg2 import pool
 from .config import get_db_connection_params

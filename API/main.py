@@ -37,7 +37,7 @@ from fastapi import  Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 import time
-import logging
+from src.galaxy.config import logger as logging
 from src.galaxy.db_session import database_instance
 from src.galaxy.config import use_connection_pooling , use_s3_to_upload
 

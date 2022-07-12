@@ -47,9 +47,9 @@ from json import dumps
 import fiona
 from fiona.crs import from_epsg
 import time
-import logging
 import shutil
 import boto3
+from .config import logger as logging
 
 #import instance for pooling 
 if use_connection_pooling:

@@ -3,6 +3,9 @@
 
 from configparser import ConfigParser
 import logging
+logger = logging.getLogger('galaxy')
+logging.getLogger("fiona").propagate = False  # disable fiona logging
+logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
 
 CONFIG_FILE_PATH = "src/config.txt"
 
