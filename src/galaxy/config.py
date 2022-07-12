@@ -3,6 +3,9 @@
 
 from configparser import ConfigParser
 import logging
+logger = logging.getLogger('galaxy')
+logging.getLogger("fiona").propagate = False  # disable fiona logging
+logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
 
 CONFIG_FILE_PATH = "src/config.txt"
 
@@ -28,9 +31,6 @@ if  config.get("EXPORT_UPLOAD", "FILE_UPLOAD_METHOD",fallback=None) == "s3":
         BUCKET_NAME="exports-stage.hotosm.org" # default 
 else:
     use_s3_to_upload=False
-
-
-  
 
 
 def get_db_connection_params(dbIdentifier: str) -> dict:

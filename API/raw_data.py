@@ -26,7 +26,6 @@ from os.path import exists
 from src.galaxy import config
 from starlette.background import BackgroundTasks
 import orjson
-import logging
 from http.client import REQUEST_ENTITY_TOO_LARGE
 from fastapi import APIRouter, Depends, Request
 from src.galaxy.query_builder.builder import remove_spaces
@@ -38,7 +37,7 @@ from datetime import datetime
 import time
 import zipfile
 router = APIRouter(prefix="/raw-data")
-import logging
+from src.galaxy.config import logger as logging
 import orjson
 import os 
 from starlette.background import BackgroundTasks
@@ -52,7 +51,7 @@ import pathlib
 import shutil
 from src.galaxy.query_builder.builder import check_last_updated_rawdata
 from src.galaxy.config import use_s3_to_upload
-logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
+
 
 # @router.post("/historical-snapshot/")
 # def get_historical_data(params:RawDataHistoricalParams):
