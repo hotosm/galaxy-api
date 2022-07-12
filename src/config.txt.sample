@@ -60,4 +60,9 @@ port=
 url=https://apikey.ingest.sentry.io/appid
 rate=1.0
 
+[EXPORT_UPLOAD]
+FILE_UPLOAD_METHOD=disk # options are s3,disk 
+AWS_ACCESS_KEY_ID= your id 
+AWS_SECRET_ACCESS_KEY= yourkey 
+BUCKET_NAME= your bucket name 
 

@@ -15,6 +15,24 @@ if config.get('EXPORT_CONFIG', 'use_connection_pooling', fallback=None):
 else:
     use_connection_pooling=False
 
+#check either to use s3 raw data exports file uploading or not 
+if  config.get("EXPORT_UPLOAD", "FILE_UPLOAD_METHOD",fallback=None) == "s3":
+    use_s3_to_upload=True
+    try :
+        AWS_ACCESS_KEY_ID=config.get("EXPORT_UPLOAD", "AWS_ACCESS_KEY_ID") 
+        AWS_SECRET_ACCESS_KEY=config.get("EXPORT_UPLOAD", "AWS_SECRET_ACCESS_KEY")
+    except :
+        AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY=None,None
+    BUCKET_NAME = config.get("EXPORT_UPLOAD", "BUCKET_NAME",fallback=None)
+    if BUCKET_NAME is None : 
+        BUCKET_NAME="exports-stage.hotosm.org" # default 
+else:
+    use_s3_to_upload=False
+
+
+  
+
+
 def get_db_connection_params(dbIdentifier: str) -> dict:
     """Return a python dict that can be passed to psycopg2 connections
     to authenticate to Postgres Databases

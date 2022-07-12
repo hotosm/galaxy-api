@@ -60,16 +60,6 @@ logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
 #     result= RawData(params).extract_historical_data()
 #     return generate_rawdata_response(result,start_time)
 
-
-def remove_file(path: str) -> None:
-    """Used for removing temp file dir and its all content after zip file is delivered to user
-    """
-    # os.unlink(path)
-    try:
-        shutil.rmtree(path)
-    except OSError as e:
-        logging.error("Error: %s - %s." % (e.filename, e.strerror))
-
 @router.post("/current-snapshot/")
 def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTasks,request: Request):  
 # def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTasks, user_data=Depends(login_required)):
@@ -154,6 +144,15 @@ def check_current_db_status():
     result = RawData().check_status()
     response = f"""{result} ago"""
     return {"last_updated": response}
+
+def remove_file(path: str) -> None:
+    """Used for removing temp file dir and its all content after zip file is delivered to user
+    """
+    # os.unlink(path)
+    try:
+        shutil.rmtree(path)
+    except OSError as e:
+        logging.error("Error: %s - %s." % (e.filename, e.strerror))
 
 
 
