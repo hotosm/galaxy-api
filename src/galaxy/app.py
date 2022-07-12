@@ -57,10 +57,6 @@ if use_connection_pooling:
 else:
     database_instance=None
 
-logging.getLogger("imported_module").setLevel(logging.DEBUG)
-logging.getLogger("fiona").propagate = False  # disable fiona logging
-logging.getLogger("boto3").propagate = False  # disable fiona logging
-
 #assigning global variable of pooling so that it will be accessible from any function within this script
 global LOCAL_CON_POOL
 
