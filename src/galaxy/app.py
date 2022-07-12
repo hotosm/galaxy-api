@@ -59,6 +59,7 @@ else:
 
 logging.getLogger("imported_module").setLevel(logging.DEBUG)
 logging.getLogger("fiona").propagate = False  # disable fiona logging
+logging.getLogger("boto3").propagate = False  # disable fiona logging
 
 #assigning global variable of pooling so that it will be accessible from any function within this script
 global LOCAL_CON_POOL
@@ -1126,7 +1127,6 @@ class S3FileTransfer :
         buckets=self.s3.list_buckets()
         return buckets 
 
-    @staticmethod
     def get_bucket_location(self,bucket_name):
         """Provides the bucket location on aws, takes bucket_name as string -- name of repo on s3"""
         bucket_location = self.s3.get_bucket_location(Bucket=bucket_name)
@@ -1140,11 +1140,15 @@ class S3FileTransfer :
         self.file_prefix = file_prefix
         file_name=f"{self.file_prefix}.zip"
         #instantiate upload 
-        self.s3.upload_file(self.file_path, 
-            BUCKET_NAME, 
-            self.file_name
-            )
+        try:
+            self.s3.upload_file(self.file_path, 
+                BUCKET_NAME, 
+                file_name
+                )
+        except Exception as ex:
+            logging.error(ex)
+            raise ex
         #generate the download url that will be available after upload is done 
-        bucket_location = S3FileTransfer.get_bucket_location(BUCKET_NAME)
+        bucket_location = self.get_bucket_location(bucket_name=BUCKET_NAME)
         object_url = f"""https://s3.{bucket_location}.amazonaws.com/{BUCKET_NAME}/{file_name}"""
         return object_url 

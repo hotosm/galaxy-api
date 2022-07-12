@@ -9,6 +9,7 @@ CONFIG_FILE_PATH = "src/config.txt"
 config = ConfigParser()
 config.read(CONFIG_FILE_PATH)
 
+AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY , BUCKET_NAME =None , None , None
 #check either to use connection pooling or not 
 if config.get('EXPORT_CONFIG', 'use_connection_pooling', fallback=None): 
     use_connection_pooling=True
@@ -22,16 +23,12 @@ if  config.get("EXPORT_UPLOAD", "FILE_UPLOAD_METHOD",fallback=None) == "s3":
         AWS_ACCESS_KEY_ID=config.get("EXPORT_UPLOAD", "AWS_ACCESS_KEY_ID") 
         AWS_SECRET_ACCESS_KEY=config.get("EXPORT_UPLOAD", "AWS_SECRET_ACCESS_KEY")
     except :
-        AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY=None,None
+        logging.DEBUG("No aws credentials supplied")
     BUCKET_NAME = config.get("EXPORT_UPLOAD", "BUCKET_NAME",fallback=None)
     if BUCKET_NAME is None : 
         BUCKET_NAME="exports-stage.hotosm.org" # default 
 else:
     use_s3_to_upload=False
-
-
-  
-
 
 def get_db_connection_params(dbIdentifier: str) -> dict:
     """Return a python dict that can be passed to psycopg2 connections
