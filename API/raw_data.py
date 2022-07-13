@@ -52,6 +52,7 @@ import shutil
 from src.galaxy.query_builder.builder import check_last_updated_rawdata
 from src.galaxy.config import use_s3_to_upload
 import requests
+from datetime import datetime as dt
 # @router.post("/historical-snapshot/")
 # def get_historical_data(params:RawDataHistoricalParams):
 #     start_time = time.time()
@@ -215,8 +216,7 @@ def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTas
         
     """
 # def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTasks, user_data=Depends(login_required)): # this will use osm login makes it restrict login 
-    start_time = time.time()
-    logging.debug('Request Received from Raw Data API ')
+    start_time = dt.now()
     if params.output_type is None: # if no ouput type is supplied default is geojson output
         params.output_type=RawDataOutputType.GEOJSON.value
 
@@ -229,12 +229,14 @@ def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTas
     else:
         # exportname = f"Raw_Export_{datetime.now().isoformat()}_{str(uuid4())}"
         exportname = f"Raw_Export_{str(uuid4())}_{params.output_type}"
+    
+    logging.info(f"Request {exportname} received ")
 
     dump_temp_file, geom_area=RawData(params).extract_current_data(exportname)
 
     logging.debug('Zip Binding Started !')
     try:
-        path = config.get("EXPORT_CONFIG", "path")
+        path = config.get("API_CONFIG", "path")
     except : 
         path = 'exports/' # first tries to import from config, if not defined creates exports in home directory 
     # saving file in temp directory instead of memory so that zipping file will not eat memory
@@ -268,12 +270,12 @@ def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTas
         background_tasks.add_task(watch_s3_upload,download_url,zip_temp_path) # watches the status code of the link provided and deletes the file if it is 200
     else:
         try:
-            client_host = config.get("EXPORT_CONFIG", "api_host")  # getting from config in case api and frontend is not hosted on same url
+            client_host = config.get("API_CONFIG", "api_host")  # getting from config in case api and frontend is not hosted on same url
         except:
             client_host = f"""{request.url.scheme}://{request.client.host}"""  # getting client host
         
         try :
-            client_port = config.get("EXPORT_CONFIG", "api_port")
+            client_port = config.get("API_CONFIG", "api_port")
         except:
             client_port = None
         if client_port :
@@ -281,21 +283,12 @@ def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTas
         else :
             download_url = f"""{client_host}/exports/{exportname}.zip"""  # disconnected download portion from this endpoint because when there will be multiple hits at a same time we don't want function to get stuck waiting for user to download the file and deliver the response , we want to reduce waiting time and free function !
 
-    response_time = time.time() - start_time
     # getting file size of zip , units are in bytes converted to mb in response
     zip_file_size = os.path.getsize(zip_temp_path)
-    response_time_str=""
-    if int(response_time) < 60:
-        response_time_str = f"""{int(response_time)} Seconds"""
-    else:
-        minute = int(response_time/60)
-        if minute >= 60 :
-            Hour = int(response_time/60)
-            response_time_str= f"""{int(Hour)} Hour"""
-            minute=minute-60*int(Hour)
-        response_time_str += f"""{minute} Minute"""
-    logging.debug("-------Raw : %s MB, %s :-: Name : %s, %s Sqkm, format-%s-------" %
-                  (round(inside_file_size/1000000), response_time_str,params.file_name,geom_area,params.output_type))
+    response_time = dt.now() - start_time
+    response_time_str=str(response_time)
+    logging.info(f"Done Export : {exportname} of {round(inside_file_size/1000000)} MB / {geom_area} sqkm in {response_time_str}")
+                  
     return {"download_url": download_url, "file_name": exportname, "response_time": response_time_str, "query_area": f"""{geom_area} Sq Km """, "binded_file_size": f"""{round(inside_file_size/1000000)} MB""", "zip_file_size_bytes": {zip_file_size}}
 
 @router.get("/status/")

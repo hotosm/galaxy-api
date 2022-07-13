@@ -1021,7 +1021,7 @@ class RawData:
             output_type = self.params.output_type
         try:
             # first try to get configuration from config if it is available or not 
-            path = config.get("EXPORT_CONFIG", "path")
+            path = config.get("API_CONFIG", "export_path")
         except : 
             # if not create default path 
             path = 'exports/' # first tries to import from config, if not defined creates exports in home directory 
@@ -1137,6 +1137,7 @@ class S3FileTransfer :
         self.file_prefix = file_prefix
         file_name=f"{self.file_prefix}.zip"
         #instantiate upload 
+        start_time=time.time()
         try:
             self.s3.upload_file(self.file_path, 
                 BUCKET_NAME, 
@@ -1145,6 +1146,8 @@ class S3FileTransfer :
         except Exception as ex:
             logging.error(ex)
             raise ex
+        end_time=time.time()
+        logging.debug(f"Upload to s3 is succesfull in {start_time-end_time} sec")
         #generate the download url 
         bucket_location = self.get_bucket_location(bucket_name=BUCKET_NAME)
         object_url = f"""https://s3.{bucket_location}.amazonaws.com/{BUCKET_NAME}/{file_name}"""
@@ -1172,7 +1175,7 @@ class ProgressPercentage(object):
         with self._lock:
             self._seen_so_far += bytes_amount
             percentage = (self._seen_so_far / self._size) * 100
-            sys.stdout.write(
+            logging.debug(
                 "\r%s  %s / %s  (%.2f%%)" % (
                     self._filename, self._seen_so_far, self._size,
                     percentage))
