@@ -1146,8 +1146,7 @@ class S3FileTransfer :
         except Exception as ex:
             logging.error(ex)
             raise ex
-        end_time=time.time()
-        logging.info(f"Uploaded {self.file_prefix} in {start_time-end_time} sec")
+        logging.info(f"Uploaded {self.file_prefix} in {time.time()-start_time} sec")
         #generate the download url 
         bucket_location = self.get_bucket_location(bucket_name=BUCKET_NAME)
         object_url = f"""https://s3.{bucket_location}.amazonaws.com/{BUCKET_NAME}/{file_name}"""
