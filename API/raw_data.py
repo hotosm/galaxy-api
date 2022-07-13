@@ -63,6 +63,7 @@ def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTas
     """Generates the recent raw osm data available on database based on the user's geometry , query and spatial features
 
     Args:
+    
         params (RawDataCurrentParams): 
                 {
                 "outputType": "GeoJSON",
@@ -323,6 +324,7 @@ def watch_s3_upload(url : str,path : str) -> None:
     remove_temp_file=True
     check_call=requests.get(url).status_code
     if check_call !=200 :
+        logging.debug("Upload is not done yet waiting ...")
         while check_call !=200 :# check until status is not green
             check_call=requests.get(url).status_code
             if time.time() - start_time >300 :

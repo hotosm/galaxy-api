@@ -50,6 +50,7 @@ import time
 import shutil
 import boto3
 from .config import logger as logging
+import requests
 
 #import instance for pooling 
 if use_connection_pooling:
@@ -1139,12 +1140,40 @@ class S3FileTransfer :
         try:
             self.s3.upload_file(self.file_path, 
                 BUCKET_NAME, 
-                file_name
+                file_name,Callback=ProgressPercentage(self.file_path)
                 )
         except Exception as ex:
             logging.error(ex)
             raise ex
-        #generate the download url that will be available after upload is done 
+        #generate the download url 
         bucket_location = self.get_bucket_location(bucket_name=BUCKET_NAME)
         object_url = f"""https://s3.{bucket_location}.amazonaws.com/{BUCKET_NAME}/{file_name}"""
         return object_url 
+    
+import os
+import sys
+import threading
+
+class ProgressPercentage(object):
+    """Determines the project percentage of aws s3 upload file call
+
+    Args:
+        object (_type_): _description_
+    """
+
+    def __init__(self, filename):
+        self._filename = filename
+        self._size = float(os.path.getsize(filename))
+        self._seen_so_far = 0
+        self._lock = threading.Lock()
+
+    def __call__(self, bytes_amount):
+        # To simplify, assume this is hooked up to a single filename
+        with self._lock:
+            self._seen_so_far += bytes_amount
+            percentage = (self._seen_so_far / self._size) * 100
+            sys.stdout.write(
+                "\r%s  %s / %s  (%.2f%%)" % (
+                    self._filename, self._seen_so_far, self._size,
+                    percentage))
+            sys.stdout.flush()
