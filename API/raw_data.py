@@ -59,8 +59,161 @@ import requests
 #     return generate_rawdata_response(result,start_time)
 
 @router.post("/current-snapshot/")
-def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTasks,request: Request):  
-# def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTasks, user_data=Depends(login_required)):
+def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTasks,request: Request):
+    """Generates the recent raw osm data available on database based on the user's geometry , query and spatial features
+
+    Args:
+        params (RawDataCurrentParams): 
+                {
+                "outputType": "GeoJSON",
+                "fileName": "string",
+                "geometry": { # only polygon is supported ** only required field on request , everything else is optional **
+                    "coordinates": [
+                    [
+                        [
+                        1,0
+                        ],
+                        [
+                        2,0
+                        ]
+                    ]
+                    ],
+                    "type": "Polygon"
+                },
+                "filters" : { 
+                    "tags": { # tags filter controls no of rows returned 
+                    "point" : {"amenity":["shop"]},
+                    "line" : {},
+                    "polygon" : {"key":["value1","value2"],"key2":["value1"]},
+                    "all_geometry" : {"building":['yes']} # will work as master filter will be applied to all of the geom selected on geom type 
+                    },
+                    "attributes": { # attribute column controls no of columns / name returned
+                    "point": [], column 
+                    "line" : [],
+                    "polygon" : [],
+                    "all_geometry" : ["name","address"], # this will work as master controller will be applied to all of the geom  type returned
+                    }
+                    },
+                "geometryType": [
+                    "point","line","polygon" 
+                ]
+                }
+        background_tasks (BackgroundTasks): task to cleanup the files produced during export 
+        request (Request): request instance
+        
+        Returns : 
+        {
+            "download_url": Url for downloading the requested file in zip,
+            "file_name": name_of_export + unique_id + outputformat,
+            "response_time": time taken to generate the export,
+            "query_area": area in sq km ,
+            "binded_file_size": actual inside file size in MB,
+            "zip_file_size_bytes": [
+                zip file size in bytes
+            ]
+        }
+        Sample Query : 
+        1. Sample query to extract point and polygon building within my area which have building = * (i.e.anything) with name attribute 
+        {
+            "outputType": "GeoJSON",
+            "fileName": "Pokhara_buildings",
+            "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                    [
+                        [
+                        83.96919250488281,
+                        28.194446860487773
+                        ],
+                        [
+                        83.99751663208006,
+                        28.194446860487773
+                        ],
+                        [
+                        83.99751663208006,
+                        28.214869548073377
+                        ],
+                        [
+                        83.96919250488281,
+                        28.214869548073377
+                        ],
+                        [
+                        83.96919250488281,
+                        28.194446860487773
+                        ]
+                    ]
+                    ]
+                },
+            "filters": {"tags":{"all_geometry":{"building":[]}},"attributes":{"all_geometry":["name"]}},
+            "geometryType": [
+                "point","polygon"
+            ]
+        }
+        2. Query to extract everything inside my area in shapefile output: 
+        {
+            "outputType": "shp",
+            "fileName": "Pokhara_buildings_everything",
+            "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                    [
+                        [
+                        83.96919250488281,
+                        28.194446860487773
+                        ],
+                        [
+                        83.99751663208006,
+                        28.194446860487773
+                        ],
+                        [
+                        83.99751663208006,
+                        28.214869548073377
+                        ],
+                        [
+                        83.96919250488281,
+                        28.214869548073377
+                        ],
+                        [
+                        83.96919250488281,
+                        28.194446860487773
+                        ]
+                    ]
+                    ]
+                }
+        }
+        3. Clean query to extract all in default : output will be same as 2 but name will be default and geojson will be selected as default format 
+        {
+            "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                    [
+                        [
+                        83.96919250488281,
+                        28.194446860487773
+                        ],
+                        [
+                        83.99751663208006,
+                        28.194446860487773
+                        ],
+                        [
+                        83.99751663208006,
+                        28.214869548073377
+                        ],
+                        [
+                        83.96919250488281,
+                        28.214869548073377
+                        ],
+                        [
+                        83.96919250488281,
+                        28.194446860487773
+                        ]
+                    ]
+                    ]
+                }
+        }
+        
+    """
+# def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTasks, user_data=Depends(login_required)): # this will use osm login makes it restrict login 
     start_time = time.time()
     logging.debug('Request Received from Raw Data API ')
     if params.output_type is None: # if no ouput type is supplied default is geojson output
@@ -140,7 +293,7 @@ def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTas
             response_time_str= f"""{int(Hour)} Hour"""
             minute=minute-60*int(Hour)
         response_time_str += f"""{minute} Minute"""
-    logging.debug("-------Raw : %s MB, %s :-: %s, %s Sqkm, format-%s-------" %
+    logging.debug("-------Raw : %s MB, %s :-: Name : %s, %s Sqkm, format-%s-------" %
                   (round(inside_file_size/1000000), response_time_str,params.file_name,geom_area,params.output_type))
     return {"download_url": download_url, "file_name": exportname, "response_time": response_time_str, "query_area": f"""{geom_area} Sq Km """, "binded_file_size": f"""{round(inside_file_size/1000000)} MB""", "zip_file_size_bytes": {zip_file_size}}
 

@@ -1113,7 +1113,7 @@ class S3FileTransfer :
             aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
             )
         except Exception as ex:
-            logging.ERROR(ex)
+            logging.error(ex)
             raise ex
         self.s3 = self.aws_session.client('s3')
         logging.debug("Connection has been successful to s3")
