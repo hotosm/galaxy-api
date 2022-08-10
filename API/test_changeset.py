@@ -4,7 +4,7 @@ from src.galaxy.config import get_db_connection_params
 router = APIRouter()
 
 @router.get("/test_changeset/{start_date}/{end_date}/{hashtag}")
-def root(start_date,end_date,hashtag):
+def test_changeset_difference(start_date,end_date,hashtag):
     """
     date format : 2018-08-10
     """
