@@ -70,6 +70,9 @@ app.include_router(raw_data_router)
 if use_s3_to_upload is False : # only mount the disk if config is set to disk 
     app.include_router(download_router)
 
+from .test_changeset import router  as test_changeset_router
+app.include_router(test_changeset_router)
+
 
 app = VersionedFastAPI(app,enable_latest=True,version_format='{major}',prefix_format='/v{major}')
 
