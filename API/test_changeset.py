@@ -41,12 +41,15 @@ def root(start_date,end_date,hashtag):
     print(underpass_query)
     
     underpass_result=underpass.executequery(underpass_query)
+    underpass.close_conn()
     
     insight=Database(get_db_connection_params("INSIGHTS"))
     insight.connect()
     print(insight_query)
     
     insight_result=insight.executequery(insight_query)
+    insight.close_conn()
+    
 
     return {
         "insight" : insight_result[0][0],
