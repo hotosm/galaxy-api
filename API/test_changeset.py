@@ -6,7 +6,10 @@ router = APIRouter()
 @router.get("/test_changeset/{start_date}/{end_date}/{hashtag}")
 def test_changeset_difference(start_date,end_date,hashtag):
     """
-    date format : 2018-08-10
+    sample request : 
+    start_date : 2018-08-09
+    end_date : 2018-08-10
+    hashtag : missingmaps
     """
     insight_query=f"""with t1 as (
                     select
