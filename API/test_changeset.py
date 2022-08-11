@@ -1,6 +1,11 @@
 from fastapi import APIRouter
 from src.galaxy.app import Database
 from src.galaxy.config import get_db_connection_params
+from fastapi.responses import StreamingResponse,FileResponse
+import io
+from uuid import uuid4
+
+
 router = APIRouter()
 
 @router.get("/test_changeset/{start_date}/{end_date}/{hashtag}")
@@ -91,6 +96,22 @@ def test_changeset_difference(start_date,end_date,hashtag):
     
     underpass.close_conn()
     
+
+    
+    
+    return {
+        "insight_changeset_intersected_priority_count" : insight_result[0][0],
+        "underpass_changeset_count_#" : underpass_result[0][0],
+        "underpass_changeset_count_id" : underpass_result_for_id[0][0],
+        "changeset_with_metadata_missing" :insight_result[0][0]-underpass_result[0][0],
+        "whole_changeset_row_missing" :insight_result[0][0]- underpass_result_for_id[0][0],
+        "missing_changesetid_whole_download" :f"""http://52.203.15.233:8000/v1/test_changeset/download_missing_changeset_whole/{start_date}/{end_date}/{hashtag}""",
+        "missing_changesetid_meta_download" :f"""http://52.203.15.233:8000/v1/test_changeset/download_missing_changeset_meta/{start_date}/{end_date}/{hashtag}"""
+        
+    }
+
+@router.get("/test_changeset/download_missing_changeset_whole/{start_date}/{end_date}/{hashtag}")
+def download_missing_changeset_whole(start_date,end_date,hashtag):
     changeset_whole_not_found_in_underpass=f"""with t1 as (
 select
 	geom ,
@@ -120,10 +141,26 @@ from
 	quote_literal('{start_date}T00:00:00'),
 	quote_literal('{end_date}T00:00:00') ))
 	as t5(id int)"""
-    print("Printing changeset_whole_not_found_in_underpass\n")
- 
-    print(changeset_whole_not_found_in_underpass)
+    print("\nPrinting changeset_whole_not_found_in_underpass\n")
+    print (changeset_whole_not_found_in_underpass)
+    insight=Database(get_db_connection_params("INSIGHTS"))
+    insight.connect()
+
+    changeset_whole_not_found_in_underpass_result=insight.executequery(changeset_whole_not_found_in_underpass)
+
+    insight.close_conn()
+    stream = f"""exports/{str(uuid4())}.txt"""
+    filename=f"""missing_whole_{hashtag}_{start_date}_{end_date}.txt"""
+    with open(stream, 'w')as f:
+        for r in changeset_whole_not_found_in_underpass_result:
+            f.write(f"{r[0]}\n")
+    response = FileResponse(stream
+    )
+    response.headers["Content-Disposition"] = f"""attachment; filename={filename}"""
+    return response
     
+@router.get("/test_changeset/download_missing_changeset_meta/{start_date}/{end_date}/{hashtag}")
+def download_missing_changeset_meta(start_date,end_date,hashtag):
     changeset_found_in_underpass_without_hashtag=f"""with t1 as (
 select
 	geom ,
@@ -172,12 +209,20 @@ from
 	quote_literal('{end_date}T00:00:00'),
 	quote_literal('{hashtag}') ))
 	as t0(id int)"""
-    print("Printing changeset_found_in_underpass_without_hashtag\n")
+    print("'nPrinting changeset_found_in_underpass_without_hashtag\n")
     print (changeset_found_in_underpass_without_hashtag)
-    return {
-        "insight_changeset_intersected_priority_count" : insight_result[0][0],
-        "underpass_changeset_count_#" : underpass_result[0][0],
-        "underpass_changeset_count_id" : underpass_result_for_id[0][0],
-        "changeset_with_metadata_missing" :insight_result[0][0]-underpass_result[0][0],
-        "whole_changeset_row_missing" :insight_result[0][0]- underpass_result_for_id[0][0],
-    }
+    insight=Database(get_db_connection_params("INSIGHTS"))
+    insight.connect()
+
+    changeset_whole_not_found_in_underpass_result=insight.executequery(changeset_found_in_underpass_without_hashtag)
+
+    insight.close_conn()
+    stream = f"""exports/{str(uuid4())}.txt"""
+    filename=f"""missing_meta_{hashtag}_{start_date}_{end_date}.txt"""
+    with open(stream, 'w')as f:
+        for r in changeset_whole_not_found_in_underpass_result:
+            f.write(f"{r[0]}\n")
+    response = FileResponse(stream
+    )
+    response.headers["Content-Disposition"] = f"""attachment; filename={filename}"""
+    return response   
