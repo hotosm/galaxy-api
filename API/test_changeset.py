@@ -100,18 +100,19 @@ def test_changeset_difference(start_date,end_date,hashtag):
     
     
     return {
-        "insight_changeset_intersected_priority_count" : insight_result[0][0],
-        "underpass_changeset_count_#" : underpass_result[0][0],
-        "underpass_changeset_count_id" : underpass_result_for_id[0][0],
-        "changeset_with_metadata_missing" :insight_result[0][0]-underpass_result[0][0],
-        "whole_changeset_row_missing" :insight_result[0][0]- underpass_result_for_id[0][0],
-        "missing_changesetid_whole_download" :f"""http://52.203.15.233:8000/v1/test_changeset/download_missing_changeset_whole/{start_date}/{end_date}/{hashtag}""",
-        "missing_changesetid_meta_download" :f"""http://52.203.15.233:8000/v1/test_changeset/download_missing_changeset_meta/{start_date}/{end_date}/{hashtag}"""
+        "changeset_detected_in_priority_by_insight" : insight_result[0][0],
+        "total_changeset_found_by_hashtag" : underpass_result[0][0],
+        "total_changeset_missing_on_stats" :insight_result[0][0]-underpass_result[0][0],
+        "total_changeset_found_by_id" : underpass_result_for_id[0][0],
+        "total_changeset_missing_metadata" : underpass_result_for_id[0][0]-underpass_result[0][0],
+        "changeset_missing_from_db" :insight_result[0][0]- underpass_result_for_id[0][0],
+        "download_changeset_missing_from_db" :f"""http://52.203.15.233:8000/v1/test_changeset/download_changeset_missing_from_db/{start_date}/{end_date}/{hashtag}""",
+        "download_changeset_missing_metadata" :f"""http://52.203.15.233:8000/v1/test_changeset/download_changeset_missing_metadata/{start_date}/{end_date}/{hashtag}"""
         
     }
 
-@router.get("/test_changeset/download_missing_changeset_whole/{start_date}/{end_date}/{hashtag}")
-def download_missing_changeset_whole(start_date,end_date,hashtag):
+@router.get("/test_changeset/download_changeset_missing_from_db/{start_date}/{end_date}/{hashtag}")
+def download_changeset_missing_from_db(start_date,end_date,hashtag):
     changeset_whole_not_found_in_underpass=f"""with t1 as (
 select
 	geom ,
@@ -159,8 +160,8 @@ from
     response.headers["Content-Disposition"] = f"""attachment; filename={filename}"""
     return response
     
-@router.get("/test_changeset/download_missing_changeset_meta/{start_date}/{end_date}/{hashtag}")
-def download_missing_changeset_meta(start_date,end_date,hashtag):
+@router.get("/test_changeset/download_changeset_missing_metadata/{start_date}/{end_date}/{hashtag}")
+def download_changeset_missing_metadata(start_date,end_date,hashtag):
     changeset_found_in_underpass_without_hashtag=f"""with t1 as (
 select
 	geom ,
