@@ -9,7 +9,7 @@ def test_changeset_difference(start_date,end_date,hashtag):
     sample request : 
     start_date : 2018-08-09
     end_date : 2018-08-10
-    hashtag : missingmaps
+    hashtag : {hashtag}
     """
     insight_query=f"""with t1 as (
                     select
@@ -91,15 +91,93 @@ def test_changeset_difference(start_date,end_date,hashtag):
     
     underpass.close_conn()
     
-
+    changeset_whole_not_found_in_underpass=f"""with t1 as (
+select
+	geom ,
+	id as total_changeset_id
+from
+	osm_changeset
+where
+	"created_at" between '{start_date}T00:00:00'::timestamp and '{end_date}T00:00:00'::timestamp
+	and (("tags" -> 'hashtags') ~~* '%{hashtag};%'
+		or ("tags" -> 'comment') ~~* '%{hashtag} %'
+			or ("tags" -> 'hashtags') ~~* '%{hashtag}'
+				or ("tags" -> 'comment') ~~* '%{hashtag}'))
+select
+	t1.total_changeset_id as intersected_id
+from
+	t1 ,
+	geoboundaries as g
+where
+	ST_Intersects(t1.geom ,
+	ST_SetSRID(g.boundary,
+	4326))
+except 
+select *
+from
+	dblink('dbname={get_db_connection_params("UNDERPASS")['dbname']} port={get_db_connection_params("UNDERPASS")['port']} host={get_db_connection_params("UNDERPASS")['host']} user=underpass password={get_db_connection_params("UNDERPASS")['password']} ',
+	format('select id from changesets where (created_at between %s::timestamp and %s::timestamp)',
+	quote_literal('{start_date}T00:00:00'),
+	quote_literal('{end_date}T00:00:00') ))
+	as t5(id int)"""
+    print("Printing changeset_whole_not_found_in_underpass\n")
+ 
+    print(changeset_whole_not_found_in_underpass)
     
-
+    changeset_found_in_underpass_without_hashtag=f"""with t1 as (
+select
+	geom ,
+	id as total_changeset_id
+from
+	osm_changeset
+where
+	"created_at" between '{start_date}T00:00:00'::timestamp and '{end_date}T00:00:00'::timestamp
+	and (("tags" -> 'hashtags') ~~* '%{hashtag};%'
+		or ("tags" -> 'comment') ~~* '%{hashtag} %'
+			or ("tags" -> 'hashtags') ~~* '%{hashtag}'
+				or ("tags" -> 'comment') ~~* '%{hashtag}')),
+			t2 as (
+select
+	t1.total_changeset_id as intersected_id
+from
+	t1 ,
+	geoboundaries as g
+where
+	ST_Intersects(t1.geom ,
+	ST_SetSRID(g.boundary,
+	4326)) ),
+t3 as (
+select
+	id as underpass_hashtag_changeset
+from
+	dblink('dbname={get_db_connection_params("UNDERPASS")['dbname']} port={get_db_connection_params("UNDERPASS")['port']} host={get_db_connection_params("UNDERPASS")['host']} user=underpass password={get_db_connection_params("UNDERPASS")['password']} ',
+	format('select id from changesets where (created_at between %s::timestamp and %s::timestamp)',
+	quote_literal('{start_date}T00:00:00'),
+	quote_literal('{end_date}T00:00:00') ))
+	as t5(id int))
+	select
+		distinct intersected_id
+	from
+		t3,
+		t2
+	where
+		t3.underpass_hashtag_changeset = t2.intersected_id
+except 
+select
+	id as underpass_hashtag_changeset
+from
+	dblink('dbname={get_db_connection_params("UNDERPASS")['dbname']} port={get_db_connection_params("UNDERPASS")['port']} host={get_db_connection_params("UNDERPASS")['host']} user=underpass password={get_db_connection_params("UNDERPASS")['password']} ',
+	format('select id from changesets where (created_at between %s::timestamp and %s::timestamp) and (%s ~~* any(hashtags))',
+	quote_literal('{start_date}T00:00:00'),
+	quote_literal('{end_date}T00:00:00'),
+	quote_literal('{hashtag}') ))
+	as t0(id int)"""
+    print("Printing changeset_found_in_underpass_without_hashtag\n")
+    print (changeset_found_in_underpass_without_hashtag)
     return {
         "insight_changeset_intersected_priority_count" : insight_result[0][0],
         "underpass_changeset_count_#" : underpass_result[0][0],
         "underpass_changeset_count_id" : underpass_result_for_id[0][0],
         "changeset_with_metadata_missing" :insight_result[0][0]-underpass_result[0][0],
         "whole_changeset_row_missing" :insight_result[0][0]- underpass_result_for_id[0][0],
-        
-        
     }
