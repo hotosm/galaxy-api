@@ -86,7 +86,7 @@ def test_changeset_difference(start_date,end_date,hashtag):
                             changesets
                         where
                             {filter_changeset_list}"""
-    # print(underpass_changeset_check_query)
+    print(underpass_changeset_check_query)
     underpass = Database(get_db_connection_params("UNDERPASS"))
     underpass.connect()
     # print(underpass_query)
@@ -150,7 +150,7 @@ from
     changeset_whole_not_found_in_underpass_result=insight.executequery(changeset_whole_not_found_in_underpass)
 
     insight.close_conn()
-    stream = f"""exports/{str(uuid4())}.txt"""
+    stream = f"""exports/{hashtag}_whole_{start_date}_{end_date}_{str(uuid4())}.txt"""
     filename=f"""missing_whole_{hashtag}_{start_date}_{end_date}.txt"""
     with open(stream, 'w')as f:
         for r in changeset_whole_not_found_in_underpass_result:
@@ -218,7 +218,7 @@ from
     changeset_whole_not_found_in_underpass_result=insight.executequery(changeset_found_in_underpass_without_hashtag)
 
     insight.close_conn()
-    stream = f"""exports/{str(uuid4())}.txt"""
+    stream = f"""exports/{hashtag}__meta_{start_date}_{end_date}_{str(uuid4())}.txt"""
     filename=f"""missing_meta_{hashtag}_{start_date}_{end_date}.txt"""
     with open(stream, 'w')as f:
         for r in changeset_whole_not_found_in_underpass_result:
