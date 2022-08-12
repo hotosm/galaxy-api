@@ -34,6 +34,7 @@ def test_changeset_difference(start_date,end_date,hashtag):
                         t1 ,
                         geoboundaries as g
                     where
+                        g.priority is true and
                         ST_Intersects(t1.geom ,
                         ST_SetSRID(g.boundary,
                         4326));"""
@@ -55,6 +56,7 @@ def test_changeset_difference(start_date,end_date,hashtag):
                         t1 ,
                         geoboundaries as g
                     where
+                        g.priority is true and
                         ST_Intersects(t1.geom ,
                         ST_SetSRID(g.boundary,
                         4326));"""                 
@@ -131,6 +133,7 @@ from
 	t1 ,
 	geoboundaries as g
 where
+    g.priority is true and
 	ST_Intersects(t1.geom ,
 	ST_SetSRID(g.boundary,
 	4326))
@@ -181,6 +184,7 @@ from
 	t1 ,
 	geoboundaries as g
 where
+    g.priority is true and
 	ST_Intersects(t1.geom ,
 	ST_SetSRID(g.boundary,
 	4326)) ),
