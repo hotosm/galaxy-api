@@ -824,7 +824,7 @@ def create_column_filter(columns, create_schema=False):
         return f"""osm_id ,tags::text as tags,changeset,timestamp::text,geom"""  # this is default attribute that we will deliver to user if user defines his own attribute column then those will be appended with osm_id only
 
 
-def generate_tag_filter_query(filter):
+def generate_tag_filter_query(filter,params):
         incoming_filter = []
         for key, value in filter.items():
 
@@ -843,7 +843,10 @@ def generate_tag_filter_query(filter):
                     f"""tags ->> '{key.strip()}' = '{value[0].strip()}'""")
             else:
                 incoming_filter.append(f"""tags ? '{key.strip()}'""")
-        tag_filter = " OR ".join(incoming_filter)
+        if params.join_filter_type:
+            tag_filter = f" {params.join_filter_type} ".join(incoming_filter)
+        else:    
+            tag_filter = " OR ".join(incoming_filter)
         return tag_filter
 
 
@@ -865,7 +868,7 @@ def extract_geometry_type_query(params,ogr_export=False):
         select_condition, schema = create_column_filter(
             master_attribute_filter, create_schema=True)
     if master_tag_filter :
-        attribute_filter = generate_tag_filter_query(master_tag_filter)
+        attribute_filter = generate_tag_filter_query(master_tag_filter,params)
     if params.geometry_type is None : # fix me 
         params.geometry_type=['point', 'line', 'polygon']
 
@@ -881,7 +884,7 @@ def extract_geometry_type_query(params,ogr_export=False):
                         where
                             {geom_filter}"""
             if point_tag_filter:
-                attribute_filter = generate_tag_filter_query(point_tag_filter)
+                attribute_filter = generate_tag_filter_query(point_tag_filter,params)
             if attribute_filter:
                 query_point += f""" and ({attribute_filter})"""
             point_schema = schema
@@ -906,7 +909,7 @@ def extract_geometry_type_query(params,ogr_export=False):
                 where
                     {geom_filter}"""
             if line_tag_filter:
-                attribute_filter = generate_tag_filter_query(line_tag_filter)
+                attribute_filter = generate_tag_filter_query(line_tag_filter,params)
             if attribute_filter:
                 query_ways_line += f""" and ({attribute_filter})"""
                 query_relations_line += f""" and ({attribute_filter})"""
@@ -934,7 +937,7 @@ def extract_geometry_type_query(params,ogr_export=False):
                 where
                     {geom_filter}"""
             if poly_tag_filter:
-                attribute_filter = generate_tag_filter_query(poly_tag_filter)
+                attribute_filter = generate_tag_filter_query(poly_tag_filter,params)
             if attribute_filter:
                 query_ways_poly += f""" and ({attribute_filter})"""
                 query_relations_poly += f""" and ({attribute_filter})"""
@@ -1034,17 +1037,17 @@ def raw_currentdata_extraction_query(params, g_id, geometry_dump, ogr_export=Fal
                     poly_select_condition=create_column_filter(point_attribute_filter)
     if tags:
         if master_tag_filter: # if master tag is supplied then other tags should be ignored and master tag will be used
-            master_tag=generate_tag_filter_query(master_tag_filter)
+            master_tag=generate_tag_filter_query(master_tag_filter,params)
             point_tag=master_tag
             line_tag=master_tag
             poly_tag=master_tag
         else:
             if point_tag_filter:
-                point_tag=generate_tag_filter_query(point_tag_filter)
+                point_tag=generate_tag_filter_query(point_tag_filter,params)
             if line_tag_filter:
-                line_tag=generate_tag_filter_query(line_tag_filter)
+                line_tag=generate_tag_filter_query(line_tag_filter,params)
             if poly_tag_filter:
-                poly_tag=generate_tag_filter_query(poly_tag_filter)
+                poly_tag=generate_tag_filter_query(poly_tag_filter,params)
 
 # condition for geometry types 
     if params.geometry_type is None : 

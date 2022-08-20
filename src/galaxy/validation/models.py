@@ -448,6 +448,10 @@ class RawDataOutputType ( Enum):
     SHAPEFILE = "shp"
     MBTILES ="MBTILES" # fully experimental for now 
 
+class JoinFilterType (Enum):
+    OR = "OR"
+    AND ="AND"
+
 class HashtagParams(BaseModel):
     hashtags : Optional[List[str]]
     @validator("hashtags",allow_reuse=True)
@@ -472,6 +476,8 @@ class RawDataHistoricalParams(HashtagParams):
     to_timestamp : datetime
     geometry : MultiPolygon
     output_type : Optional[RawDataOutputType]
+    join_filtery_by : Optional[RawDataOutputType]
+
     # geometry_type : Optional[List[FeatureTypeRawData]] = None
     
 
@@ -539,6 +545,7 @@ class RawDataCurrentParams(BaseModel):
     file_name : Optional[str]=None
     geometry : Union[Polygon,MultiPolygon]
     filters : Optional[dict]=None
+    join_filter_type: Optional[JoinFilterType]=None
     geometry_type : Optional[List[SupportedGeometryFilters]] = None
     
     @validator("filters", allow_reuse=True)

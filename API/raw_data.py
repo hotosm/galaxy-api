@@ -89,7 +89,8 @@ def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTas
                     },
                 "geometryType": [
                     "point","line","polygon" 
-                ]
+                ],
+                joinFilterType:"OR" # options are and / or and or by default -- applies condition for filters **optional
                 }
         background_tasks (BackgroundTasks): task to cleanup the files produced during export 
         request (Request): request instance

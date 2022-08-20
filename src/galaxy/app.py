@@ -967,6 +967,7 @@ class RawData:
         #creating geojson file 
         pre_geojson = """{"type": "FeatureCollection","features": ["""
         post_geojson = """]}"""
+        print(extraction_query)
         #writing to the file 
         with open(dump_temp_file_path, 'a', encoding='utf-8') as f:  # directly writing query result to the file one by one without holding them in object so that it will not eat up our memory
             f.write(pre_geojson)
