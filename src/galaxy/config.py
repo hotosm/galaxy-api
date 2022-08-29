@@ -83,6 +83,9 @@ elif file_upload_method not in ["s3", "disk"]:
         "value not supported for file_upload_method ,switching to default disk method")
     use_s3_to_upload = False
 
+MAIN_API_URL = config.get("API_MONITORING", "MAIN_API_URL", fallback="http://127.0.0.1:8000/v1/")
+ACCESS_TOKEN = config.get("API_MONITORING", "ACCESS_TOKEN", fallback=None)
+
 
 def get_db_connection_params(dbIdentifier: str) -> dict:
     """Return a python dict that can be passed to psycopg2 connections

@@ -36,6 +36,7 @@ from .raw_data import router as raw_data_router
 from .download_export import router as download_router
 # from .test_router import router as test_router
 from .status import router as status_router
+from .system import router as health_router
 from src.galaxy.db_session import database_instance
 from src.galaxy.config import use_connection_pooling, use_s3_to_upload, logger as logging, config
 from fastapi_versioning import VersionedFastAPI
@@ -71,6 +72,7 @@ app.include_router(hashtag_router)
 app.include_router(tm_router)
 app.include_router(status_router)
 app.include_router(raw_data_router)
+app.include_router(health_router)
 
 if use_s3_to_upload is False:
     # only mount the disk if config is set to disk

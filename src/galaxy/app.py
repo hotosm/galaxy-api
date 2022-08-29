@@ -20,7 +20,8 @@
 import os
 import sys
 import threading
-from .config import get_db_connection_params, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, BUCKET_NAME, level, logger as logging, export_path, use_connection_pooling, shp_limit
+import requests
+from .config import get_db_connection_params, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, BUCKET_NAME, level, logger as logging, export_path, use_connection_pooling, shp_limit, ACCESS_TOKEN
 from .validation.models import Source
 from psycopg2 import connect, sql
 from psycopg2.extras import DictCursor
@@ -1324,3 +1325,14 @@ class ProgressPercentage(object):
             percentage = (self._seen_so_far / self._size) * 100
             logging.debug("\r%s  %s / %s  (%.2f%%)", self._filename,
                           self._seen_so_far, self._size, percentage)
+
+
+class SystemHealth(object):
+    @staticmethod
+    def monitor_endpoint(endpoint, request_type, body=None):
+        if request_type == 'GET':
+            get_req = requests.get(endpoint)
+            return get_req.status_code
+        if request_type == 'POST':
+            post_req = requests.post(endpoint, json=body, headers={'access-token':ACCESS_TOKEN})
+            return post_req.status_code
