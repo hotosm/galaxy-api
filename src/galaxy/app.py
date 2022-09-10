@@ -264,6 +264,7 @@ class Insight:
             self.params, self.con, self.cur)
         query=create_osm_history_query_cnt(changeset_query,
                                                      with_username=True)
+        print(query)
         result=self.database.executequery(query)
         return result
 
