@@ -145,6 +145,34 @@ def create_osm_history_query(changeset_query, with_username):
 
     return query
 
+def create_osm_history_query_cnt(changeset_query, with_username):
+    '''returns osm history query'''
+
+    column_names = [
+        "action",
+        "count(distinct id) AS count",
+    ]
+    group_by_names = ["action"]
+
+    if with_username is True:
+        column_names.append("username")
+        group_by_names.extend(["user_id", "username"])
+
+    order_by = (["count DESC"]
+                if with_username is False else ["user_id", "action", "count"])
+    order_by = ", ".join(order_by)
+
+    columns = ", ".join(column_names)
+    group_by_columns = ", ".join(group_by_names)
+
+    query = f"""
+    WITH T1 AS({changeset_query})
+    SELECT {columns} FROM osm_element_history AS t2, t1
+    WHERE t1.changeset_id = t2.changeset
+    GROUP BY {group_by_columns} ORDER BY {order_by}
+    """
+
+    return query
 
 def create_userstats_get_statistics_with_hashtags_query(params, con, cur):
     changeset_query, _, _ = create_changeset_query(params, con, cur)

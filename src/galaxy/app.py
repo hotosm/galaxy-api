@@ -258,6 +258,14 @@ class Insight:
         total_contributors_result = self.database.executequery(
             total_contributor_query)
         return osm_history_result, total_contributors_result
+    
+    def get_detailed_report_cnt(self):
+        changeset_query, _, _ = create_changeset_query(
+            self.params, self.con, self.cur)
+        query=create_osm_history_query_cnt(changeset_query,
+                                                     with_username=True)
+        result=self.database.executequery(query)
+        return result
 
     def get_mapathon_detailed_result(self):
         changeset_query, _, _ = create_changeset_query(
@@ -422,6 +430,13 @@ class Mapathon:
             "contributors_count", "None"),
             mapped_features=mapped_features)
         return report
+    def get_detailed_report_cnt(self):
+        report_result = self.database.get_detailed_report_cnt()
+        print(report_result)
+        mapped_features=[MappedFeatureCnt(**r) for r in report_result]
+        # print(mapped_features)
+        return MappedDetail(mapped_features=mapped_features)
+        
 
     def get_detailed_report(self):
         """Function to get detail report of your mapathon event. It includes individual user contribution"""

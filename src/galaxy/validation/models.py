@@ -625,3 +625,11 @@ class DataOutput(str, Enum):
 class DataRecencyParams(BaseModel):
     data_source: DataSource
     data_output: DataOutput
+
+class MappedFeatureCnt(BaseModel):
+    action: str
+    count: int
+    username:str
+
+class MappedDetail(BaseModel):
+    mapped_features: List[MappedFeatureCnt]

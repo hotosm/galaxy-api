@@ -23,11 +23,17 @@ from src.galaxy.app import Mapathon
 from src.galaxy.validation.models import (
     MapathonSummary,
     MapathonRequestParams,
-    MapathonDetail,
+    MapathonDetail,MappedDetail
 )
 from .auth import login_required
 
 router = APIRouter(prefix="/mapathon")
+
+@router.post("/detail/count/", response_model=MappedDetail)
+@version(1)
+def get_mapathon_detailed_report(params: MapathonRequestParams):
+    mapathon = Mapathon(params,"insights")
+    return mapathon.get_detailed_report_cnt()
 
 @router.post("/detail/", response_model=MapathonDetail)
 @version(1)
@@ -356,3 +362,4 @@ def get_mapathon_summary(params: MapathonRequestParams):
     else:
         mapathon = Mapathon(params,"insights")
     return mapathon.get_summary()
+
