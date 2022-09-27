@@ -38,8 +38,9 @@ from fastapi.responses import JSONResponse
 from src.galaxy.query_builder.builder import format_file_name_str
 from src.galaxy.validation.models import RawDataCurrentParams, RawDataOutputType
 from src.galaxy.app import RawData, S3FileTransfer
-
-from src.galaxy.config import use_s3_to_upload, logger as logging, config
+from celery.result import AsyncResult
+from .api_worker import process_raw_data, celery
+from src.galaxy.config import export_rate_limit, use_s3_to_upload, logger as logging, config, limiter
 
 router = APIRouter(prefix="/raw-data")
 
@@ -52,7 +53,7 @@ router = APIRouter(prefix="/raw-data")
 
 @router.post("/current-snapshot/")
 @version(1)
-def get_current_data(params: RawDataCurrentParams, background_tasks: BackgroundTasks, request: Request):
+def get_current_snapshot_osm_data(params: RawDataCurrentParams, background_tasks: BackgroundTasks, request: Request):
     """Generates the current raw OpenStreetMap data available on database based on the input geometry, query and spatial features
 
     Args:
@@ -284,7 +285,7 @@ def get_current_data(params: RawDataCurrentParams, background_tasks: BackgroundT
     logging.info(
         f"Done Export : {exportname} of {round(inside_file_size/1000000)} MB / {geom_area} sqkm in {response_time_str}")
 
-    return {"download_url": download_url, "file_name": exportname, "response_time": response_time_str, "query_area": f"""{geom_area} Sq Km """, "binded_file_size": f"""{round(inside_file_size/1000000)} MB""", "zip_file_size_bytes": {zip_file_size}}
+    return {"download_url": download_url, "file_name": exportname, "response_time": response_time_str, "query_area": f"""{geom_area} Sq Km """, "binded_file_size": f"""{round(inside_file_size/1000000,2)} MB""", "zip_file_size_bytes": {zip_file_size}}
 
 
 @router.get("/status/")
@@ -330,3 +331,210 @@ def watch_s3_upload(url: str, path: str) -> None:
         logging.debug(
             "File is uploaded at %s , flushing out from %s", url, path)
         os.unlink(path)
+
+
+@router.post("/current-snapshot/")
+@limiter.limit(f"{export_rate_limit}/minute")
+@version(2)
+def get_current_snapshot_of_osm_data(
+    params: RawDataCurrentParams, background_tasks: BackgroundTasks, request: Request
+):
+    """Generates the current raw OpenStreetMap data available on database based on the input geometry, query and spatial features
+
+    Steps to Run Snapshot :
+
+    1.  Post the your request here and your request will be on queue, endpoint will return as following :
+        {
+            "task_id": "your task_id",
+            "track_link": "/current-snapshot/tasks/task_id/"
+        }
+    2. Now navigate to /current-snapshot/tasks/ with your task id to track progress and result
+
+    Args:
+
+        params (RawDataCurrentParams):
+                {
+                "outputType": "GeoJSON",
+                "fileName": "string",
+                "geometry": { # only polygon is supported ** required field **
+                    "coordinates": [
+                    [
+                        [
+                        1,0
+                        ],
+                        [
+                        2,0
+                        ]
+                    ]
+                    ],
+                    "type": "Polygon"
+                },
+                "filters" : {
+                    "tags": { # tags filter controls no of rows returned
+                    "point" : {"amenity":["shop"]},
+                    "line" : {},
+                    "polygon" : {"key":["value1","value2"],"key2":["value1"]},
+                    "all_geometry" : {"building":['yes']} # master filter applied to all of the geometries selected on geometryType
+                    },
+                    "attributes": { # attribute column controls associated k-v pairs returned
+                    "point": [], column
+                    "line" : [],
+                    "polygon" : [],
+                    "all_geometry" : ["name","address"], # master field applied to all geometries selected on geometryType
+                    }
+                    },
+                "geometryType": [
+                    "point","line","polygon"
+                ]
+                }
+        background_tasks (BackgroundTasks): task to cleanup the files produced during export
+        request (Request): request instance
+
+        Returns :
+        {
+            "task_id": "7d241e47-ffd6-405c-9312-614593f77b14",
+            "track_link": "/current-snapshot/tasks/7d241e47-ffd6-405c-9312-614593f77b14/"
+        }
+
+        Sample Query :
+        1. Sample query to extract point and polygon features that are marked building=*  with name attribute
+        {
+            "outputType": "GeoJSON",
+            "fileName": "Pokhara_buildings",
+            "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                    [
+                        [
+                        83.96919250488281,
+                        28.194446860487773
+                        ],
+                        [
+                        83.99751663208006,
+                        28.194446860487773
+                        ],
+                        [
+                        83.99751663208006,
+                        28.214869548073377
+                        ],
+                        [
+                        83.96919250488281,
+                        28.214869548073377
+                        ],
+                        [
+                        83.96919250488281,
+                        28.194446860487773
+                        ]
+                    ]
+                    ]
+                },
+            "filters": {"tags":{"all_geometry":{"building":[]}},"attributes":{"all_geometry":["name"]}},
+            "geometryType": [
+                "point","polygon"
+            ]
+        }
+        2. Query to extract all OpenStreetMap features in a polygon in shapefile format:
+        {
+            "outputType": "shp",
+            "fileName": "Pokhara_all_features",
+            "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                    [
+                        [
+                        83.96919250488281,
+                        28.194446860487773
+                        ],
+                        [
+                        83.99751663208006,
+                        28.194446860487773
+                        ],
+                        [
+                        83.99751663208006,
+                        28.214869548073377
+                        ],
+                        [
+                        83.96919250488281,
+                        28.214869548073377
+                        ],
+                        [
+                        83.96919250488281,
+                        28.194446860487773
+                        ]
+                    ]
+                    ]
+                }
+        }
+        3. Clean query to extract all features by deafult; output will be same as 2nd query but in GeoJSON format and output name will be `default`
+        {
+            "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                    [
+                        [
+                        83.96919250488281,
+                        28.194446860487773
+                        ],
+                        [
+                        83.99751663208006,
+                        28.194446860487773
+                        ],
+                        [
+                        83.99751663208006,
+                        28.214869548073377
+                        ],
+                        [
+                        83.96919250488281,
+                        28.214869548073377
+                        ],
+                        [
+                        83.96919250488281,
+                        28.194446860487773
+                        ]
+                    ]
+                    ]
+                }
+        }
+
+    """
+    # def get_current_data(params:RawDataCurrentParams,background_tasks: BackgroundTasks, user_data=Depends(login_required)): # this will use osm login makes it restrict login
+    task = process_raw_data.delay(request.url.scheme, request.client.host, params)
+    return JSONResponse({"task_id": task.id, "track_link": f"/current-snapshot/tasks/{task.id}/"})
+
+
+@router.get("/current-snapshot/tasks/{task_id}/")
+@version(2)
+def get_task_status(task_id):
+    """Tracks the request from the task id provided by galaxy api for the request
+
+    Args:
+
+        task_id ([type]): [Unique id provided on response from /current-snapshot/]
+
+    Returns:
+
+        id: Id of the task
+        status : SUCCESS / PENDING
+        result : Result of task
+
+    Successful task will have additional nested json inside row as following :
+    Example response of rawdata current snapshot response :
+
+
+        {
+            "id": "3fded368-456f-4ef4-a1b8-c099a7f77ca4",
+            "status": "SUCCESS",
+            "result": {
+                "download_url": "https://s3.us-east-1.amazonaws.com/exports-stage.hotosm.org/Raw_Export_3fded368-456f-4ef4-a1b8-c099a7f77ca4_GeoJSON.zip",
+                "file_name": "Raw_Export_3fded368-456f-4ef4-a1b8-c099a7f77ca4_GeoJSON",
+                "response_time": "0:00:12.175976",
+                "query_area": "6 Sq Km ",
+                "binded_file_size": "7 MB",
+                "zip_file_size_bytes": 1331601
+
+        }
+
+    """
+    task_result = AsyncResult(task_id, app=celery)
+    result = { "id": task_id, "status": task_result.state, "result": task_result.result if task_result.status == 'SUCCESS' else None }
+    return JSONResponse(result)

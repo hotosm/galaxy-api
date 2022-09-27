@@ -20,13 +20,13 @@
 import os
 import sys
 import threading
-from .config import get_db_connection_params, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, BUCKET_NAME, level, logger as logging, export_path, use_connection_pooling, shp_limit
-from .validation.models import Source
+from src.galaxy.config import get_db_connection_params, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, BUCKET_NAME, level, logger as logging, export_path, use_connection_pooling, shp_limit
+from src.galaxy.validation.models import Source
 from psycopg2 import connect, sql
 from psycopg2.extras import DictCursor
 from psycopg2 import OperationalError
-from .validation.models import UserRole, TeamMemberFunction, List, RawDataCurrentParams, RawDataOutputType, MapathonRequestParams, MappedFeature, MapathonSummary, MappedFeatureWithUser, MapathonContributor, MappedTaskStats, ValidatedTaskStats, TimeSpentMapping, OrganizationHashtagParams, DataRecencyParams, OrganizationHashtag, Trainings, TrainingParams, TrainingOrganisations, User, TimeSpentValidating, TMUserStats, MapathonDetail, UserStatistics, DataQualityHashtagParams, DataQuality_TM_RequestParams, DataQuality_username_RequestParams
-from .query_builder.builder import generate_list_teams_metadata, get_grid_id_query, raw_currentdata_extraction_query, check_last_updated_rawdata, extract_geometry_type_query, raw_historical_data_extraction_query, generate_tm_teams_list, generate_tm_validators_stats_query, create_user_time_spent_mapping_and_validating_query, create_user_tasks_mapped_and_validated_query, generate_organization_hashtag_reports, check_last_updated_user_data_quality_underpass, create_changeset_query, create_osm_history_query, create_users_contributions_query, check_last_updated_osm_insights, generate_data_quality_TM_query, generate_data_quality_hashtag_reports, generate_data_quality_username_query, check_last_updated_mapathon_insights, check_last_updated_user_statistics_insights, check_last_updated_osm_underpass, generate_mapathon_summary_underpass_query, generate_training_organisations_query, generate_filter_training_query, generate_training_query, create_UserStats_get_statistics_query, create_userstats_get_statistics_with_hashtags_query
+from src.galaxy.validation.models import UserRole, TeamMemberFunction, List, RawDataCurrentParams, RawDataOutputType, MapathonRequestParams, MappedFeature, MapathonSummary, MappedFeatureWithUser, MapathonContributor, MappedTaskStats, ValidatedTaskStats, TimeSpentMapping, OrganizationHashtagParams, DataRecencyParams, OrganizationHashtag, Trainings, TrainingParams, TrainingOrganisations, User, TimeSpentValidating, TMUserStats, MapathonDetail, UserStatistics, DataQualityHashtagParams, DataQuality_TM_RequestParams, DataQuality_username_RequestParams
+from src.galaxy.query_builder.builder import generate_list_teams_metadata, get_grid_id_query, raw_currentdata_extraction_query, check_last_updated_rawdata, extract_geometry_type_query, raw_historical_data_extraction_query, generate_tm_teams_list, generate_tm_validators_stats_query, create_user_time_spent_mapping_and_validating_query, create_user_tasks_mapped_and_validated_query, generate_organization_hashtag_reports, check_last_updated_user_data_quality_underpass, create_changeset_query, create_osm_history_query, create_users_contributions_query, check_last_updated_osm_insights, generate_data_quality_TM_query, generate_data_quality_hashtag_reports, generate_data_quality_username_query, check_last_updated_mapathon_insights, check_last_updated_user_statistics_insights, check_last_updated_osm_underpass, generate_mapathon_summary_underpass_query, generate_training_organisations_query, generate_filter_training_query, generate_training_query, create_UserStats_get_statistics_query, create_userstats_get_statistics_with_hashtags_query
 import json
 import pandas
 from json import loads as json_loads
@@ -37,8 +37,8 @@ import orjson
 from area import area
 import subprocess
 from json import dumps
-import fiona
-from fiona.crs import from_epsg
+# import fiona
+# from fiona.crs import from_epsg
 import time
 import shutil
 import boto3
@@ -925,16 +925,16 @@ class RawData:
         if query:
             formatted_query = query.replace('"', '\\"')
         # for mbtiles we need additional input as well i.e. minzoom and maxzoom , setting default at max=22 and min=10
-        if outputtype is RawDataOutputType.MBTILES.value:
+        if outputtype == RawDataOutputType.MBTILES.value:
             cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" -dsco MINZOOM=10 -dsco MAXZOOM=22 {export_path} PG:"host={host} user={username} dbname={db} password={password}" -sql "{pg_sql_select}" -progress'''.format(
                 outputtype=outputtype, export_path=export_temp_path, host=db_items.get('host'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=formatted_query)
 
-        elif outputtype is RawDataOutputType.SHAPEFILE.value:
+        elif outputtype == RawDataOutputType.SHAPEFILE.value:
             # if it is shapefile it needs different logic for point,line and polygon
             file_paths = []
             outputtype = "ESRI Shapefile"
             if point_query:
-                query_path = f"""{dump_temp_file_path}_sql.sql"""
+                query_path = f"""{dump_temp_file_path}_point.sql"""
 
                 # writing to .sql to pass in ogr2ogr because we don't want to pass too much argument on command with sql
                 with open(query_path, 'w') as file:
@@ -942,8 +942,8 @@ class RawData:
                 # standard file path for the generation
                 point_file_path = f"""{dump_temp_file_path}_point.shp"""
                 # command for ogr2ogr to generate file
-                cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" {export_path} PG:"host={host} user={username} dbname={db} password={password}" -sql @"{pg_sql_select}" -progress'''.format(
-                    outputtype=outputtype, export_path=point_file_path, host=db_items.get('host'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=query_path)
+                cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" {export_path} PG:"host={host} port={port} user={username} dbname={db} password={password}" -sql @"{pg_sql_select}" -progress'''.format(
+                    outputtype=outputtype, export_path=point_file_path, host=db_items.get('host'), port=db_items.get('port'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=query_path)
                 logging.debug("Calling ogr2ogr-Point Shapefile")
                 run_ogr2ogr_cmd(cmd, binding_file_dir)
                 # clear query file we don't need it anymore
@@ -956,15 +956,15 @@ class RawData:
                 file_paths.append(f"""{dump_temp_file_path}_point.dbf""")
                 file_paths.append(f"""{dump_temp_file_path}_point.prj""")
             if line_query:
-                query_path = f"""{dump_temp_file_path}_sql.sql"""
+                query_path = f"""{dump_temp_file_path}_line.sql"""
 
                 # writing to .sql to pass in ogr2ogr because we don't want to pass too much argument on command with sql
                 with open(query_path, 'w') as file:
                     file.write(line_query)
 
                 line_file_path = f"""{dump_temp_file_path}_line.shp"""
-                cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" {export_path} PG:"host={host} user={username} dbname={db} password={password}" -sql @"{pg_sql_select}" -progress'''.format(
-                    outputtype=outputtype, export_path=line_file_path, host=db_items.get('host'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=query_path)
+                cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" {export_path} PG:"host={host} port={port} user={username} dbname={db} password={password}" -sql @"{pg_sql_select}" -progress'''.format(
+                    outputtype=outputtype, export_path=line_file_path, host=db_items.get('host'), port=db_items.get('port'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=query_path)
                 logging.debug("Calling ogr2ogr-Line Shapefile")
                 run_ogr2ogr_cmd(cmd, binding_file_dir)
                 # clear query file we don't need it anymore
@@ -978,13 +978,13 @@ class RawData:
             if poly_query:
 
                 poly_file_path = f"""{dump_temp_file_path}_poly.shp"""
-                poly_query_path = f"""{dump_temp_file_path}_poly_sql.sql"""
+                poly_query_path = f"""{dump_temp_file_path}_poly.sql"""
 
                 # writing to .sql to pass in ogr2ogr because we don't want to pass too much argument on command with sql
                 with open(poly_query_path, 'w') as file:
                     file.write(poly_query)
-                cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" {export_path} PG:"host={host} user={username} dbname={db} password={password}" -sql @"{pg_sql_select}" -progress'''.format(
-                    outputtype=outputtype, export_path=poly_file_path, host=db_items.get('host'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=poly_query_path)
+                cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" {export_path} PG:"host={host} port={port} user={username} dbname={db} password={password}" -sql @"{pg_sql_select}" -progress'''.format(
+                    outputtype=outputtype, export_path=poly_file_path, host=db_items.get('host'), port=db_items.get('port'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=poly_query_path)
                 logging.debug("Calling ogr2ogr-Poly Shapefile")
                 run_ogr2ogr_cmd(cmd, binding_file_dir)
                 # clear query file we don't need it anymore
@@ -997,8 +997,8 @@ class RawData:
             return file_paths
         else:
             # if it is not shapefile use standard ogr2ogr with their output format , will be useful for kml
-            cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" {export_path} PG:"host={host} user={username} dbname={db} password={password}" -sql "{pg_sql_select}" -progress'''.format(
-                outputtype=outputtype, export_path=export_path, host=db_items.get('host'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=formatted_query)
+            cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" {export_path} PG:"host={host} port={port} user={username} dbname={db} password={password}" -sql "{pg_sql_select}" -progress'''.format(
+                outputtype=outputtype, export_path=export_path, host=db_items.get('host'), port=db_items.get('port'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=formatted_query)
         run_ogr2ogr_cmd(cmd, binding_file_dir)
         return export_path
 
@@ -1028,81 +1028,6 @@ class RawData:
                 # close the writing geojson with last part
             f.write(post_geojson)
         logging.debug("Server side Query Result  Post Processing Done")
-
-    @staticmethod
-    def query2shapefile(con, point_query, line_query, poly_query, point_schema, line_schema, poly_schema, dump_temp_file_path):
-        """Function that transfer db query to shp"""
-        # schema: it is a simple dictionary with geometry and properties as keys
-        # schema = {'geometry': 'LineString','properties': {'test': 'int'}}
-        file_paths = []
-        if point_query:
-            logging.debug("Writing Point Shapefile")
-
-            schema = {'geometry': 'Point', 'properties': point_schema, }
-            point_file_path = f"""{dump_temp_file_path}_point.shp"""
-            # open a fiona object
-            pointShp = fiona.open(point_file_path, mode='w', driver='ESRI Shapefile', encoding='UTF-8',
-                                  schema=schema, crs="EPSG:4326")
-
-            with con.cursor(name='fetch_raw') as cursor:  # using server side cursor
-                cursor.itersize = 1000  # chunk size to get 1000 row at a time in client side
-                cursor.execute(point_query)
-                for row in cursor:
-                    pointShp.write(orjson.loads(row[0]))
-
-                cursor.close()  # closing connection to avoid memory issues
-                # close fiona object
-            pointShp.close()
-            file_paths.append(point_file_path)
-            file_paths.append(f"""{dump_temp_file_path}_point.shx""")
-            file_paths.append(f"""{dump_temp_file_path}_point.cpg""")
-            file_paths.append(f"""{dump_temp_file_path}_point.dbf""")
-            file_paths.append(f"""{dump_temp_file_path}_point.prj""")
-
-        if line_query:
-            logging.debug("Writing Line Shapefile")
-
-            schema = {'geometry': 'LineString', 'properties': line_schema, }
-            # print(schema)
-            line_file_path = f"""{dump_temp_file_path}_line.shp"""
-            with fiona.open(line_file_path, 'w', encoding='UTF-8', crs=from_epsg(4326), driver='ESRI Shapefile', schema=schema) as layer:
-                with con.cursor(name='fetch_raw') as cursor:  # using server side cursor
-                    cursor.itersize = 1000  # chunk size to get 1000 row at a time in client side
-                    cursor.execute(line_query)
-                    for row in cursor:
-                        layer.write(orjson.loads(row[0]))
-
-                    cursor.close()  # closing connection to avoid memory issues
-                # close fiona object
-                layer.close()
-            file_paths.append(line_file_path)
-            file_paths.append(f"""{dump_temp_file_path}_line.shx""")
-            file_paths.append(f"""{dump_temp_file_path}_line.cpg""")
-            file_paths.append(f"""{dump_temp_file_path}_line.dbf""")
-            file_paths.append(f"""{dump_temp_file_path}_line.prj""")
-
-        if poly_query:
-            logging.debug("Writing Poly Shapefile")
-
-            poly_file_path = f"""{dump_temp_file_path}_poly.shp"""
-            schema = {'geometry': 'Polygon', 'properties': poly_schema, }
-
-            with fiona.open(poly_file_path, 'w', encoding='UTF-8', crs=from_epsg(4326), driver='ESRI Shapefile', schema=schema) as layer:
-                with con.cursor(name='fetch_raw') as cursor:  # using server side cursor
-                    cursor.itersize = 1000  # chunk size to get 1000 row at a time in client side
-                    cursor.execute(poly_query)
-                    for row in cursor:
-                        layer.write(orjson.loads(row[0]))
-
-                    cursor.close()  # closing connection to avoid memory issues
-                # close fiona object
-                layer.close()
-            file_paths.append(poly_file_path)
-            file_paths.append(f"""{dump_temp_file_path}_poly.shx""")
-            file_paths.append(f"""{dump_temp_file_path}_poly.cpg""")
-            file_paths.append(f"""{dump_temp_file_path}_poly.dbf""")
-            file_paths.append(f"""{dump_temp_file_path}_poly.prj""")
-        return file_paths
 
     @staticmethod
     def get_grid_id(geom, cur):
@@ -1158,10 +1083,10 @@ class RawData:
         dump_temp_file_path = f"""{path}{exportname}.{output_type.lower()}"""
         try:
             # currently we have only geojson binding function written other than that we have depend on ogr
-            if output_type is RawDataOutputType.GEOJSON.value:
+            if output_type == RawDataOutputType.GEOJSON.value:
                 RawData.query2geojson(self.con, raw_currentdata_extraction_query(
                     self.params, g_id=grid_id, geometry_dump=geometry_dump), dump_temp_file_path)  # uses own conversion class
-            elif output_type is RawDataOutputType.SHAPEFILE.value:
+            elif output_type == RawDataOutputType.SHAPEFILE.value:
                 point_query, line_query, poly_query, point_schema, line_schema, poly_schema = extract_geometry_type_query(
                     self.params, ogr_export=True)
                 # point_query, line_query, poly_query, point_schema, line_schema, poly_schema = extract_geometry_type_query(
@@ -1206,6 +1131,7 @@ def run_ogr2ogr_cmd(cmd, binding_file_dir):
     """
     try:
         # start_time=time.time()
+        logging.debug("Calling command : %s",cmd)
         process = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,

@@ -21,12 +21,22 @@
 
 from configparser import ConfigParser
 import logging
+import os
+from slowapi.util import get_remote_address
+from slowapi import Limiter
+import errno
+import os
 
 CONFIG_FILE_PATH = "src/config.txt"
+
+if os.path.exists(CONFIG_FILE_PATH) is False:
+    raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), CONFIG_FILE_PATH)
 
 config = ConfigParser()
 config.read(CONFIG_FILE_PATH)
 
+limiter = Limiter(key_func=get_remote_address) # rate limiter for API requests
+export_rate_limit = int(config.get("API_CONFIG", "export_rate_limit", fallback=5))
 # get log level from config
 log_level = config.get("API_CONFIG", "log_level", fallback=None)
 use_s3_to_upload = False
@@ -44,11 +54,16 @@ else:
         "logging config is not supported , Supported fields are : debug,error,warning,info , Logging to default :debug")
     level = logging.DEBUG
 
-logging.getLogger("fiona").propagate = False  # disable fiona logging
+# logging.getLogger("fiona").propagate = False  # disable fiona logging
 logging.basicConfig(format='%(asctime)s - %(message)s', level=level)
 logging.getLogger('boto3').propagate = False  # disable boto3 logging
+logging.getLogger('botocore').propagate = False  # disable boto3 logging
+logging.getLogger('s3transfer').propagate = False  # disable boto3 logging
+logging.getLogger('boto').propagate = False  # disable boto3 logging
 
-logger = logging.getLogger('galaxy')
+
+
+logger = logging.getLogger('src.galaxy')
 
 export_path = config.get('API_CONFIG', 'export_path', fallback=None)
 if export_path is None:
