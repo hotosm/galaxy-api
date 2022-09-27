@@ -1330,6 +1330,7 @@ class ProgressPercentage(object):
 class SystemHealth(object):
     @staticmethod
     def monitor_endpoint(endpoint, request_type, body=None):
+        """returns the response status code for a request made to a particular API endpoint"""
         if request_type == 'GET':
             get_req = requests.get(endpoint)
             return get_req.status_code
