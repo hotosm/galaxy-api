@@ -678,3 +678,13 @@ class DataOutput(str, Enum):
 class DataRecencyParams(BaseModel):
     data_source: DataSource
     data_output: DataOutput
+
+class SystemHealthType(Enum):
+    HEALTHY = "healthy"
+    UNHEALTHY = "unhealthy"
+
+class SystemHealthOutput(BaseModel):
+    authentication: SystemHealthType
+    mapathon_summary: SystemHealthType
+    mapathon_detail: SystemHealthType
+    raw_data: SystemHealthType
