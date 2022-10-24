@@ -8,11 +8,11 @@ from .. import BaseModel
 
 
 class FilterParams(BaseModel):
-    project_ids: Optional[List[int]]
     geom: Optional[Union[Polygon, MultiPolygon]]
-    hashtags: List[str]
-    from_timestamp: Union[datetime, date]
-    to_timestamp: Union[datetime, date]
+    hashtags: Optional[List[str]]
+    from_timestamp: Optional[Union[datetime, date]]
+    to_timestamp: Optional[Union[datetime, date]]
+    project_ids: Optional[List[int]]
 
     @validator("to_timestamp", allow_reuse=True)
     def check_timestamp_diffs(cls, value, values, **kwargs):
@@ -23,6 +23,25 @@ class FilterParams(BaseModel):
         if from_timestamp > value:
             raise ValueError(
                 "Timestamp difference should be in order")
+        return value
+        """
+         {
+            "fromTimestamp":"2022-10-20T18:15:00.461",
+            "toTimestamp":"2022-10-22T18:14:59.461",
+            "hashtags":["missingmaps"]
+        }
+        """
+    @validator("project_ids", allow_reuse=True)
+    def check_other_fields(cls, value, values, **kwargs):
+        '''checks existence of other fields '''
+
+        from_timestamp = values.get("from_timestamp")
+        to_timestamp = values.get("to_timestamp")
+        hashtags = values.get("hashtags")
+        geom = values.get("geom")
+        if from_timestamp or to_timestamp or hashtags or geom:
+            raise ValueError(
+                "When projectid is supplied other fields are auto populated. Remove them")
         return value
         """
          {

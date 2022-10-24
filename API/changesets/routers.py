@@ -18,29 +18,33 @@ router = APIRouter(prefix="/changesets")
 @router.post("/")
 @version(1)
 def get_changesets(params: FilterParams):
-
-    hashtag_filter=create_hashtagfilter_underpass(params.hashtags,"hashtags")
     underpass_db_params = get_db_connection_params("UNDERPASS")
     if params.project_ids :
+        # if project id is supplied nothing is required from timestamp , to timestamp , hashtag are pre populated
         project_id_filters = []
+        hashtag_ids=[]
         for i in params.project_ids:
 
             project_id_filters.append(f"""id={i}""")
+            hashtag_ids.append(f"""hotosm-project-{i}""")
 
         project_id_filter_comb = " OR ".join(project_id_filters)
         tm_db_params = get_db_connection_params("TM")
         with psycopg2.connect(**tm_db_params) as conn:
             with conn.cursor(cursor_factory=DictCursor) as cur:
                 query =f"""
-                    select ST_AsGeoJSON(ST_Extent(p.geometry))
+                    select ST_AsGeoJSON(ST_Extent(p.geometry)), min(p.created), max(p.last_updated)
                     from projects p
                     where ({project_id_filter_comb})
                 """
                 cur.execute(query)
-                geom_bbox = cur.fetchone()
-        params.geom=json.loads(geom_bbox[0])
+                tm_result = cur.fetchone()
+        params.geom=json.loads(tm_result[0]) # gets bbox of task geometry
+        params.from_timestamp=str(tm_result[1]) # gets min created timestamp of task
+        params.to_timestamp=str(tm_result[2]) # gets max last updated timestamp of task
+        params.hashtags=hashtag_ids # populate hashtags for projectid
     print(params.geom)
-
+    hashtag_filter=create_hashtagfilter_underpass(params.hashtags,"hashtags")
     with psycopg2.connect(**underpass_db_params) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cur:
             timestamp_filter = create_timestamp_filter_query("created_at", params.from_timestamp, params.to_timestamp, cur)
