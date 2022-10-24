@@ -44,6 +44,8 @@ def get_changesets(params: FilterParams):
         params.to_timestamp=str(tm_result[2]) # gets max last updated timestamp of task
         params.hashtags=hashtag_ids # populate hashtags for projectid
     print(params.geom)
+    print(params.from_timestamp)
+    print(params.to_timestamp)
     hashtag_filter=create_hashtagfilter_underpass(params.hashtags,"hashtags")
     with psycopg2.connect(**underpass_db_params) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cur:
