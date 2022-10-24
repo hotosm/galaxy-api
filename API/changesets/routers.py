@@ -18,6 +18,11 @@ router = APIRouter(prefix="/changesets")
 @router.post("/")
 @version(1)
 def get_changesets(params: FilterParams):
+    """Sample for getting changesets for a tasking manager projects :
+
+    { "projectIds":[ 11372, 11373, 11374, 11375, 11376, 11377, 11378, 11379, 11380, 11381, 11382, 11383, 11384, 11385, 11386, 11387, 11388, 12020, 12022 ] }
+
+    """
     underpass_db_params = get_db_connection_params("UNDERPASS")
     if params.project_ids :
         # if project id is supplied nothing is required from timestamp , to timestamp , hashtag are pre populated
@@ -43,7 +48,7 @@ def get_changesets(params: FilterParams):
         params.from_timestamp=str(tm_result[1]) # gets min created timestamp of task
         params.to_timestamp=str(tm_result[2]) # gets max last updated timestamp of task
         params.hashtags=hashtag_ids # populate hashtags for projectid
-    print(params.geom)
+    print(json.dumps(params.geom))
     print(params.from_timestamp)
     print(params.to_timestamp)
     hashtag_filter=create_hashtagfilter_underpass(params.hashtags,"hashtags")
