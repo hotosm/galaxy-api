@@ -73,17 +73,16 @@ def get_changesets(params: FilterParams):
     if len(result) == 0:
         csv_stream= iter("")
     else:
-        csv_keys = ["changeset_id"]
+        csv_keys = ["changeset_id","bbox","start_date","end_date"]
 
         writer = DictWriter(stream, fieldnames=csv_keys)
         writer.writeheader()
-
+        writer.writerow({'bbox': json.dumps(params.geom),'start_date':params.from_timestamp,'end_date':params.to_timestamp})
         for item in result:
             row = {
                     'changeset_id': item[0]}
 
             writer.writerow(row)
-
         csv_stream= iter(stream.getvalue())
     response = StreamingResponse(csv_stream)
     exportname = f"Changesets_{datetime.now().isoformat()}"

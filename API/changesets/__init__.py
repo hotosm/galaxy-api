@@ -43,10 +43,3 @@ class FilterParams(BaseModel):
             raise ValueError(
                 "When projectid is supplied other fields are auto populated. Remove them")
         return value
-        """
-         {
-            "fromTimestamp":"2022-10-20T18:15:00.461",
-            "toTimestamp":"2022-10-22T18:14:59.461",
-            "hashtags":["missingmaps"]
-        }
-        """
