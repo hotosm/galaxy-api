@@ -26,7 +26,7 @@ from psycopg2 import connect, sql
 from psycopg2.extras import DictCursor
 from psycopg2 import OperationalError
 from .validation.models import UserRole, TeamMemberFunction, List, RawDataCurrentParams, RawDataOutputType, MapathonRequestParams, MappedFeature, MapathonSummary, MappedFeatureWithUser, MapathonContributor, MappedTaskStats, ValidatedTaskStats, TimeSpentMapping, OrganizationHashtagParams, DataRecencyParams, OrganizationHashtag, Trainings, TrainingParams, TrainingOrganisations, User, TimeSpentValidating, TMUserStats, MapathonDetail, UserStatistics, DataQualityHashtagParams, DataQuality_TM_RequestParams, DataQuality_username_RequestParams
-from .query_builder.builder import generate_list_teams_metadata, get_grid_id_query, raw_currentdata_extraction_query, check_last_updated_rawdata, extract_geometry_type_query, raw_historical_data_extraction_query, generate_tm_teams_list, generate_tm_validators_stats_query, create_user_time_spent_mapping_and_validating_query, create_user_tasks_mapped_and_validated_query, generate_organization_hashtag_reports, check_last_updated_user_data_quality_underpass, create_changeset_query, create_osm_history_query, create_users_contributions_query, check_last_updated_osm_insights, generate_data_quality_TM_query, generate_data_quality_hashtag_reports, generate_data_quality_username_query, check_last_updated_mapathon_insights, check_last_updated_user_statistics_insights, check_last_updated_osm_underpass, generate_mapathon_summary_underpass_query, generate_training_organisations_query, generate_filter_training_query, generate_training_query, create_UserStats_get_statistics_query, create_userstats_get_statistics_with_hashtags_query
+from .query_builder.builder import generate_list_teams_metadata, get_grid_id_query, raw_currentdata_extraction_query, check_last_updated_rawdata, extract_geometry_type_query, raw_historical_data_extraction_query, generate_tm_teams_list, generate_tm_validators_stats_query, create_user_time_spent_mapping_and_validating_query, create_user_tasks_mapped_and_validated_query, generate_organization_hashtag_reports, check_last_updated_user_data_quality_underpass, create_changeset_query, create_osm_history_query, create_users_contributions_query, check_last_updated_osm_insights, generate_data_quality_TM_query, generate_data_quality_hashtag_reports, generate_data_quality_username_query, check_last_updated_mapathon_insights, check_last_updated_user_statistics_insights, check_last_updated_osm_underpass, generate_mapathon_summary_underpass_query, generate_training_organisations_query, generate_filter_training_query, generate_training_query, create_UserStats_get_statistics_query, create_userstats_get_statistics_with_hashtags_query, create_changeset_query_underpass, create_users_contributions_query_underpass
 import json
 import pandas
 from json import loads as json_loads
@@ -225,6 +225,15 @@ class Underpass:
         status_query = check_last_updated_user_data_quality_underpass()
         result = self.database.executequery(status_query)
         return result[0][0]
+        
+    def get_mapathon_detailed_result(self):
+        changeset_query, _, _ = create_changeset_query_underpass(
+            self.params, self.con, self.cur)
+        contributors_query = create_users_contributions_query_underpass(
+            self.params, self.con, self.cur)
+        changesets = self.database.executequery(changeset_query)
+        contributors = self.database.executequery(contributors_query)
+        return changesets, contributors
 
 
 class Insight:
@@ -470,8 +479,9 @@ class Mapathon:
                                 time_spent_validating=time_validating_stats)]
 
         report = MapathonDetail(contributors=contributors,
-                                mapped_features=mapped_features,
-                                tm_stats=tm_stats)
+                                mapped_features=mapped_features)
+                                # ,
+                                # tm_stats=tm_stats)
         # print(Output(osm_history_query,self.con).to_list())
         return report
 
