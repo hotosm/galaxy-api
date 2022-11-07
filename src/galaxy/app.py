@@ -479,9 +479,8 @@ class Mapathon:
                                 time_spent_validating=time_validating_stats)]
 
         report = MapathonDetail(contributors=contributors,
-                                mapped_features=mapped_features)
-                                # ,
-                                # tm_stats=tm_stats)
+                                mapped_features=mapped_features,
+                                tm_stats=tm_stats)
         # print(Output(osm_history_query,self.con).to_list())
         return report
 
