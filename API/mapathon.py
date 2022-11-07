@@ -34,16 +34,19 @@ router = APIRouter(prefix="/mapathon")
 @router.post("/detail", response_model=MapathonDetail)
 def get_mapathon_detailed_report(params: MapathonRequestParams,
                                  user_data=Depends(login_required)):
-    mapathon = Mapathon(params,"insight")
+    if params.source == "insight":
+        mapathon = Mapathon(params,"insight")
+    else:
+        mapathon = Mapathon(params,"underpass")
     return mapathon.get_detailed_report()
 
 
 @router.post("/summary", response_model=MapathonSummary)
 def get_mapathon_summary(params: MapathonRequestParams):
    
-    if params.source == "underpass":
-        mapathon = Mapathon(params,"underpass")
-    else:
+    if params.source == "insight":
         mapathon = Mapathon(params,"insight")
+    else:
+        mapathon = Mapathon(params,"underpass")
     
     return mapathon.get_summary()

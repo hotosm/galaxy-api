@@ -198,6 +198,15 @@ class Underpass:
         
         return user_role
 
+    def get_mapathon_detailed_result(self):
+        changeset_query, _, _ = create_changeset_query_underpass(
+            self.params, self.con, self.cur)
+        contributors_query = create_users_contributions_query_underpass(
+            self.params, self.con, self.cur)
+        changesets = self.database.executequery(changeset_query)
+        contributors = self.database.executequery(contributors_query)
+        return changesets, contributors
+
 
 class Insight:
     """This class connects to Insight database and responsible for all the Insight related functionality"""

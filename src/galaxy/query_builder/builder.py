@@ -300,11 +300,17 @@ def generate_data_quality_hashtag_reports(cur, params):
 
     return query
 
-def create_hashtagfilter_underpass(hashtags,columnname):
+
+def create_hashtagfilter_underpass(hashtags, project_ids, columnname = 'hashtags'):
     """Generates hashtag filter query on the basis of list of hastags."""
     
+    hashtag_filter_values = [
+        *[f"hotosm-project-{i}" if project_ids is not None else '' for i in project_ids],
+        *[f"{i}" for i in hashtags],
+    ]
+
     hashtag_filters = []
-    for i in hashtags:
+    for i in hashtag_filter_values:
         if columnname =="username":
             hashtag_filters.append(f"""'{i}'={columnname}""")
         else:
@@ -484,10 +490,62 @@ def generate_mapathon_summary_underpass_query(params,cur):
         """
     # print(summary_query)
     # print("\n")
-
     # print(total_contributor_query)
-    
     return summary_query,total_contributor_query
+
+
+def create_changeset_query_underpass(params, conn, cur):
+    '''returns the changeset query from Underpass'''
+
+    hashtag_filter=create_hashtagfilter_underpass(params.hashtags, params.project_ids, "hashtags")
+    timestamp_filter=create_timestamp_filter_query("created_at",params.from_timestamp, params.to_timestamp,cur)
+
+    changeset_query = f"""
+                with t1 as (
+                select  *
+                from changesets c
+                join users u
+                on u.id  = c.user_id
+                where {hashtag_filter}
+                and {timestamp_filter}
+        ) ,t2 as (
+                select (each(added)).key as feature , (each(added)).value::Integer as count, 'create'::text as action, username, user_id, editor
+                from t1
+                union all
+                select  (each(modified)).key as feature , (each(modified)).value::Integer as count, 'modify'::text as action, username, user_id, editor
+                from t1
+        )
+        select feature,action ,sum(count) as count, username, user_id, array_agg(distinct(editor)) as editors
+        from t2
+        group by feature ,action, username, user_id
+    """
+    return changeset_query, hashtag_filter, timestamp_filter
+
+def create_users_contributions_query_underpass(params, conn, cur):
+    '''returns the changeset query from Underpass'''
+
+    hashtag_filter=create_hashtagfilter_underpass(params.hashtags, params.project_ids, "hashtags")
+    timestamp_filter=create_timestamp_filter_query("created_at",params.from_timestamp, params.to_timestamp,cur)
+
+    contributors_query = f"""
+        with t1 as (
+        select  *
+        from changesets c
+        join users u
+		on u.id  = c.user_id
+		where {hashtag_filter}
+		and {timestamp_filter}
+        ) ,t2 as (
+                select sum((added->'building')::numeric) as added_buildings, sum((modified->'building')::numeric) as modified_buildings, user_id, username, string_agg(distinct (editor)::text, ',') as editors
+                from t1
+                group by user_id, username
+        )
+        select user_id, username, (coalesce(added_buildings, 0) + coalesce(modified_buildings, 0)) as total_buildings, editors
+        from t2
+        group by user_id, total_buildings ,username, editors
+    """
+    return contributors_query
+
 
 def generate_training_organisations_query():
     """Generates query for listing out all the organisations listed in training table from underpass
