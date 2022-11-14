@@ -227,6 +227,7 @@ class Underpass:
         return result[0][0]
         
     def get_mapathon_detailed_result(self):
+        """Functions that returns detailed reports  for mapathon results_dicts"""
         changeset_query, _, _ = create_changeset_query_underpass(
             self.params, self.con, self.cur)
         contributors_query = create_users_contributions_query_underpass(
@@ -567,7 +568,7 @@ class Output:
 
         features = self.dataframe.apply(
             lambda row: Feature(geometry=Point(
-                (float(row[lng_column]), float(row[lat_column]))),
+                ( float(row[lng_column]), float(row[lat_column]) )),
                 properties=properties[row.name]),
             axis=1).tolist()
 
@@ -678,7 +679,7 @@ class DataQualityHashtags:
                 "type": "Feature",
                 "geometry": {
                     "type": "Point",
-                    "coordinates": [row["lon"], row["lat"]]
+                    "coordinates": [row["lat"], row["lon"]]
                 },
                 "properties": {
                     "created_at": row["created_at"],
