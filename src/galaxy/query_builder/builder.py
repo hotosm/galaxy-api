@@ -353,7 +353,7 @@ def generate_data_quality_hashtag_reports(cur, params):
     return query
 
 
-def create_hashtagfilter_underpass(hashtags, project_ids, columnname = 'hashtags'):
+def create_hashtagfilter_underpass(hashtags, columnname, project_ids = []):
     """Generates hashtag filter query on the basis of list of hastags."""
     
     hashtag_filter_values = [
@@ -555,7 +555,7 @@ def generate_mapathon_summary_underpass_query(params, cur):
 def create_changeset_query_underpass(params, conn, cur):
     '''returns the changeset query from Underpass'''
 
-    hashtag_filter=create_hashtagfilter_underpass(params.hashtags, params.project_ids, "hashtags")
+    hashtag_filter=create_hashtagfilter_underpass(params.hashtags, "hashtags", params.project_ids)
     timestamp_filter=create_timestamp_filter_query("created_at",params.from_timestamp, params.to_timestamp,cur)
 
     changeset_query = f"""
@@ -582,7 +582,7 @@ def create_changeset_query_underpass(params, conn, cur):
 def create_users_contributions_query_underpass(params, conn, cur):
     '''returns the changeset query from Underpass'''
 
-    hashtag_filter=create_hashtagfilter_underpass(params.hashtags, params.project_ids, "hashtags")
+    hashtag_filter=create_hashtagfilter_underpass(params.hashtags, "hashtags", params.project_ids)
     timestamp_filter=create_timestamp_filter_query("created_at",params.from_timestamp, params.to_timestamp,cur)
 
     contributors_query = f"""
