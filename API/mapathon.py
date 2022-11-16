@@ -255,7 +255,10 @@ def get_mapathon_detailed_report(params: MapathonRequestParams,
         ]
         }
     """
-    mapathon = Mapathon(params, "insights")
+    if params.source == "insight":
+        mapathon = Mapathon(params,"insights")
+    else:
+        mapathon = Mapathon(params,"underpass")
     return mapathon.get_detailed_report()
 
 
@@ -355,8 +358,8 @@ def get_mapathon_summary(params: MapathonRequestParams):
         }
     """
 
-    if params.source == "underpass":
-        mapathon = Mapathon(params, "underpass")
-    else:
+    if params.source == "insights":
         mapathon = Mapathon(params, "insights")
+    else:
+        mapathon = Mapathon(params, "underpass")
     return mapathon.get_summary()
