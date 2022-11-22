@@ -135,9 +135,9 @@ class TimeStampParams(BaseModel):
         if from_timestamp > value:
             raise ValueError(
                 "Timestamp difference should be in order")
-        if timestamp_diff > timedelta(hours=24):
+        if timestamp_diff > timedelta(weeks=1):
             raise ValueError(
-                "Timestamp difference must be lower than 24 hours")
+                "Timestamp difference must be lower than 1 week")
 
         return value
 
