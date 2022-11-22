@@ -26,7 +26,7 @@ from psycopg2 import connect, sql
 from psycopg2.extras import DictCursor
 from psycopg2 import OperationalError
 from .validation.models import UserRole, TeamMemberFunction, List, RawDataCurrentParams, RawDataOutputType, MapathonRequestParams, MappedFeature, MapathonSummary, MappedFeatureWithUser, MapathonContributor, MappedTaskStats, ValidatedTaskStats, TimeSpentMapping, OrganizationHashtagParams, DataRecencyParams, OrganizationHashtag, Trainings, TrainingParams, TrainingOrganisations, User, TimeSpentValidating, TMUserStats, MapathonDetail, UserStatistics, DataQualityHashtagParams, DataQuality_TM_RequestParams, DataQuality_username_RequestParams
-from .query_builder.builder import generate_list_teams_metadata, get_grid_id_query, raw_currentdata_extraction_query, check_last_updated_rawdata, extract_geometry_type_query, raw_historical_data_extraction_query, generate_tm_teams_list, generate_tm_validators_stats_query, create_user_time_spent_mapping_and_validating_query, create_user_tasks_mapped_and_validated_query, generate_organization_hashtag_reports, check_last_updated_user_data_quality_underpass, create_changeset_query, create_osm_history_query, create_users_contributions_query, check_last_updated_osm_insights, generate_data_quality_TM_query, generate_data_quality_hashtag_reports, generate_data_quality_username_query, check_last_updated_mapathon_insights, check_last_updated_user_statistics_insights, check_last_updated_osm_underpass, generate_mapathon_summary_underpass_query, generate_training_organisations_query, generate_filter_training_query, generate_training_query, create_UserStats_get_statistics_query, create_userstats_get_statistics_with_hashtags_query, create_changeset_query_underpass, create_users_contributions_query_underpass
+from .query_builder.builder import generate_list_teams_metadata, get_grid_id_query, raw_currentdata_extraction_query, check_last_updated_rawdata, extract_geometry_type_query, raw_historical_data_extraction_query, generate_tm_teams_list, generate_tm_validators_stats_query, create_user_time_spent_mapping_and_validating_query, create_user_tasks_mapped_and_validated_query, generate_organization_hashtag_reports, check_last_updated_user_data_quality_underpass, create_changeset_query, create_osm_history_query, create_users_contributions_query, check_last_updated_osm_insights, generate_data_quality_TM_query, generate_data_quality_hashtag_reports, generate_data_quality_hashtag_reports_summary, generate_data_quality_username_query, check_last_updated_mapathon_insights, check_last_updated_user_statistics_insights, check_last_updated_osm_underpass, generate_mapathon_summary_underpass_query, generate_training_organisations_query, generate_filter_training_query, generate_training_query, create_UserStats_get_statistics_query, create_userstats_get_statistics_with_hashtags_query, create_changeset_query_underpass, create_users_contributions_query_underpass
 import json
 import pandas
 from json import loads as json_loads
@@ -498,7 +498,6 @@ class Output:
 
     def __init__(self, result, connection=None):
         """Constructor"""
-        # print(result)
         if isinstance(result, (list, dict)):
             # print(type(result))
             try:
@@ -695,13 +694,23 @@ class DataQualityHashtags:
         return feature_collection
 
     def get_report(self):
-        """Functions    that    Returns dataquality report """
+        """Function that returns data quality report """
         query = generate_data_quality_hashtag_reports(self.cur, self.params)
         results = self.db.executequery(query)
         feature_collection = DataQualityHashtags.to_geojson(results)
 
         return feature_collection
 
+    def get_report_summary(self):
+        """Function that returns data quality report summary"""
+        query = generate_data_quality_hashtag_reports_summary(self.cur, self.params)
+        result = [dict(r) for r in self.db.executequery(query)]
+        if result:
+            df = pandas.DataFrame(result).set_index("value")
+            stream = StringIO()
+            df.to_csv(stream)
+            return  iter(stream.getvalue())
+        return iter("")
 
 class DataQuality:
     """Class for data quality report this is the class that self connects to database and provide you detail report about data quality inside specific tasking manager project
