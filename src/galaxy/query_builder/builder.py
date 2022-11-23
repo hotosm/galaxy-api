@@ -348,7 +348,7 @@ def generate_data_quality_hashtag_reports(cur, params):
             FROM t1, t2 WHERE t1.change_id = t2.id
             {filter_hashtags}
             AND unnest_status in ({issue_types})
-            GROUP BY t1.osm_id, t1.values,t1.lat, t1.lon, t2.created_at, t1.change_id;
+            GROUP BY t1.osm_id, t1.values, t1.lat, t1.lon, t2.created_at, t1.change_id;
     """
 
     return query
