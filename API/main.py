@@ -18,27 +18,32 @@
 # <info@hotosm.org>
 import time
 
+import sentry_sdk
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import sentry_sdk
+from fastapi_versioning import VersionedFastAPI
 
-from .countries.routers import router as countries_router
+from src.galaxy.config import config
+from src.galaxy.config import logger as logging
+from src.galaxy.config import use_connection_pooling, use_s3_to_upload
+from src.galaxy.db_session import database_instance
+
 # from .changesets.routers import router as changesets_router
 # from .data.routers import router as data_router
 from .auth.routers import router as auth_router
-from .mapathon import router as mapathon_router
-from .osm_users import router as osm_users_router
+from .countries.routers import router as countries_router
 from .data_quality import router as data_quality_router
+from .download_export import router as download_router
+
 # from .trainings import router as training_router
 from .hashtag_stats import router as hashtag_router
-from .tasking_manager import router as tm_router
+from .mapathon import router as mapathon_router
+from .osm_users import router as osm_users_router
 from .raw_data import router as raw_data_router
-from .download_export import router as download_router
+
 # from .test_router import router as test_router
 from .status import router as status_router
-from src.galaxy.db_session import database_instance
-from src.galaxy.config import use_connection_pooling, use_s3_to_upload, logger as logging, config
-from fastapi_versioning import VersionedFastAPI
+from .tasking_manager import router as tm_router
 
 # only use sentry if it is specified in config blocks
 if config.get("SENTRY", "dsn", fallback=None):
@@ -47,14 +52,15 @@ if config.get("SENTRY", "dsn", fallback=None):
         # Set traces_sample_rate to 1.0 to capture 100%
         # of transactions for performance monitoring.
         # We recommend adjusting this value in production.
-        traces_sample_rate=config.get("SENTRY", "rate")
+        traces_sample_rate=config.get("SENTRY", "rate"),
     )
 
-run_env = config.get("API_CONFIG", "env", fallback='prod')
-if run_env.lower() == 'dev':
+run_env = config.get("API_CONFIG", "env", fallback="prod")
+if run_env.lower() == "dev":
     # This is used for local setup for auth login
     import os
-    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 app = FastAPI(title="Galaxy API")
 
@@ -77,8 +83,9 @@ if use_s3_to_upload is False:
     app.include_router(download_router)
 
 
-app = VersionedFastAPI(app, enable_latest=True,
-                       version_format='{major}', prefix_format='/v{major}')
+app = VersionedFastAPI(
+    app, enable_latest=True, version_format="{major}", prefix_format="/v{major}"
+)
 
 
 origins = ["*"]
@@ -98,8 +105,9 @@ async def add_process_time_header(request, call_next):
     start_time = time.time()
     response = await call_next(request)
     process_time = time.time() - start_time
-    response.headers["X-Process-Time"] = str(f'{process_time:0.4f} sec')
+    response.headers["X-Process-Time"] = str(f"{process_time:0.4f} sec")
     return response
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -127,8 +135,7 @@ async def on_startup():
 
 @app.on_event("shutdown")
 def on_shutdown():
-    """Closing all the threads connection from pooling before shuting down the api
-    """
+    """Closing all the threads connection from pooling before shuting down the api"""
     if use_connection_pooling:
         logging.debug("Shutting down connection pool")
         database_instance.close_all_connection_pool()
