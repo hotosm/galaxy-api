@@ -20,7 +20,7 @@
 from fastapi import APIRouter
 from fastapi_versioning import version
 from src.galaxy.validation.models import DataQuality_TM_RequestParams, DataQuality_username_RequestParams, DataQualityHashtagParams, OutputType
-from src.galaxy.app import DataQuality, DataQualityHashtags
+from src.galaxy.app import DataQuality, DataQualityHashtags, Output
 from fastapi.responses import StreamingResponse
 import io
 from datetime import datetime
@@ -47,6 +47,15 @@ def get_hashtag_data_quality_report(params: DataQualityHashtagParams):
 
     return response
 
+@router.post("/hashtag-reports-summary/")
+@version(1)
+def get_hashtag_data_quality_report_summary(params: DataQualityHashtagParams):
+    data_quality = DataQualityHashtags(params)
+    csv_stream = data_quality.get_report_summary()
+    response = StreamingResponse(csv_stream)
+    exportname = f"DataQuality_Hashtags_{datetime.now().isoformat()}"
+    response.headers["Content-Disposition"] = f"attachment; filename={exportname}.csv"
+    return response
 
 @router.post("/project-reports/")
 @version(1)

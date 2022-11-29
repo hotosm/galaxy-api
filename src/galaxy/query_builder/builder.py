@@ -336,10 +336,11 @@ def generate_data_quality_hashtag_reports(cur, params):
         "created_at BETWEEN %s AND %s"), (params.from_timestamp, params.to_timestamp)).decode()
 
     query = f"""
-        WITH t1 AS (SELECT osm_id, change_id, st_x(location) AS lat, st_y(location) AS lon, unnest(status) AS unnest_status from validation {geom_filter}),
+        WITH t1 AS (SELECT osm_id, change_id, values, st_x(location) AS lat, st_y(location) AS lon, unnest(status) AS unnest_status from validation {geom_filter}),
         t2 AS (SELECT id, created_at, unnest(hashtags) AS unnest_hashtags from changesets WHERE {timestamp_filter})
         SELECT t1.osm_id,
             t1.change_id as changeset_id,
+            t1.values,
             t1.lat,
             t1.lon,
             t2.created_at,
@@ -347,11 +348,55 @@ def generate_data_quality_hashtag_reports(cur, params):
             FROM t1, t2 WHERE t1.change_id = t2.id
             {filter_hashtags}
             AND unnest_status in ({issue_types})
-            GROUP BY t1.osm_id, t1.lat, t1.lon, t2.created_at, t1.change_id;
+            GROUP BY t1.osm_id, t1.values, t1.lat, t1.lon, t2.created_at, t1.change_id;
     """
 
     return query
 
+def generate_data_quality_hashtag_reports_summary(cur, params):
+    if params.hashtags is not None and len(params.hashtags) > 0:
+        filter_hashtags = ", ".join(["%s"] * len(params.hashtags))
+        filter_hashtags = cur.mogrify(
+            sql.SQL(filter_hashtags), params.hashtags).decode()
+        filter_hashtags = f"AND unnest_hashtags in ({filter_hashtags})"
+    else:
+        filter_hashtags = ""
+
+    if params.geometry is not None:
+        geometry_dump = dumps(dict(params.geometry))
+        geom_filter = f"WHERE ST_CONTAINS(ST_GEOMFROMGEOJSON('{geometry_dump}'), location)"
+    else:
+        geom_filter = ""
+
+    issue_types = ", ".join(["%s"] * len(params.issue_type))
+    issue_types_str = [i for i in params.issue_type]
+    issue_types = cur.mogrify(sql.SQL(issue_types), issue_types_str).decode()
+
+    timestamp_filter = cur.mogrify(sql.SQL(
+        "created_at BETWEEN %s AND %s"), (params.from_timestamp, params.to_timestamp)).decode()
+
+    query = f"""
+        WITH t1 AS (
+            SELECT source, change_id, unnest(status) AS unnest_status, unnest(values) as unnest_values
+            from validation {geom_filter}
+        ),
+        t2 AS (
+            SELECT id, unnest(hashtags) AS unnest_hashtags
+            from changesets
+            WHERE {timestamp_filter}
+        )
+        SELECT
+            t1.unnest_values as value, t1.source,
+            count(t1.unnest_values) as count
+            FROM t1, t2 WHERE
+            t1.change_id = t2.id
+            {filter_hashtags}
+            and unnest_values is not null
+            AND unnest_status in ({issue_types})
+            group by t1.unnest_values, t1.source
+            order by count desc;
+    """
+    return query
 
 def create_hashtagfilter_underpass(hashtags, columnname, project_ids = []):
     """Generates hashtag filter query on the basis of list of hastags."""
