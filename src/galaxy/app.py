@@ -17,46 +17,18 @@
 # 1100 13th Street NW Suite 800 Washington, D.C. 20005
 # <info@hotosm.org>
 '''Main page contains class for database mapathon and funtion for error printing  '''
-import os
 import sys
-import threading
-from .config import get_db_connection_params, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, BUCKET_NAME, level, logger as logging, export_path, use_connection_pooling, shp_limit
-from .validation.models import Source
+from .config import get_db_connection_params, logger as logging
 from psycopg2 import connect, sql
 from psycopg2.extras import DictCursor
 from psycopg2 import OperationalError
-from .validation.models import UserRole, TeamMemberFunction, List, RawDataCurrentParams, RawDataOutputType, MapathonRequestParams, MappedFeature, MapathonSummary, MappedFeatureWithUser, MapathonContributor, MappedTaskStats, ValidatedTaskStats, TimeSpentMapping, OrganizationHashtagParams, DataRecencyParams, OrganizationHashtag, Trainings, TrainingParams, TrainingOrganisations, User, TimeSpentValidating, TMUserStats, MapathonDetail, UserStatistics, DataQualityHashtagParams, DataQuality_TM_RequestParams, DataQuality_username_RequestParams
-from .query_builder.builder import generate_list_teams_metadata, get_grid_id_query, raw_currentdata_extraction_query, check_last_updated_rawdata, extract_geometry_type_query, raw_historical_data_extraction_query, generate_tm_teams_list, generate_tm_validators_stats_query, create_user_time_spent_mapping_and_validating_query, create_user_tasks_mapped_and_validated_query, generate_organization_hashtag_reports, check_last_updated_user_data_quality_underpass, create_changeset_query, create_osm_history_query, create_users_contributions_query, check_last_updated_osm_insights, generate_data_quality_TM_query, generate_data_quality_hashtag_reports, generate_data_quality_hashtag_reports_summary, generate_data_quality_username_query, check_last_updated_mapathon_insights, check_last_updated_user_statistics_insights, check_last_updated_osm_underpass, generate_mapathon_summary_underpass_query, generate_training_organisations_query, generate_filter_training_query, generate_training_query, create_UserStats_get_statistics_query, create_userstats_get_statistics_with_hashtags_query, create_changeset_query_underpass, create_users_contributions_query_underpass
-import json
+from .validation.models import UserRole, TeamMemberFunction, List, MapathonRequestParams, MappedFeature, MapathonSummary, MappedFeatureWithUser, MapathonContributor, MappedTaskStats, ValidatedTaskStats, TimeSpentMapping, OrganizationHashtagParams, DataRecencyParams, OrganizationHashtag, Trainings, TrainingParams, TrainingOrganisations, User, TimeSpentValidating, TMUserStats, MapathonDetail, UserStatistics, DataQualityHashtagParams, DataQuality_TM_RequestParams, DataQuality_username_RequestParams
+from .query_builder.builder import generate_list_teams_metadata, generate_tm_teams_list, generate_tm_validators_stats_query, create_user_time_spent_mapping_and_validating_query, create_user_tasks_mapped_and_validated_query, generate_organization_hashtag_reports, generate_data_quality_TM_query, generate_data_quality_hashtag_reports, generate_data_quality_hashtag_reports_summary, generate_data_quality_username_query, generate_mapathon_summary_underpass_query, generate_training_organisations_query, generate_filter_training_query, generate_training_query, create_UserStats_get_statistics_query, create_userstats_get_statistics_with_hashtags_query, create_changeset_query_underpass, create_users_contributions_query_underpass, check_last_updated_changesets, check_last_updated_validation
 import pandas
 from json import loads as json_loads
 from geojson import Feature, FeatureCollection, Point
 from io import StringIO
 from csv import DictWriter
-import orjson
-from area import area
-import subprocess
-from json import dumps
-import fiona
-from fiona.crs import from_epsg
-import time
-import shutil
-import boto3
-import signal
-from fastapi import HTTPException
-# import instance for pooling
-if use_connection_pooling:
-    from src.galaxy.db_session import database_instance
-else:
-    database_instance = None
-import logging as log
-# assigning global variable of pooling so that it
-# will be accessible from any function within this script
-global LOCAL_CON_POOL
-
-# getting the pool instance which was fireup when API is started
-LOCAL_CON_POOL = database_instance
-
 
 def print_psycopg2_exception(err):
     """
@@ -214,18 +186,6 @@ class Underpass:
 
         return user_role
 
-    def get_osm_last_updated(self):
-        """OSM synchronisation"""
-        status_query = check_last_updated_osm_underpass()
-        result = self.database.executequery(status_query)
-        return result[0][0]
-
-    def get_user_data_quality_last_updated(self):
-        """ Recency of user data quality reports"""
-        status_query = check_last_updated_user_data_quality_underpass()
-        result = self.database.executequery(status_query)
-        return result[0][0]
-        
     def get_mapathon_detailed_result(self):
         """Functions that returns detailed reports  for mapathon results_dicts"""
         changeset_query, _, _ = create_changeset_query_underpass(
@@ -236,68 +196,29 @@ class Underpass:
         contributors = self.database.executequery(contributors_query)
         return changesets, contributors
 
-
-class Insight:
-    """This class connects to Insight database and responsible for all the Insight related functionality"""
-
-    def __init__(self, parameters=None):
-        self.database = Database(get_db_connection_params("INSIGHTS"))
-        # self.database = Database(dict(config.items("INSIGHTS_PG")))
-        self.con, self.cur = self.database.connect()
-        self.params = parameters
-
-    def get_mapathon_summary_result(self):
-        """ Get mapathon summary result"""
-        changeset_query, hashtag_filter, timestamp_filter = create_changeset_query(
-            self.params, self.con, self.cur)
-        osm_history_query = create_osm_history_query(changeset_query,
-                                                     with_username=False)
-        total_contributor_query = f"""
-                SELECT COUNT(distinct user_id) as contributors_count
-                FROM osm_changeset
-                WHERE {timestamp_filter}
-            """
-        if len(hashtag_filter) > 0:
-            total_contributor_query += f""" AND ({hashtag_filter})"""
-
-        # print(osm_history_query)
-        osm_history_result = self.database.executequery(osm_history_query)
-        total_contributors_result = self.database.executequery(
-            total_contributor_query)
-        return osm_history_result, total_contributors_result
-
-    def get_mapathon_detailed_result(self):
-        """Functions that returns detailed reports  for mapathon results_dicts"""
-        changeset_query, _, _ = create_changeset_query(
-            self.params, self.con, self.cur)
-        # History Query
-        osm_history_query = create_osm_history_query(changeset_query,
-                                                     with_username=True)
-        contributors_query = create_users_contributions_query(
-            self.params, changeset_query)
-        osm_history_result = self.database.executequery(osm_history_query)
-        total_contributors_result = self.database.executequery(
-            contributors_query)
-        return osm_history_result, total_contributors_result
-
     def get_osm_last_updated(self):
         """OSM synchronisation"""
-        status_query = check_last_updated_osm_insights()
+        status_query = check_last_updated_changesets()
+        result = self.database.executequery(status_query)
+        return result[0][0]
+
+    def get_user_data_quality_last_updated(self):
+        """ Recency of user data quality reports"""
+        status_query = check_last_updated_validation()
         result = self.database.executequery(status_query)
         return result[0][0]
 
     def get_mapathon_statistics_last_updated(self):
         """Recency of mapathon statistics"""
-        status_query = check_last_updated_mapathon_insights()
+        status_query = check_last_updated_changesets()
         result = self.database.executequery(status_query)
         return result[0][0]
 
     def get_user_statistics_last_updated(self):
         """Recency of user statistics"""
-        status_query = check_last_updated_user_statistics_insights()
+        status_query = check_last_updated_changesets()
         result = self.database.executequery(status_query)
         return result[0][0]
-
 
 class TaskingManager:
     """ This class connects to the Tasking Manager database and is responsible for all the TM related functionality. """
@@ -417,20 +338,14 @@ class Mapathon:
     """Class for mapathon detail report and summary report this is the class that self connects to database and provide you summary and detail report."""
 
     # constructor
-    def __init__(self, parameters, source):
+    def __init__(self, parameters):
         # parameter validation using pydantic model
         if type(parameters) is MapathonRequestParams:
             self.params = parameters
         else:
             self.params = MapathonRequestParams(**parameters)
 
-        if source == "underpass":
-            self.database = Underpass(self.params)
-        elif source == "insights":
-            self.database = Insight(self.params)
-        else:
-            raise HTTPException(
-                status_code=404, detail="Source is not Supported")
+        self.database = Underpass(self.params)
 
     # Mapathon class instance method
     def get_summary(self):
@@ -578,8 +493,7 @@ class Output:
 
 class UserStats:
     def __init__(self):
-        self.db = Database(get_db_connection_params("INSIGHTS"))
-        # self.db = Database(dict(config.items("INSIGHTS_PG")))
+        self.db = Database(get_db_connection_params("UNDERPASS"))
         self.con, self.cur = self.db.connect()
 
     def list_users(self, params):
@@ -588,12 +502,14 @@ class UserStats:
             ["%s" for n in range(len(params.user_names))])
 
         query = sql.SQL(
-            f"""SELECT DISTINCT user_id, user_name from osm_changeset
-        WHERE created_at between %s AND %s AND user_name IN ({user_names_str})
+            f"""SELECT distinct user_id, username AS user_name FROM changesets c
+            INNER JOIN users u ON u.id = c.user_id
+            WHERE c.created_at BETWEEN %s AND %s AND u.username IN ({user_names_str})
         """)
 
         items = (params.from_timestamp, params.to_timestamp,
                  *params.user_names)
+
         list_users_query = self.cur.mogrify(query, items)
 
         result = self.db.executequery(list_users_query)
@@ -771,11 +687,8 @@ class Training:
     """[Class responsible for Training data API]
     """
 
-    def __init__(self, source):
-        if source == Source.UNDERPASS.value:
-            self.database = Underpass()
-        else:
-            raise ValueError("Source is not Supported")
+    def __init__(self):
+        self.database = Underpass()
 
     def get_all_organisations(self):
         """[Generates result for all list of available organisations within the database.]
@@ -802,8 +715,7 @@ class OrganizationHashtags:
     """
 
     def __init__(self, params: OrganizationHashtagParams):
-        self.db = Database(get_db_connection_params("INSIGHTS"))
-        # self.db = Database(dict(config.items("INSIGHTS_PG")))
+        self.db = Database(get_db_connection_params("UNDERPASS"))
         self.con, self.cur = self.db.connect()
         self.params = params
         self.query = generate_organization_hashtag_reports(
@@ -835,15 +747,10 @@ class Status:
         else:
             self.params = DataRecencyParams(**parameters)
 
-        if self.params.data_source == "underpass":
-            self.database = Underpass(self.params)
-        elif self.params.data_source == "insight":
-            self.database = Insight(self.params)
-        else:
-            raise ValueError("Source is not Supported")
+        self.database = Underpass(self.params)
 
     def get_osm_recency(self):
-        """Returns OSm Recency"""
+        """Returns OSM Recency"""
         # checks either that method is supported by the database supplied or not without making call to database class if yes will make a call else it will return None
         return self.database.get_osm_last_updated() if getattr(self.database, "get_osm_last_updated", None) else None
 
@@ -859,487 +766,3 @@ class Status:
         """Returns Userdata quality recency"""
         return self.database.get_user_data_quality_last_updated() if getattr(self.database, "get_user_data_quality_last_updated", None) else None
 
-    def get_raw_data_recency(self):
-        """Returns recency of rawdata snapshot"""
-        return RawData().check_status()
-
-
-class RawData:
-    """Class responsible for the Rawdata Extraction from available sources ,
-        Currently Works for Underpass source Current Snapshot
-    Returns:
-    Geojson Zip file
-    Supports:
-    -Any Key value pair of osm tags
-    -A Polygon
-    -Osm element type (Optional)
-    """
-
-    def __init__(self, parameters=None, dbdict=None):
-        if parameters:
-            # validation for the parameters if it is already validated with
-            # pydantic model or not , people coming from package they
-            # will not have api valdiation so to make sure they will be validated
-            # before accessing the class
-            if isinstance(parameters, RawDataCurrentParams) is False:
-                self.params = RawDataCurrentParams(**parameters)
-            else:
-                self.params = parameters
-        # only use connection pooling if it is configured in config file
-        if use_connection_pooling:
-            # if database credentials directly from class is not passed grab from pool
-            pool_conn = LOCAL_CON_POOL.get_conn_from_pool()
-            self.con, self.cur = pool_conn, pool_conn.cursor(
-                cursor_factory=DictCursor)
-        else:
-            # else use our default db class
-            if not dbdict:
-                dbdict = get_db_connection_params("RAW_DATA")
-            self.d_b = Database(dict(dbdict))
-            self.con, self.cur = self.d_b.connect()
-
-    @staticmethod
-    def close_con(con):
-        """Closes connection if exists"""
-        if con:
-            if use_connection_pooling:
-                # release connection from pool
-                database_instance.release_conn_from_pool(con)
-            else:
-                con.close()
-
-    @staticmethod
-    def to_geojson(results):
-        """Responsible for converting query result to featurecollection , It is absolute now ~ not used anymore
-
-        Args:
-            results (_type_): Query Result geojson per feature string
-
-        Returns:
-            _type_: featurecollection
-        """
-        logging.debug('Geojson Binding Started !')
-        feature_collection = FeatureCollection(
-            features=[orjson.loads(row[0]) for row in results])
-        logging.debug('Geojson Binding Done !')
-        return feature_collection
-
-    def extract_historical_data(self):
-        """Idea is to extract historical data , Currently not maintained
-
-        Returns:
-            _type_: geojson featurecollection
-        """
-        extraction_query = raw_historical_data_extraction_query(
-            self.cur, self.con, self.params)
-        results = self.d_b.executequery(extraction_query)
-        return RawData.to_geojson(results)
-
-    @staticmethod
-    def ogr_export(outputtype, query=None, export_temp_path=None, point_query=None, line_query=None, poly_query=None, dump_temp_file_path=None, binding_file_dir=None):
-        """Function written to support ogr type extractions as well , In this way we will be able to support all file formats supported by Ogr , Currently it is slow when dataset gets bigger as compared to our own conversion method but rich in feature and data types even though it is slow"""
-        db_items = get_db_connection_params("RAW_DATA")
-        # format query if it has " in string"
-        formatted_query = ''
-        if query:
-            formatted_query = query.replace('"', '\\"')
-        # for mbtiles we need additional input as well i.e. minzoom and maxzoom , setting default at max=22 and min=10
-        if outputtype is RawDataOutputType.MBTILES.value:
-            cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" -dsco MINZOOM=10 -dsco MAXZOOM=22 {export_path} PG:"host={host} user={username} dbname={db} password={password}" -sql "{pg_sql_select}" -progress'''.format(
-                outputtype=outputtype, export_path=export_temp_path, host=db_items.get('host'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=formatted_query)
-
-        elif outputtype is RawDataOutputType.SHAPEFILE.value:
-            # if it is shapefile it needs different logic for point,line and polygon
-            file_paths = []
-            outputtype = "ESRI Shapefile"
-            if point_query:
-                query_path = f"""{dump_temp_file_path}_sql.sql"""
-
-                # writing to .sql to pass in ogr2ogr because we don't want to pass too much argument on command with sql
-                with open(query_path, 'w') as file:
-                    file.write(point_query)
-                # standard file path for the generation
-                point_file_path = f"""{dump_temp_file_path}_point.shp"""
-                # command for ogr2ogr to generate file
-                cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" {export_path} PG:"host={host} user={username} dbname={db} password={password}" -sql @"{pg_sql_select}" -progress'''.format(
-                    outputtype=outputtype, export_path=point_file_path, host=db_items.get('host'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=query_path)
-                logging.debug("Calling ogr2ogr-Point Shapefile")
-                run_ogr2ogr_cmd(cmd, binding_file_dir)
-                # clear query file we don't need it anymore
-                os.remove(query_path)
-
-                file_paths.append(point_file_path)
-                # need filepath to zip in to file and clear them after zipping
-                file_paths.append(f"""{dump_temp_file_path}_point.shx""")
-                # file_paths.append(f"""{dump_temp_file_path}_point.cpg""")
-                file_paths.append(f"""{dump_temp_file_path}_point.dbf""")
-                file_paths.append(f"""{dump_temp_file_path}_point.prj""")
-            if line_query:
-                query_path = f"""{dump_temp_file_path}_sql.sql"""
-
-                # writing to .sql to pass in ogr2ogr because we don't want to pass too much argument on command with sql
-                with open(query_path, 'w') as file:
-                    file.write(line_query)
-
-                line_file_path = f"""{dump_temp_file_path}_line.shp"""
-                cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" {export_path} PG:"host={host} user={username} dbname={db} password={password}" -sql @"{pg_sql_select}" -progress'''.format(
-                    outputtype=outputtype, export_path=line_file_path, host=db_items.get('host'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=query_path)
-                logging.debug("Calling ogr2ogr-Line Shapefile")
-                run_ogr2ogr_cmd(cmd, binding_file_dir)
-                # clear query file we don't need it anymore
-                os.remove(query_path)
-
-                file_paths.append(line_file_path)
-                file_paths.append(f"""{dump_temp_file_path}_line.shx""")
-                # file_paths.append(f"""{dump_temp_file_path}_line.cpg""")
-                file_paths.append(f"""{dump_temp_file_path}_line.dbf""")
-                file_paths.append(f"""{dump_temp_file_path}_line.prj""")
-            if poly_query:
-
-                poly_file_path = f"""{dump_temp_file_path}_poly.shp"""
-                poly_query_path = f"""{dump_temp_file_path}_poly_sql.sql"""
-
-                # writing to .sql to pass in ogr2ogr because we don't want to pass too much argument on command with sql
-                with open(poly_query_path, 'w') as file:
-                    file.write(poly_query)
-                cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" {export_path} PG:"host={host} user={username} dbname={db} password={password}" -sql @"{pg_sql_select}" -progress'''.format(
-                    outputtype=outputtype, export_path=poly_file_path, host=db_items.get('host'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=poly_query_path)
-                logging.debug("Calling ogr2ogr-Poly Shapefile")
-                run_ogr2ogr_cmd(cmd, binding_file_dir)
-                # clear query file we don't need it anymore
-                os.remove(poly_query_path)
-                file_paths.append(poly_file_path)
-                file_paths.append(f"""{dump_temp_file_path}_poly.shx""")
-                # file_paths.append(f"""{dump_temp_file_path}_poly.cpg""")
-                file_paths.append(f"""{dump_temp_file_path}_poly.dbf""")
-                file_paths.append(f"""{dump_temp_file_path}_poly.prj""")
-            return file_paths
-        else:
-            # if it is not shapefile use standard ogr2ogr with their output format , will be useful for kml
-            cmd = '''ogr2ogr -overwrite -f \"{outputtype}\" {export_path} PG:"host={host} user={username} dbname={db} password={password}" -sql "{pg_sql_select}" -progress'''.format(
-                outputtype=outputtype, export_path=export_path, host=db_items.get('host'), username=db_items.get('user'), db=db_items.get('database'), password=db_items.get('password'), pg_sql_select=formatted_query)
-        run_ogr2ogr_cmd(cmd, binding_file_dir)
-        return export_path
-
-    @staticmethod
-    def query2geojson(con, extraction_query, dump_temp_file_path):
-        """Function written from scratch without being dependent on any library, Provides better performance for geojson binding"""
-        # creating geojson file
-        pre_geojson = """{"type": "FeatureCollection","features": ["""
-        post_geojson = """]}"""
-        # writing to the file
-        # directly writing query result to the file one by one without holding them in object so that it will not eat up our memory
-        with open(dump_temp_file_path, 'a', encoding='utf-8') as f:
-            f.write(pre_geojson)
-            logging.debug('Server side Cursor Query Sent with 1000 Chunk Size')
-            with con.cursor(name='fetch_raw') as cursor:  # using server side cursor
-                cursor.itersize = 1000  # chunk size to get 1000 row at a time in client side
-                cursor.execute(extraction_query)
-                first = True
-                for row in cursor:
-                    if first:
-                        first = False
-                        f.write(row[0])
-                    else:
-                        f.write(',')
-                        f.write(row[0])
-                cursor.close()  # closing connection to avoid memory issues
-                # close the writing geojson with last part
-            f.write(post_geojson)
-        logging.debug("Server side Query Result  Post Processing Done")
-
-    @staticmethod
-    def query2shapefile(con, point_query, line_query, poly_query, point_schema, line_schema, poly_schema, dump_temp_file_path):
-        """Function that transfer db query to shp"""
-        # schema: it is a simple dictionary with geometry and properties as keys
-        # schema = {'geometry': 'LineString','properties': {'test': 'int'}}
-        file_paths = []
-        if point_query:
-            logging.debug("Writing Point Shapefile")
-
-            schema = {'geometry': 'Point', 'properties': point_schema, }
-            point_file_path = f"""{dump_temp_file_path}_point.shp"""
-            # open a fiona object
-            pointShp = fiona.open(point_file_path, mode='w', driver='ESRI Shapefile', encoding='UTF-8',
-                                  schema=schema, crs="EPSG:4326")
-
-            with con.cursor(name='fetch_raw') as cursor:  # using server side cursor
-                cursor.itersize = 1000  # chunk size to get 1000 row at a time in client side
-                cursor.execute(point_query)
-                for row in cursor:
-                    pointShp.write(orjson.loads(row[0]))
-
-                cursor.close()  # closing connection to avoid memory issues
-                # close fiona object
-            pointShp.close()
-            file_paths.append(point_file_path)
-            file_paths.append(f"""{dump_temp_file_path}_point.shx""")
-            file_paths.append(f"""{dump_temp_file_path}_point.cpg""")
-            file_paths.append(f"""{dump_temp_file_path}_point.dbf""")
-            file_paths.append(f"""{dump_temp_file_path}_point.prj""")
-
-        if line_query:
-            logging.debug("Writing Line Shapefile")
-
-            schema = {'geometry': 'LineString', 'properties': line_schema, }
-            # print(schema)
-            line_file_path = f"""{dump_temp_file_path}_line.shp"""
-            with fiona.open(line_file_path, 'w', encoding='UTF-8', crs=from_epsg(4326), driver='ESRI Shapefile', schema=schema) as layer:
-                with con.cursor(name='fetch_raw') as cursor:  # using server side cursor
-                    cursor.itersize = 1000  # chunk size to get 1000 row at a time in client side
-                    cursor.execute(line_query)
-                    for row in cursor:
-                        layer.write(orjson.loads(row[0]))
-
-                    cursor.close()  # closing connection to avoid memory issues
-                # close fiona object
-                layer.close()
-            file_paths.append(line_file_path)
-            file_paths.append(f"""{dump_temp_file_path}_line.shx""")
-            file_paths.append(f"""{dump_temp_file_path}_line.cpg""")
-            file_paths.append(f"""{dump_temp_file_path}_line.dbf""")
-            file_paths.append(f"""{dump_temp_file_path}_line.prj""")
-
-        if poly_query:
-            logging.debug("Writing Poly Shapefile")
-
-            poly_file_path = f"""{dump_temp_file_path}_poly.shp"""
-            schema = {'geometry': 'Polygon', 'properties': poly_schema, }
-
-            with fiona.open(poly_file_path, 'w', encoding='UTF-8', crs=from_epsg(4326), driver='ESRI Shapefile', schema=schema) as layer:
-                with con.cursor(name='fetch_raw') as cursor:  # using server side cursor
-                    cursor.itersize = 1000  # chunk size to get 1000 row at a time in client side
-                    cursor.execute(poly_query)
-                    for row in cursor:
-                        layer.write(orjson.loads(row[0]))
-
-                    cursor.close()  # closing connection to avoid memory issues
-                # close fiona object
-                layer.close()
-            file_paths.append(poly_file_path)
-            file_paths.append(f"""{dump_temp_file_path}_poly.shx""")
-            file_paths.append(f"""{dump_temp_file_path}_poly.cpg""")
-            file_paths.append(f"""{dump_temp_file_path}_poly.dbf""")
-            file_paths.append(f"""{dump_temp_file_path}_poly.prj""")
-        return file_paths
-
-    @staticmethod
-    def get_grid_id(geom, cur):
-        """Gets the intersecting related grid id for the geometry that is passed
-
-        Args:
-            geom (_type_): _description_
-            cur (_type_): _description_
-
-        Returns:
-            _type_: grid id , geometry dump and the area of geometry
-        """
-        geometry_dump = dumps(dict(geom))
-        # generating geometry area in sqkm
-        geom_area = int(area(json.loads(geom.json())) * 1E-6)
-        # only apply grid in the logic if it exceeds the 5000 Sqkm
-        if geom_area > 5000:
-            # this will be applied only when polygon gets bigger we will be slicing index size to search
-            cur.execute(
-                get_grid_id_query(geometry_dump))
-            grid_id = cur.fetchall()
-            cur.close()
-        else:
-            grid_id = None
-        return grid_id, geometry_dump, geom_area
-
-    def extract_current_data(self, exportname):
-        """Responsible for Extracting rawdata current snapshot, Initially it creates a geojson file , Generates query , run it with 1000 chunk size and writes it directly to the geojson file and closes the file after dump
-        Args:
-            exportname: takes filename as argument to create geojson file passed from routers
-
-        Returns:
-            _file_path_: geojson file location path
-        """
-        # first check either geometry needs grid or not for querying
-        grid_id, geometry_dump, geom_area = RawData.get_grid_id(
-            self.params.geometry, self.cur)
-        if self.params.output_type is None:
-            # if nothing is supplied then default output type will be geojson
-            output_type = RawDataOutputType.GEOJSON.value
-        else:
-            output_type = self.params.output_type
-
-        # Check whether the export path exists or not
-        isExist = os.path.exists(export_path)
-        if not isExist:
-            # Create a exports directory because it does not exist
-            os.makedirs(export_path)
-        root_dir_file = export_path
-        path = f"""{export_path}{exportname}/"""
-        os.makedirs(path)
-        # create file path with respect to of output type
-        dump_temp_file_path = f"""{path}{exportname}.{output_type.lower()}"""
-        try:
-            # currently we have only geojson binding function written other than that we have depend on ogr
-            if output_type is RawDataOutputType.GEOJSON.value:
-                RawData.query2geojson(self.con, raw_currentdata_extraction_query(
-                    self.params, g_id=grid_id, geometry_dump=geometry_dump), dump_temp_file_path)  # uses own conversion class
-            elif output_type is RawDataOutputType.SHAPEFILE.value:
-                point_query, line_query, poly_query, point_schema, line_schema, poly_schema = extract_geometry_type_query(
-                    self.params, ogr_export=True)
-                # point_query, line_query, poly_query, point_schema, line_schema, poly_schema = extract_geometry_type_query(
-                #     self.params,ogr_export=True)
-                dump_temp_file_path = f"""{path}{exportname}"""
-                filepaths = RawData.ogr_export(outputtype=output_type, point_query=point_query, line_query=line_query,
-                                               poly_query=poly_query, dump_temp_file_path=dump_temp_file_path, binding_file_dir=path)  # using ogr2ogr
-                # filepaths = RawData.query2shapefile(self.con, point_query, line_query, poly_query, point_schema, line_schema, poly_schema, dump_temp_file_path) #using fiona
-                return filepaths, geom_area, root_dir_file
-            else:
-                filepaths = RawData.ogr_export(query=raw_currentdata_extraction_query(self.params, grid_id, geometry_dump, ogr_export=True),
-                                               export_temp_path=dump_temp_file_path, outputtype=output_type, binding_file_dir=path)  # uses ogr export to export
-            return [dump_temp_file_path], geom_area, root_dir_file
-        except Exception as ex:
-            logging.error(ex)
-            raise ex
-        finally:
-            # closing connection before leaving class
-            RawData.close_con(self.con)
-
-    def check_status(self):
-        """Gives status about DB update, Substracts with current time and last db update time"""
-        status_query = check_last_updated_rawdata()
-        self.cur.execute(status_query)
-        behind_time = self.cur.fetchall()
-        self.cur.close()
-        # closing connection before leaving class
-        RawData.close_con(self.con)
-        return str(behind_time[0][0])
-
-
-def run_ogr2ogr_cmd(cmd, binding_file_dir):
-    """Runs command and monitors the file size until the process runs
-
-    Args:
-        cmd (_type_): Command to run for subprocess
-        binding_file_dir (_type_): _description_
-
-    Raises:
-        ValueError: Shapefile exceed 4GB limit
-        ValueError: Binding failed
-    """
-    try:
-        # start_time=time.time()
-        process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            shell=True,
-            preexec_fn=os.setsid
-        )
-        while process.poll() is None:
-            # if (time.time()-start_time)/60 > 25 :
-            #     raise ValueError("Shapefile Exceed Limit export")
-
-            size = 0
-            for ele in os.scandir(binding_file_dir):
-                size += os.path.getsize(ele)
-            # print(size/1000000) # in MB
-            if size / 1000000 > shp_limit:
-                logging.warn(
-                    f"Killing ogr2ogr because it exceed {shp_limit} MB...")
-                # process.kill()
-                # os.killpg(os.getpgid(process.pid), signal.SIGTERM)  # Send the signal to all the process groups
-                # shutil.rmtree(binding_file_dir)
-                raise HTTPException(
-                    status_code=404, detail=f"Shapefile Exceed {shp_limit} MB Limit")
-
-        logging.debug(process.stdout.read())
-    except Exception as ex:
-        logging.error(ex)
-        process.kill()
-        # Send the signal to all the process groups
-        os.killpg(os.getpgid(process.pid), signal.SIGTERM)
-        if os.path.exists(binding_file_dir):
-            shutil.rmtree(binding_file_dir)
-        raise ex
-
-
-class S3FileTransfer:
-    """Responsible for the file transfer to s3 from API maachine """
-
-    def __init__(self):
-        # responsible for the connection
-        try:
-            if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
-                self.aws_session = boto3.Session(
-                    aws_access_key_id=AWS_ACCESS_KEY_ID,
-                    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-                )
-            else:  # if it is not passed on config then api will assume it is configured within machine using credentials file
-                self.aws_session = boto3.Session()
-            self.s_3 = self.aws_session.client('s3')
-            logging.debug("Connection has been successful to s3")
-        except Exception as ex:
-            logging.error(ex)
-            raise ex
-
-    def list_buckets(self):
-        """used to list all the buckets available on s3"""
-        buckets = self.s_3.list_buckets()
-        return buckets
-
-    def get_bucket_location(self, bucket_name):
-        """Provides the bucket location on aws, takes bucket_name as string -- name of repo on s3"""
-        try:
-            bucket_location = self.s_3.get_bucket_location(Bucket=bucket_name)[
-                'LocationConstraint']
-        except Exception as ex:
-            logging.error("Can't access bucket location")
-            raise ex
-        return bucket_location or 'us-east-1'
-
-    def upload(self, file_path, file_prefix):
-        """Used for transferring file to s3 after reading path from the user , It will wait for the upload to complete
-        Parameters :file_path --- your local file path to upload ,
-            file_prefix -- prefix for the filename which is stored
-        sample function call :
-            S3FileTransfer.transfer(file_path="exports",file_prefix="upload_test") """
-        file_name = f"{file_prefix}.zip"
-        # instantiate upload
-        start_time = time.time()
-
-        try:
-            if level is log.DEBUG:
-                self.s_3.upload_file(
-                    file_path, BUCKET_NAME, file_name, Callback=ProgressPercentage(file_path))
-            else:
-                self.s_3.upload_file(file_path, BUCKET_NAME, file_name)
-
-        except Exception as ex:
-            logging.error(ex)
-            raise ex
-        logging.debug("Uploaded %s in %s sec",
-                      file_prefix, time.time() - start_time)
-        # generate the download url
-        bucket_location = self.get_bucket_location(bucket_name=BUCKET_NAME)
-        object_url = f"""https://s3.{bucket_location}.amazonaws.com/{BUCKET_NAME}/{file_name}"""
-        return object_url
-
-
-class ProgressPercentage(object):
-    """Determines the project percentage of aws s3 upload file call
-
-    Args:
-        object (_type_): _description_
-    """
-
-    def __init__(self, filename):
-        self._filename = filename
-        self._size = float(os.path.getsize(filename))
-        self._seen_so_far = 0
-        self._lock = threading.Lock()
-
-    def __call__(self, bytes_amount):
-        """ returns log percentage"""
-        # To simplify, assume this is hooked up to a single filename
-        with self._lock:
-            self._seen_so_far += bytes_amount
-            percentage = (self._seen_so_far / self._size) * 100
-            logging.debug("\r%s  %s / %s  (%.2f%%)", self._filename,
-                          self._seen_so_far, self._size, percentage)

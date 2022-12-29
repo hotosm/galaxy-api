@@ -26,22 +26,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi_versioning import VersionedFastAPI
 
 from src.galaxy.config import config
-from src.galaxy.config import logger as logging
-from src.galaxy.config import use_connection_pooling, use_s3_to_upload
-from src.galaxy.db_session import database_instance
 
 # from .changesets.routers import router as changesets_router
 # from .data.routers import router as data_router
 from .auth.routers import router as auth_router
 from .countries.routers import router as countries_router
 from .data_quality import router as data_quality_router
-from .download_export import router as download_router
 
 # from .trainings import router as training_router
 from .hashtag_stats import router as hashtag_router
 from .mapathon import router as mapathon_router
 from .osm_users import router as osm_users_router
-from .raw_data import router as raw_data_router
 
 # from .test_router import router as test_router
 from .status import router as status_router
@@ -78,12 +73,6 @@ app.include_router(data_quality_router)
 app.include_router(hashtag_router)
 app.include_router(tm_router)
 app.include_router(status_router)
-app.include_router(raw_data_router)
-
-if use_s3_to_upload is False:
-    # only mount the disk if config is set to disk
-    app.include_router(download_router)
-
 
 app = VersionedFastAPI(
     app, enable_latest=True, version_format="{major}", prefix_format="/v{major}"
@@ -119,25 +108,3 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-@app.on_event("startup")
-async def on_startup():
-    """Fires up 3 idle conenction with threaded connection pooling before starting the API
-
-    Raises:
-        e: if connection is rejected to database
-    """
-    try:
-        if use_connection_pooling:
-            database_instance.connect()
-    except Exception as e:
-        logging.error(e)
-        raise e
-
-
-@app.on_event("shutdown")
-def on_shutdown():
-    """Closing all the threads connection from pooling before shuting down the api"""
-    if use_connection_pooling:
-        logging.debug("Shutting down connection pool")
-        database_instance.close_all_connection_pool()

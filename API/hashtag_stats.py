@@ -23,7 +23,6 @@ from fastapi import APIRouter
 from fastapi_versioning import version
 from src.galaxy.app import OrganizationHashtags
 from src.galaxy.validation.models import OrganizationHashtag, OrganizationOutputtype, OrganizationHashtagParams
-# from .auth import login_required
 from typing import List
 from fastapi.responses import StreamingResponse
 import io
@@ -34,7 +33,6 @@ router = APIRouter(prefix="/hashtags")
 
 @router.post("/statistics/", response_model=List[OrganizationHashtag])
 @version(1)
-# def get_organisations_list(user_data=Depends(login_required)):
 def get_hashtag_stats(params: OrganizationHashtagParams):
     """Monitors specific OpenStreetMap hashtag statistics for
     weekly/quarterly/monthly frequency.

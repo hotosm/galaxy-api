@@ -20,7 +20,7 @@
 from fastapi import APIRouter
 from fastapi_versioning import version
 from src.galaxy.validation.models import DataQuality_TM_RequestParams, DataQuality_username_RequestParams, DataQualityHashtagParams, OutputType
-from src.galaxy.app import DataQuality, DataQualityHashtags, Output
+from src.galaxy.app import DataQuality, DataQualityHashtags
 from fastapi.responses import StreamingResponse
 import io
 from datetime import datetime

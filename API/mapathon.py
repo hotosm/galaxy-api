@@ -48,8 +48,7 @@ def get_mapathon_detailed_report(params: MapathonRequestParams,
                                 ],
                                 "hashtags": [
                                     "list of OpenStreetMap hashtags you want to use without # sign separated by comma"
-                                ],
-                                "source": "Define source of data : Options are insights,underpass - current support : insights only"
+                                ]
                                 }
         user_data (_type_, optional): _description_. Defaults to Depends(login_required). Authentication required , access token can be generated from /auth/login
 
@@ -255,10 +254,7 @@ def get_mapathon_detailed_report(params: MapathonRequestParams,
         ]
         }
     """
-    if params.source == "insight":
-        mapathon = Mapathon(params,"insights")
-    else:
-        mapathon = Mapathon(params,"underpass")
+    mapathon = Mapathon(params)
     return mapathon.get_detailed_report()
 
 
@@ -277,8 +273,7 @@ def get_mapathon_summary(params: MapathonRequestParams):
                                 ],
                                 "hashtags": [
                                     "list of hashtags you want to use without # sign separate by comma"
-                                ],
-                                "source": "Define source of data : Options are insights,underpass - current support : insights only"
+                                ]
                                 }
 
     Returns:
@@ -358,8 +353,5 @@ def get_mapathon_summary(params: MapathonRequestParams):
         }
     """
 
-    if params.source == "insights":
-        mapathon = Mapathon(params, "insights")
-    else:
-        mapathon = Mapathon(params, "underpass")
+    mapathon = Mapathon(params)
     return mapathon.get_summary()
