@@ -3,15 +3,7 @@
 
 ## Getting Started
 
-### 1. Install requirements.
-
-Install gdal on your machine , for example on Ubuntu
-
-```
-sudo apt-add-repository ppa:ubuntugis/ubuntugis-unstable
-sudo apt-get update
-sudo apt-get install gdal-bin libgdal-dev
-```
+### 1. Install
 
 Clone the Repo to your machine
 
@@ -24,11 +16,6 @@ Navigate to repo
 Install python dependencies
 
 ```pip install -r requirements.txt```
-
-Install gdal python ( Include your gdal version , if you are using different version )
-
-```pip install gdal==3.0.2```
-
 
 
 ### 2. Create ```config.txt``` inside src directory.
