@@ -306,7 +306,7 @@ def test_userstats_get_statistics_query():
         "projectIds": [11224]
     }
     validated_params = UserStatsParams(**test_params)
-    expected_result = "\n    SELECT\n    sum((added->'building')::numeric) AS added_buildings,\n    sum((modified->'building')::numeric) AS modified_buildings,\n    sum((added->'highway')::numeric) AS added_highway,\n    sum((modified->'highway')::numeric) AS modified_highway,\n    sum((added->'highway_km')::numeric) AS added_highway_km,\n    sum((modified->'highway_km')::numeric) AS modified_highway_km\n    FROM changesets\n    WHERE created_at BETWEEN '2021-08-27T09:00:00'::timestamp AND '2021-08-27T11:00:00'::timestamp\n    AND user_id = 11593794;\n    "
+    expected_result = "\n    SELECT\n    sum((added->'building')::numeric) AS added_buildings,\n    sum((modified->'building')::numeric) AS modified_buildings,\n    sum((added->'highway')::numeric) AS added_highway,\n    sum((modified->'highway')::numeric) AS modified_highway,\n    sum((added->'highway_km')::numeric) AS added_highway_km\n    sum((modified->'highway_km')::numeric) AS modified_highway_km\n    FROM changesets\n    WHERE created_at BETWEEN '2021-08-27T09:00:00'::timestamp AND '2021-08-27T11:00:00'::timestamp\n    AND user_id = 11593794;\n    "
     query_result = create_UserStats_get_statistics_query(
         validated_params, con, cur)
     assert query_result == expected_result.encode('utf-8')
@@ -317,29 +317,14 @@ def test_organization_hashtag_weekly_query():
     """
     # for weekly stat
     test_params = {
-        "hashtags": [
-            "msf"
-        ],
+        "hashtag": "msf",
         "frequency": "w",
         "outputType": "json",
-        "startDate": "2020-10-22",
-        "endDate": "2020-12-22"
+        "startDate": "2022-10-20",
+        "endDate": "2022-12-22"
     }
     validated_params = OrganizationHashtagParams(**test_params)
-    expected_query = """with t1 as (
-            select id, name
-            from hashtag
-            where name = 'msf'
-            ),
-            t2 as (
-                select name as hashtag, type as frequency , start_date , end_date , total_new_buildings , total_uq_contributors as total_unique_contributors , total_new_road_m as total_new_road_meters,
-            total_new_amenity as total_new_amenities, total_new_places as total_new_places
-            from hashtag_stats join t1 on hashtag_id=t1.id
-            where type='w' and start_date >= '2020-10-22T12:00:00.000'::timestamp and end_date <= '2020-12-22T12:00:00.000'::timestamp
-            )
-            select *
-            from t2
-            order by hashtag"""
+    expected_query = '\n    with t1 as (\n        select * from changesets where\n        closed_at BETWEEN \'2022-10-20\' AND \'2022-12-22\'\n    )\n    SELECT \n        date_trunc(\'week\', closed_at::date) AS "startDate",\n        date_trunc(\'week\', closed_at::date) + interval \'1 WEEK\' AS "endDate",\n        COUNT(distinct (user_id)) AS "totalUniqueContributors",\n        coalesce(sum((added->\'building\')::numeric), 0) AS "totalNewBuildings",\n        coalesce(sum((added->\'amenity\')::numeric), 0) AS "totalNewAmenities",\n        coalesce(sum((added->\'place\')::numeric), 0) AS "totalNewPlaces",\n        coalesce(sum((added->\'highway_km\')::numeric), 0) AS "totalNewRoadKm",\n        \'w\' AS frequency,\n        \'msf\' AS hashtag\n        FROM t1 \n        WHERE \'msf\' = any(hashtags)\n        AND added IS NOT NULL OR modified IS NOT NULL\n        GROUP BY "startDate", "endDate"\n        ORDER BY "startDate" ASC;\n    '
     query_result = generate_organization_hashtag_reports(cur, validated_params)
     assert query_result.encode('utf-8') == expected_query.encode('utf-8')
 
@@ -347,29 +332,14 @@ def test_organization_hashtag_weekly_query():
 def test_organization_hashtag_monthly_query():
     # for monthly stat
     month_param = {
-        "hashtags": [
-            "msf"
-        ],
+        "hashtag": "msf",
         "frequency": "m",
         "outputType": "json",
-        "startDate": "2020-10-22",
-        "endDate": "2020-12-22"
+        "startDate": "2022-01-20",
+        "endDate": "2022-12-22"
     }
     validated_params = OrganizationHashtagParams(**month_param)
-    expected_query = """with t1 as (
-            select id, name
-            from hashtag
-            where name = 'msf'
-            ),
-            t2 as (
-                select name as hashtag, type as frequency , start_date , end_date , total_new_buildings , total_uq_contributors as total_unique_contributors , total_new_road_m as total_new_road_meters,
-            total_new_amenity as total_new_amenities, total_new_places as total_new_places
-            from hashtag_stats join t1 on hashtag_id=t1.id
-            where type='m' and start_date >= '2020-10-22T00:00:00.000'::timestamp and end_date <= '2020-12-22T00:00:00.000'::timestamp
-            )
-            select *
-            from t2
-            order by hashtag"""
+    expected_query = expected_query = '\n    with t1 as (\n        select * from changesets where\n        closed_at BETWEEN \'2022-01-20\' AND \'2022-12-22\'\n    )\n    SELECT \n        date_trunc(\'month\', closed_at::date) AS "startDate",\n        date_trunc(\'month\', closed_at::date) + interval \'1 MONTH\' AS "endDate",\n        COUNT(distinct (user_id)) AS "totalUniqueContributors",\n        coalesce(sum((added->\'building\')::numeric), 0) AS "totalNewBuildings",\n        coalesce(sum((added->\'amenity\')::numeric), 0) AS "totalNewAmenities",\n        coalesce(sum((added->\'place\')::numeric), 0) AS "totalNewPlaces",\n        coalesce(sum((added->\'highway_km\')::numeric), 0) AS "totalNewRoadKm",\n        \'m\' AS frequency,\n        \'msf\' AS hashtag\n        FROM t1 \n        WHERE \'msf\' = any(hashtags)\n        AND added IS NOT NULL OR modified IS NOT NULL\n        GROUP BY "startDate", "endDate"\n        ORDER BY "startDate" ASC;\n    '
     query_result = generate_organization_hashtag_reports(cur, validated_params)
     assert query_result.encode('utf-8') == expected_query.encode('utf-8')
 
@@ -379,5 +349,4 @@ def test_user_statistics_recency_query():
 
 def test_user_data_quality_recency_query():
     expected_underpass_query = 'SELECT (NOW() - MAX(timestamp)) AS "last_updated" FROM public.validation;'
-    print(check_last_updated_validation())
     assert check_last_updated_validation() == expected_underpass_query
