@@ -121,8 +121,8 @@ def create_userstats_get_statistics_with_hashtags_query(params, con, cur):
     sum((modified->'building')::numeric) AS modified_buildings,
     sum((added->'highway')::numeric) AS added_highway,
     sum((modified->'highway')::numeric) AS modified_highway,
-    sum((added->'highway_km')::numeric) AS added_highway_meters,
-    sum((modified->'highway_km')::numeric) AS modified_highway_meters
+    sum((added->'highway_km')::numeric) AS added_highway_km,
+    sum((modified->'highway_km')::numeric) AS modified_highway_km
     FROM changesets c
     WHERE {timestamp_filter}
     AND user_id = {params.user_id}
@@ -137,8 +137,8 @@ def create_UserStats_get_statistics_query(params, con, cur):
     sum((modified->'building')::numeric) AS modified_buildings,
     sum((added->'highway')::numeric) AS added_highway,
     sum((modified->'highway')::numeric) AS modified_highway,
-    sum((added->'highway_km')::numeric) AS added_highway_meters,
-    sum((modified->'highway_km')::numeric) AS modified_highway_meters
+    sum((added->'highway_km')::numeric) AS added_highway_km
+    sum((modified->'highway_km')::numeric) AS modified_highway_km
     FROM changesets
     WHERE created_at BETWEEN %s AND %s
     AND user_id = %s;
@@ -613,40 +613,39 @@ def generate_training_query(filter_query):
 
 
 def generate_organization_hashtag_reports(cur, params):
-    hashtags = []
-    for p in params.hashtags:
-        hashtags.append("name = '" + str(p.strip()).lower() + "'")
-    filter_hashtags = " or ".join(hashtags)
-    # filter_hashtags = cur.mogrify(sql.SQL(filter_hashtags), params.hashtags).decode()
-    t2_query = f"""select name as hashtag, type as frequency , start_date , end_date , total_new_buildings , total_uq_contributors as total_unique_contributors , total_new_road_m as total_new_road_meters,
-            total_new_amenity as total_new_amenities, total_new_places as total_new_places
-            from hashtag_stats join t1 on hashtag_id=t1.id
-            where type='{params.frequency}'"""
-    # month_time = """0:00:00"""
-    # week_time = """12:00:00"""
-    if params.end_date is not None or params.start_date is not None:
-        timestamp = []
-        time = f"""{"12" if params.frequency is Frequency.WEEKLY.value else "00" }"""
-        if params.start_date:
-            timestamp.append(
-                f"""start_date >= '{params.start_date}T{time}:00:00.000'::timestamp""")
-        if params.end_date:
-            timestamp.append(
-                f"""end_date <= '{params.end_date}T{time}:00:00.000'::timestamp""")
-        filter_timestamp = " and ".join(timestamp)
-        t2_query += f""" and {filter_timestamp}"""
-    query = f"""with t1 as (
-            select id, name
-            from hashtag
-            where {filter_hashtags}
-            ),
-            t2 as (
-                {t2_query}
-            )
-            select *
-            from t2
-            order by hashtag"""
-    # print(query)
+    if params.frequency == "w":
+        frequency = "week"
+        interval = "1 WEEK"
+    elif params.frequency == "m":
+        frequency = "month"
+        interval = "1 MONTH"
+    elif params.frequency == "q":
+        frequency = "quarter"
+        interval = "3 MONTH"
+    elif params.frequency == "y":
+        frequency = "year"
+        interval = "1 YEAR"
+    query = f"""
+    with t1 as (
+        select * from changesets where
+        closed_at BETWEEN '{params.start_date}' AND '{params.end_date}'
+    )
+    SELECT 
+        date_trunc('{frequency}', closed_at::date) AS "startDate",
+        date_trunc('{frequency}', closed_at::date) + interval '{interval}' AS "endDate",
+        COUNT(distinct (user_id)) AS "totalUniqueContributors",
+        coalesce(sum((added->'building')::numeric), 0) AS "totalNewBuildings",
+        coalesce(sum((added->'amenity')::numeric), 0) AS "totalNewAmenities",
+        coalesce(sum((added->'place')::numeric), 0) AS "totalNewPlaces",
+        coalesce(sum((added->'highway_km')::numeric), 0) AS "totalNewRoadKm",
+        '{params.frequency}' AS frequency,
+        '{params.hashtag}' AS hashtag
+        FROM t1 
+        WHERE '{params.hashtag}' = any(hashtags)
+        AND added IS NOT NULL OR modified IS NOT NULL
+        GROUP BY "startDate", "endDate"
+        ORDER BY "startDate" ASC;
+    """
     return query
 
 

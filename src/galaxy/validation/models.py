@@ -406,25 +406,24 @@ class OrganizationOutputtype(Enum):
 
 
 class OrganizationHashtagParams(BaseModel):
-    hashtags: conlist(str, min_items=1)
+    hashtag: str
     frequency: Frequency
     output_type: OrganizationOutputtype
     start_date: Optional[date] = None
     end_date: Optional[date] = None
 
-    @validator("hashtags", allow_reuse=True)
+    @validator("hashtag", allow_reuse=True)
     def check_hashtag_string(cls, value, values, **kwargs):
         """Validates hashtags"""
         regex = re.compile(SPECIAL_CHARACTER)
-        for v in value:
-            v = v.strip()
-            if len(v) < 2:
-                raise ValueError(
-                    "Hash tag value " + v + " is not allowed")
+        value = value.strip()
+        if len(value) < 2:
+            raise ValueError(
+                "Hash tag value " + value + " is not allowed")
 
-            if (regex.search(v) is not None):
-                raise ValueError(
-                    "Hash tag contains special character or space : " + v + " ,Which is not allowed")
+        if (regex.search(value) is not None):
+            raise ValueError(
+                "Hash tag contains special character or space : " + value + " ,Which is not allowed")
         return value
 
     @validator("end_date", allow_reuse=True)
@@ -447,7 +446,7 @@ class OrganizationHashtag(BaseModel):
     end_date: date
     total_new_buildings: int
     total_unique_contributors: int
-    total_new_road_meters: int
+    total_new_road_km: int
     total_new_amenities: int
     total_new_places: int
 
@@ -508,8 +507,8 @@ class UserStatistics(BaseModel):
     modified_buildings: int
     added_highway: int
     modified_highway: int
-    added_highway_meters: float
-    modified_highway_meters: float
+    added_highway_km: float
+    modified_highway_km: float
 
 class DataOutput(str, Enum):
     osm = "osm"

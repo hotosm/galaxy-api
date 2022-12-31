@@ -42,9 +42,7 @@ def get_hashtag_stats(params: OrganizationHashtagParams):
     Args:
 
             {
-            "hashtags": [
-                "string" # list of OpenStreetMap hashtags separated by comma
-            ],
+            "hashtag": "string" # OpenStreetMap hashtag,
             "frequency": "w", # supported :  WEEKLY = "w",MONTHLY = "m",
             QUARTERLY = "q",YEARLY = "y"
             "outputType": "json", # supported json and csv
@@ -74,9 +72,7 @@ def get_hashtag_stats(params: OrganizationHashtagParams):
     1. To get weekly stats
 
         {
-            "hashtags": [
-                "msf"
-            ],
+            "hashtag": "msf",
             "frequency": "w",
             "outputType": "json",
             "startDate": "2020-10-22",
@@ -85,9 +81,7 @@ def get_hashtag_stats(params: OrganizationHashtagParams):
     2. To get monthly stats
 
         {
-            "hashtags": [
-                "msf"
-            ],
+            "hashtags": "msf",
             "frequency": "m",
             "outputType": "json",
             "startDate": "2020-10-22",

@@ -92,8 +92,8 @@ def get_user_statistics(params: UserStatsParams):
             "modifiedBuildings": 0, #count
             "addedHighway": 0, #count
             "modifiedHighway": 0, #count
-            "addedHighwayMeters": 0, #meters
-            "modifiedHighwayMeters": 0 #meters
+            "addedHighwayKm": 0, #km
+            "modifiedHighwayKm": 0 #km
         }
 
     Example Request :

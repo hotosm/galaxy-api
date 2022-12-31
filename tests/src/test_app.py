@@ -289,7 +289,7 @@ def test_userstats_get_statistics_with_hashtags_query():
                        10985, 10988, 11190, 6658, 5644, 10913, 6495, 4229]
     }
     validated_params = UserStatsParams(**test_params)
-    expected_result = "\n    SELECT\n    sum((added->\'building\')::numeric) AS added_buildings,\n    sum((modified->\'building\')::numeric) AS modified_buildings,\n    sum((added->\'highway\')::numeric) AS added_highway,\n    sum((modified->\'highway\')::numeric) AS modified_highway,\n    sum((added->\'highway_km\')::numeric) AS added_highway_meters,\n    sum((modified->\'highway_km\')::numeric) AS modified_highway_meters\n    FROM changesets c\n    WHERE c.\"created_at\" between \'2021-08-27T09:00:00\'::timestamp AND \'2021-08-27T11:00:00\'::timestamp\n    AND user_id = 11593794\n    AND \'mapandchathour2021\'=ANY(hashtags);\n    "
+    expected_result = "\n    SELECT\n    sum((added->\'building\')::numeric) AS added_buildings,\n    sum((modified->\'building\')::numeric) AS modified_buildings,\n    sum((added->\'highway\')::numeric) AS added_highway,\n    sum((modified->\'highway\')::numeric) AS modified_highway,\n    sum((added->\'highway_km\')::numeric) AS added_highway_km,\n    sum((modified->\'highway_km\')::numeric) AS modified_highway_km\n    FROM changesets c\n    WHERE c.\"created_at\" between \'2021-08-27T09:00:00\'::timestamp AND \'2021-08-27T11:00:00\'::timestamp\n    AND user_id = 11593794\n    AND \'mapandchathour2021\'=ANY(hashtags);\n    "
     query_result = create_userstats_get_statistics_with_hashtags_query(
         validated_params, con, cur)
     assert query_result.encode('utf-8') == expected_result.encode('utf-8')
@@ -306,7 +306,7 @@ def test_userstats_get_statistics_query():
         "projectIds": [11224]
     }
     validated_params = UserStatsParams(**test_params)
-    expected_result = "\n    SELECT\n    sum((added->'building')::numeric) AS added_buildings,\n    sum((modified->'building')::numeric) AS modified_buildings,\n    sum((added->'highway')::numeric) AS added_highway,\n    sum((modified->'highway')::numeric) AS modified_highway,\n    sum((added->'highway_km')::numeric) AS added_highway_meters,\n    sum((modified->'highway_km')::numeric) AS modified_highway_meters\n    FROM changesets\n    WHERE created_at BETWEEN '2021-08-27T09:00:00'::timestamp AND '2021-08-27T11:00:00'::timestamp\n    AND user_id = 11593794;\n    "
+    expected_result = "\n    SELECT\n    sum((added->'building')::numeric) AS added_buildings,\n    sum((modified->'building')::numeric) AS modified_buildings,\n    sum((added->'highway')::numeric) AS added_highway,\n    sum((modified->'highway')::numeric) AS modified_highway,\n    sum((added->'highway_km')::numeric) AS added_highway_km,\n    sum((modified->'highway_km')::numeric) AS modified_highway_km\n    FROM changesets\n    WHERE created_at BETWEEN '2021-08-27T09:00:00'::timestamp AND '2021-08-27T11:00:00'::timestamp\n    AND user_id = 11593794;\n    "
     query_result = create_UserStats_get_statistics_query(
         validated_params, con, cur)
     assert query_result == expected_result.encode('utf-8')
