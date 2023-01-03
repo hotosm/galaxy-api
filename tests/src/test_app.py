@@ -19,15 +19,11 @@
 
 from src.galaxy import app
 import testing.postgresql
-import pytest
 from src.galaxy.validation import models as mapathon_validation
 from src.galaxy.query_builder import builder as mapathon_query_builder
-from src.galaxy.query_builder.builder import check_last_updated_osm_insights, check_last_updated_osm_underpass, check_last_updated_user_data_quality_underpass, check_last_updated_user_statistics_insights, generate_organization_hashtag_reports, create_UserStats_get_statistics_query, create_userstats_get_statistics_with_hashtags_query, generate_data_quality_TM_query, generate_data_quality_username_query, generate_data_quality_hashtag_reports, raw_currentdata_extraction_query
-from src.galaxy.validation.models import DataRecencyParams, OrganizationHashtagParams, UserStatsParams, DataQuality_TM_RequestParams, DataQuality_username_RequestParams, DataQualityHashtagParams, RawDataCurrentParams
-from src.galaxy import Output
+from src.galaxy.query_builder.builder import check_last_updated_changesets, check_last_updated_validation, generate_organization_hashtag_reports, create_UserStats_get_statistics_query, create_userstats_get_statistics_with_hashtags_query, generate_data_quality_TM_query, generate_data_quality_username_query, generate_data_quality_hashtag_reports
+from src.galaxy.validation.models import OrganizationHashtagParams, UserStatsParams, DataQuality_TM_RequestParams, DataQuality_username_RequestParams, DataQualityHashtagParams
 import os.path
-from json import dumps
-from pydantic import ValidationError as PydanticError
 
 # Reference to testing.postgresql db instance
 postgresql = None
@@ -91,31 +87,6 @@ def teardown_module(module):
         if os.path.isfile(filepath) is True:
             os.remove(filepath)
 
-
-# def test_db_create():
-    # createtable = """ CREATE TABLE test_table (id int, value varchar(256))"""
-    # print(database.executequery(createtable))
-
-
-# def test_db_insert():
-    # insertvalue = """ INSERT INTO test_table values(1, 'hello'), (2, 'namaste')"""
-    # print(database.executequery(insertvalue))
-
-
-def test_populate_data():
-    database.executequery(slurp('tests/src/fixtures/mapathon_summary.sql'))
-
-
-def test_mapathon_osm_history_mapathon_query_builder():
-    default_osm_history_query = '\n    WITH T1 AS(\n    SELECT user_id, id as changeset_id, user_name as username\n    FROM osm_changeset\n    WHERE "created_at" between \'2021-08-27T09:00:00\'::timestamp AND \'2021-08-27T11:00:00\'::timestamp AND (("tags" -> \'hashtags\') ~~* \'%hotosm-project-11224;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10042;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-9906;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-1381;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11203;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10681;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-8055;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-8732;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11193;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-7305;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11210;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10985;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10988;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11190;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-6658;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-5644;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10913;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-6495;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-4229;%\' OR ("tags" -> \'hashtags\') ~~* \'%mapandchathour2021;%\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11224 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10042 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-9906 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-1381 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11203 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10681 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-8055 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-8732 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11193 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-7305 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11210 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10985 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10988 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11190 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-6658 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-5644 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10913 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-6495 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-4229 %\' OR ("tags" -> \'comment\') ~~* \'%mapandchathour2021 %\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11224\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11224\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10042\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10042\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-9906\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-9906\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-1381\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-1381\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11203\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11203\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10681\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10681\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-8055\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-8055\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-8732\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-8732\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11193\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11193\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-7305\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-7305\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11210\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11210\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10985\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10985\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10988\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10988\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11190\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11190\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-6658\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-6658\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-5644\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-5644\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10913\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10913\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-6495\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-6495\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-4229\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-4229\' OR ("tags" -> \'hashtags\') ~~* \'%mapandchathour2021\' OR ("tags" -> \'comment\') ~~* \'%mapandchathour2021\')\n    )\n    SELECT (each(tags)).key AS feature, action, count(distinct id) AS count FROM osm_element_history AS t2, t1\n    WHERE t1.changeset_id = t2.changeset\n    GROUP BY feature, action ORDER BY count DESC\n    '
-    params = mapathon_validation.MapathonRequestParams(**test_param)
-    changeset_query, hashtag_filter, timestamp_filter = mapathon_query_builder.create_changeset_query(
-        params, con, cur)
-    result_osm_history_query = mapathon_query_builder.create_osm_history_query(
-        changeset_query, with_username=False)
-    assert result_osm_history_query == default_osm_history_query
-
-
 def test_data_quality_hashtags_query_builder():
     # No geometry, with hashtags.
     test_params = {
@@ -176,22 +147,8 @@ def test_data_quality_hashtags_query_builder():
 
     assert query == test_data_quality_hashtags_query_no_hashtags
 
-
-def test_mapathon_total_contributor_mapathon_query_builder():
-    default_total_contributor_query = '\n                SELECT COUNT(distinct user_id) as contributors_count\n                FROM osm_changeset\n                WHERE "created_at" between \'2021-08-27T09:00:00\'::timestamp AND \'2021-08-27T11:00:00\'::timestamp AND (("tags" -> \'hashtags\') ~~* \'%hotosm-project-11224;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10042;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-9906;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-1381;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11203;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10681;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-8055;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-8732;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11193;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-7305;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11210;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10985;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10988;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11190;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-6658;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-5644;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10913;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-6495;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-4229;%\' OR ("tags" -> \'hashtags\') ~~* \'%mapandchathour2021;%\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11224 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10042 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-9906 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-1381 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11203 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10681 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-8055 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-8732 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11193 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-7305 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11210 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10985 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10988 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11190 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-6658 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-5644 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10913 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-6495 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-4229 %\' OR ("tags" -> \'comment\') ~~* \'%mapandchathour2021 %\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11224\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11224\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10042\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10042\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-9906\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-9906\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-1381\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-1381\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11203\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11203\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10681\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10681\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-8055\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-8055\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-8732\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-8732\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11193\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11193\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-7305\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-7305\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11210\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11210\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10985\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10985\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10988\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10988\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11190\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11190\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-6658\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-6658\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-5644\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-5644\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10913\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10913\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-6495\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-6495\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-4229\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-4229\' OR ("tags" -> \'hashtags\') ~~* \'%mapandchathour2021\' OR ("tags" -> \'comment\') ~~* \'%mapandchathour2021\')\n            '
-    params = mapathon_validation.MapathonRequestParams(**test_param)
-    changeset_query, hashtag_filter, timestamp_filter = mapathon_query_builder.create_changeset_query(
-        params, con, cur)
-    result_total_contributor_query = f"""
-                SELECT COUNT(distinct user_id) as contributors_count
-                FROM osm_changeset
-                WHERE {timestamp_filter} AND ({hashtag_filter})
-            """
-    assert result_total_contributor_query == default_total_contributor_query
-
-
 def test_mapathon_users_contributors_mapathon_query_builder():
-    default_users_contributors_query = '\n    WITH T1 AS(\n    SELECT user_id, id as changeset_id, user_name as username\n    FROM osm_changeset\n    WHERE "created_at" between \'2021-08-27T09:00:00\'::timestamp AND \'2021-08-27T11:00:00\'::timestamp AND (("tags" -> \'hashtags\') ~~* \'%hotosm-project-11224;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10042;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-9906;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-1381;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11203;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10681;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-8055;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-8732;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11193;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-7305;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11210;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10985;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10988;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11190;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-6658;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-5644;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10913;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-6495;%\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-4229;%\' OR ("tags" -> \'hashtags\') ~~* \'%mapandchathour2021;%\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11224 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10042 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-9906 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-1381 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11203 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10681 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-8055 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-8732 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11193 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-7305 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11210 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10985 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10988 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11190 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-6658 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-5644 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10913 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-6495 %\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-4229 %\' OR ("tags" -> \'comment\') ~~* \'%mapandchathour2021 %\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11224\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11224\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10042\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10042\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-9906\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-9906\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-1381\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-1381\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11203\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11203\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10681\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10681\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-8055\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-8055\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-8732\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-8732\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11193\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11193\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-7305\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-7305\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11210\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11210\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10985\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10985\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10988\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10988\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-11190\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-11190\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-6658\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-6658\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-5644\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-5644\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-10913\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-10913\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-6495\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-6495\' OR ("tags" -> \'hashtags\') ~~* \'%hotosm-project-4229\' OR ("tags" -> \'comment\') ~~* \'%hotosm-project-4229\' OR ("tags" -> \'hashtags\') ~~* \'%mapandchathour2021\' OR ("tags" -> \'comment\') ~~* \'%mapandchathour2021\')\n    ),\n    T2 AS (\n        SELECT (each(tags)).key AS feature,\n            user_id,\n            username,\n            count(distinct id) AS count\n        FROM osm_element_history AS t2, t1\n        WHERE t1.changeset_id    = t2.changeset\n        GROUP BY feature, user_id, username\n    ),\n    T3 AS (\n        SELECT user_id,\n            username,\n            SUM(count) AS total_buildings\n        FROM T2\n        WHERE feature = \'building\'\n        GROUP BY user_id, username\n    )\n    SELECT user_id,\n        username,\n        total_buildings,\n        public.editors_per_user(user_id,\n        \'2021-08-27T09:00:00\',\n        \'2021-08-27T11:00:00\') AS editors\n    FROM T3;\n    '
+    default_users_contributors_query = '\n        with t0 as (\n        SELECT user_id, array_agg(distinct (editor)) as editor\n            FROM changesets c\n            WHERE added->\'building\' is not null\n            and created_at BETWEEN \'2021-08-27T09:00:00\' AND \'2021-08-27T11:00:00\'\n            group by user_id\n        ),\n        t1 as (\n            SELECT added->\'building\' as added_buildings, user_id, username\n            FROM changesets c\n            INNER JOIN users u ON u.id = c.user_id\n            WHERE added->\'building\' is not null\n            and created_at BETWEEN 2021-08-27T09:00:00\' AND \'2021-08-27T11:00:00\'\n            group by user_id, username, added_buildings\n        )\n        select t1.user_id, username, sum(added_buildings::numeric) as total_buildings, editor from t1\n        inner join t0 on t0.user_id = t1.user_id\n        group by t1.user_id, username, editor;\n    '
     params = mapathon_validation.MapathonRequestParams(**test_param)
     changeset_query, _, _ = mapathon_query_builder.create_changeset_query(params, con,
                                                                           cur)
@@ -220,43 +177,6 @@ def test_mapathon_users_time_spent_mapping_and_validating_query_builder():
 
     assert result_time_mapping_query == default_time_mapping_query
     assert result_time_validating_query == default_time_validating_query
-
-
-def test_mapathon_summary():
-    params = mapathon_validation.MapathonRequestParams(**test_param)
-    changeset_query, hashtag_filter, timestamp_filter = mapathon_query_builder.create_changeset_query(
-        params, con, cur)
-    result_osm_history_query = mapathon_query_builder.create_osm_history_query(
-        changeset_query, with_username=False)
-
-    result = database.executequery(result_osm_history_query)
-    expected_report = [['building', 'create', 827], ['natural', 'create', 117], ['building', 'modify', 27], ['highway', 'modify', 19], ['highway', 'create', 17], ['name', 'modify', 15], ['landuse', 'modify', 9], ['surface', 'modify', 8], ['addr:street', 'modify', 6], ['plinthlevel:height', 'modify', 6], ['roof:material', 'modify', 6], ['visual:condition', 'modify', 6], ['building:form', 'modify', 6], ['building:levels', 'modify', 6], ['building:material', 'modify', 6], [
-        'landuse', 'create', 5], ['water', 'create', 4], ['natural', 'modify', 4], ['maxspeed', 'modify', 2], ['source', 'modify', 2], ['water', 'modify', 1], ['damage:event', 'modify', 1], ['ford', 'create', 1], ['ford', 'modify', 1], ['idp:camp_site', 'modify', 1], ['int_ref', 'modify', 1], ['man_made', 'modify', 1], ['name:en', 'modify', 1], ['name:ne', 'modify', 1], ['ref', 'modify', 1], ['shop', 'modify', 1], ['source:geometry', 'modify', 1], ['addr:housenumber', 'modify', 1]]
-    assert result == expected_report
-
-
-def test_output_JSON():
-    """Function to test to_json functionality of Output Class """
-    global summary_query
-    summary_query = """ WITH T1 AS(
-    SELECT user_id, id as changeset_id, user_name as username
-    FROM osm_changeset
-    WHERE "created_at" between '2021-08-27T09:00:00'::timestamp AND '2021-08-27T11:00:00'::timestamp AND (("tags" -> 'hashtags') ~~* '%hotosm-project-11224 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-10042 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-9906 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-1381 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-11203 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-10681 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-8055 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-8732 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-11193 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-7305 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-11210 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-10985 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-10988 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-11190 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-6658 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-5644 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-10913 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-6495 %' OR ("tags" -> 'hashtags') ~~* '%hotosm-project-4229 %' OR ("tags" -> 'hashtags') ~~* '%mapandchathour2021 %' OR ("tags" -> 'comment') ~~* '%hotosm-project-11224;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-10042;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-9906;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-1381;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-11203;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-10681;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-8055;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-8732;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-11193;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-7305;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-11210;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-10985;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-10988;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-11190;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-6658;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-5644;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-10913;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-6495;%' OR ("tags" -> 'comment') ~~* '%hotosm-project-4229;%' OR ("tags" -> 'comment') ~~* '%mapandchathour2021;%')
-    )
-    SELECT (each(tags)).key AS feature, action, count(distinct id) AS count FROM osm_element_history AS t2, t1
-    WHERE t1.changeset_id = t2.changeset
-    GROUP BY feature, action ORDER BY count DESC;"""
-    exp_result = '[{"feature":"building","action":"create","count":78},{"feature":"highway","action":"modify","count":6},{"feature":"natural","action":"create","count":5},{"feature":"water","action":"create","count":4},{"feature":"highway","action":"create","count":4},{"feature":"name:en","action":"modify","count":1},{"feature":"name:ne","action":"modify","count":1},{"feature":"name","action":"modify","count":1},{"feature":"ref","action":"modify","count":1},{"feature":"source","action":"modify","count":1},{"feature":"int_ref","action":"modify","count":1}]'
-    jsonresult = Output(summary_query, con).to_JSON()
-    assert jsonresult == exp_result
-
-
-def test_output_CSV():
-    """Function to test to_CSV functionality of Output Class """
-    global filepath
-    filepath = 'tests/src/fixtures/csv_output.csv'
-    Output(summary_query, con).to_CSV(filepath)
-    assert os.path.isfile(filepath) is True
 
 
 def test_data_quality_TM_query():
@@ -369,7 +289,7 @@ def test_userstats_get_statistics_with_hashtags_query():
                        10985, 10988, 11190, 6658, 5644, 10913, 6495, 4229]
     }
     validated_params = UserStatsParams(**test_params)
-    expected_result = """\n    select\n        sum(added_buildings)::int as added_buildings,\n        sum(modified_buildings)::int as  modified_buildings,\n        sum(added_highway)::int as added_highway,\n        sum(modified_highway)::int as modified_highway,\n        sum(added_highway_meters)::float as added_highway_meters,\n        sum(modified_highway_meters)::float as modified_highway_meters\n    from\n        public.all_changesets_stats s\n    join public.osm_changeset c on\n        c.id = s.changeset\n    where\n        c."created_at" between \'2021-08-27T09:00:00\'::timestamp AND \'2021-08-27T11:00:00\'::timestamp\n        and c.user_id = 11593794 and ((c."tags" -> \'hashtags\') ~~* \'%hotosm-project-11224;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-10042;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-9906;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-1381;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-11203;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-10681;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-8055;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-8732;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-11193;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-7305;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-11210;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-10985;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-10988;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-11190;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-6658;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-5644;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-10913;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-6495;%\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-4229;%\' OR (c."tags" -> \'hashtags\') ~~* \'%mapandchathour2021;%\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-11224 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-10042 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-9906 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-1381 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-11203 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-10681 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-8055 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-8732 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-11193 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-7305 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-11210 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-10985 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-10988 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-11190 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-6658 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-5644 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-10913 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-6495 %\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-4229 %\' OR (c."tags" -> \'comment\') ~~* \'%mapandchathour2021 %\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-11224\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-11224\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-10042\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-10042\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-9906\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-9906\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-1381\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-1381\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-11203\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-11203\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-10681\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-10681\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-8055\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-8055\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-8732\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-8732\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-11193\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-11193\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-7305\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-7305\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-11210\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-11210\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-10985\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-10985\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-10988\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-10988\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-11190\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-11190\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-6658\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-6658\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-5644\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-5644\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-10913\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-10913\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-6495\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-6495\' OR (c."tags" -> \'hashtags\') ~~* \'%hotosm-project-4229\' OR (c."tags" -> \'comment\') ~~* \'%hotosm-project-4229\' OR (c."tags" -> \'hashtags\') ~~* \'%mapandchathour2021\' OR (c."tags" -> \'comment\') ~~* \'%mapandchathour2021\')"""
+    expected_result = "\n    SELECT\n    sum((added->\'building\')::numeric) AS added_buildings,\n    sum((modified->\'building\')::numeric) AS modified_buildings,\n    sum((added->\'highway\')::numeric) AS added_highway,\n    sum((modified->\'highway\')::numeric) AS modified_highway,\n    sum((added->\'highway_km\')::numeric) AS added_highway_km,\n    sum((modified->\'highway_km\')::numeric) AS modified_highway_km\n    FROM changesets c\n    WHERE c.\"created_at\" between \'2021-08-27T09:00:00\'::timestamp AND \'2021-08-27T11:00:00\'::timestamp\n    AND user_id = 11593794\n    AND \'mapandchathour2021\'=ANY(hashtags);\n    "
     query_result = create_userstats_get_statistics_with_hashtags_query(
         validated_params, con, cur)
     assert query_result.encode('utf-8') == expected_result.encode('utf-8')
@@ -386,7 +306,7 @@ def test_userstats_get_statistics_query():
         "projectIds": [11224]
     }
     validated_params = UserStatsParams(**test_params)
-    expected_result = """\n    select\n        sum(added_buildings)::int as added_buildings,\n        sum(modified_buildings)::int as  modified_buildings,\n        sum(added_highway)::int as added_highway,\n        sum(modified_highway)::int as modified_highway,\n        sum(added_highway_meters)::float as added_highway_meters,\n        sum(modified_highway_meters)::float as modified_highway_meters\n    from\n        public.all_changesets_stats s\n    join public.osm_changeset c on\n        c.id = s.changeset\n    where\n        c.created_at between '2021-08-27T09:00:00'::timestamp and '2021-08-27T11:00:00'::timestamp\n        and c.user_id = 11593794"""
+    expected_result = "\n    SELECT\n    sum((added->'building')::numeric) AS added_buildings,\n    sum((modified->'building')::numeric) AS modified_buildings,\n    sum((added->'highway')::numeric) AS added_highway,\n    sum((modified->'highway')::numeric) AS modified_highway,\n    sum((added->'highway_km')::numeric) AS added_highway_km\n    sum((modified->'highway_km')::numeric) AS modified_highway_km\n    FROM changesets\n    WHERE created_at BETWEEN '2021-08-27T09:00:00'::timestamp AND '2021-08-27T11:00:00'::timestamp\n    AND user_id = 11593794;\n    "
     query_result = create_UserStats_get_statistics_query(
         validated_params, con, cur)
     assert query_result == expected_result.encode('utf-8')
@@ -397,29 +317,14 @@ def test_organization_hashtag_weekly_query():
     """
     # for weekly stat
     test_params = {
-        "hashtags": [
-            "msf"
-        ],
+        "hashtag": "msf",
         "frequency": "w",
         "outputType": "json",
-        "startDate": "2020-10-22",
-        "endDate": "2020-12-22"
+        "startDate": "2022-10-20",
+        "endDate": "2022-12-22"
     }
     validated_params = OrganizationHashtagParams(**test_params)
-    expected_query = """with t1 as (
-            select id, name
-            from hashtag
-            where name = 'msf'
-            ),
-            t2 as (
-                select name as hashtag, type as frequency , start_date , end_date , total_new_buildings , total_uq_contributors as total_unique_contributors , total_new_road_m as total_new_road_meters,
-            total_new_amenity as total_new_amenities, total_new_places as total_new_places
-            from hashtag_stats join t1 on hashtag_id=t1.id
-            where type='w' and start_date >= '2020-10-22T12:00:00.000'::timestamp and end_date <= '2020-12-22T12:00:00.000'::timestamp
-            )
-            select *
-            from t2
-            order by hashtag"""
+    expected_query = '\n    with t1 as (\n        select * from changesets where\n        closed_at BETWEEN \'2022-10-20\' AND \'2022-12-22\'\n    )\n    SELECT \n        date_trunc(\'week\', closed_at::date) AS "startDate",\n        date_trunc(\'week\', closed_at::date) + interval \'1 WEEK\' AS "endDate",\n        COUNT(distinct (user_id)) AS "totalUniqueContributors",\n        coalesce(sum((added->\'building\')::numeric), 0) AS "totalNewBuildings",\n        coalesce(sum((added->\'amenity\')::numeric), 0) AS "totalNewAmenities",\n        coalesce(sum((added->\'place\')::numeric), 0) AS "totalNewPlaces",\n        coalesce(sum((added->\'highway_km\')::numeric), 0) AS "totalNewRoadKm",\n        \'w\' AS frequency,\n        \'msf\' AS hashtag\n        FROM t1 \n        WHERE \'msf\' = any(hashtags)\n        AND added IS NOT NULL OR modified IS NOT NULL\n        GROUP BY "startDate", "endDate"\n        ORDER BY "startDate" ASC;\n    '
     query_result = generate_organization_hashtag_reports(cur, validated_params)
     assert query_result.encode('utf-8') == expected_query.encode('utf-8')
 
@@ -427,202 +332,21 @@ def test_organization_hashtag_weekly_query():
 def test_organization_hashtag_monthly_query():
     # for monthly stat
     month_param = {
-        "hashtags": [
-            "msf"
-        ],
+        "hashtag": "msf",
         "frequency": "m",
         "outputType": "json",
-        "startDate": "2020-10-22",
-        "endDate": "2020-12-22"
+        "startDate": "2022-01-20",
+        "endDate": "2022-12-22"
     }
     validated_params = OrganizationHashtagParams(**month_param)
-    expected_query = """with t1 as (
-            select id, name
-            from hashtag
-            where name = 'msf'
-            ),
-            t2 as (
-                select name as hashtag, type as frequency , start_date , end_date , total_new_buildings , total_uq_contributors as total_unique_contributors , total_new_road_m as total_new_road_meters,
-            total_new_amenity as total_new_amenities, total_new_places as total_new_places
-            from hashtag_stats join t1 on hashtag_id=t1.id
-            where type='m' and start_date >= '2020-10-22T00:00:00.000'::timestamp and end_date <= '2020-12-22T00:00:00.000'::timestamp
-            )
-            select *
-            from t2
-            order by hashtag"""
+    expected_query = expected_query = '\n    with t1 as (\n        select * from changesets where\n        closed_at BETWEEN \'2022-01-20\' AND \'2022-12-22\'\n    )\n    SELECT \n        date_trunc(\'month\', closed_at::date) AS "startDate",\n        date_trunc(\'month\', closed_at::date) + interval \'1 MONTH\' AS "endDate",\n        COUNT(distinct (user_id)) AS "totalUniqueContributors",\n        coalesce(sum((added->\'building\')::numeric), 0) AS "totalNewBuildings",\n        coalesce(sum((added->\'amenity\')::numeric), 0) AS "totalNewAmenities",\n        coalesce(sum((added->\'place\')::numeric), 0) AS "totalNewPlaces",\n        coalesce(sum((added->\'highway_km\')::numeric), 0) AS "totalNewRoadKm",\n        \'m\' AS frequency,\n        \'msf\' AS hashtag\n        FROM t1 \n        WHERE \'msf\' = any(hashtags)\n        AND added IS NOT NULL OR modified IS NOT NULL\n        GROUP BY "startDate", "endDate"\n        ORDER BY "startDate" ASC;\n    '
     query_result = generate_organization_hashtag_reports(cur, validated_params)
     assert query_result.encode('utf-8') == expected_query.encode('utf-8')
 
-
-def test_rawdata_current_snapshot_geometry_query():
-
-    test_param = {
-        "geometry": {
-            "type": "Polygon",
-            "coordinates": [
-                [
-                    [
-                        84.92431640625,
-                        27.766190642387496
-                    ],
-                    [
-                        85.31982421875,
-                        27.766190642387496
-                    ],
-                    [
-                        85.31982421875,
-                        28.02592458049937
-                    ],
-                    [
-                        84.92431640625,
-                        28.02592458049937
-                    ],
-                    [
-                        84.92431640625,
-                        27.766190642387496
-                    ]
-                ]
-            ]
-        },
-        "outputType": "GeoJSON",
-        "filters": {"tags": {"point": {"amenity": ["shop", "toilet"]}}, "attributes": {"point": ["name"]}}
-    }
-    validated_params = RawDataCurrentParams(**test_param)
-    expected_query = """select ST_AsGeoJSON(t0.*) from (select
-                    osm_id , tags ->> 'name' as name , geom
-                    from
-                        nodes
-                    where
-                        ST_intersects(ST_GEOMFROMGEOJSON('{"coordinates": [[[84.92431640625, 27.766190642387496], [85.31982421875, 27.766190642387496], [85.31982421875, 28.02592458049937], [84.92431640625, 28.02592458049937], [84.92431640625, 27.766190642387496]]], "type": "Polygon"}'), geom) and (tags ->>  'amenity' IN ( 'shop'  ,  'toilet' ))) t0 UNION ALL select ST_AsGeoJSON(t1.*) from (select
-            osm_id ,version,tags::text as tags,changeset,timestamp::text,geom
-            from
-                ways_line
-            where
-                ST_intersects(ST_GEOMFROMGEOJSON('{"coordinates": [[[84.92431640625, 27.766190642387496], [85.31982421875, 27.766190642387496], [85.31982421875, 28.02592458049937], [84.92431640625, 28.02592458049937], [84.92431640625, 27.766190642387496]]], "type": "Polygon"}'), geom)) t1 UNION ALL select ST_AsGeoJSON(t2.*) from (select
-            osm_id ,version,tags::text as tags,changeset,timestamp::text,geom
-            from
-                ways_poly
-            where
-                ST_intersects(ST_GEOMFROMGEOJSON('{"coordinates": [[[84.92431640625, 27.766190642387496], [85.31982421875, 27.766190642387496], [85.31982421875, 28.02592458049937], [84.92431640625, 28.02592458049937], [84.92431640625, 27.766190642387496]]], "type": "Polygon"}'), geom)) t2 UNION ALL select ST_AsGeoJSON(t3.*) from (select
-            osm_id ,version,tags::text as tags,changeset,timestamp::text,geom
-            from
-                relations
-            where
-                ST_intersects(ST_GEOMFROMGEOJSON('{"coordinates": [[[84.92431640625, 27.766190642387496], [85.31982421875, 27.766190642387496], [85.31982421875, 28.02592458049937], [84.92431640625, 28.02592458049937], [84.92431640625, 27.766190642387496]]], "type": "Polygon"}'), geom)) t3"""
-    query_result = raw_currentdata_extraction_query(
-        validated_params, None, dumps(dict(validated_params.geometry)))
-    assert query_result.encode('utf-8') == expected_query.encode('utf-8')
-
-
-def test_rawdata_current_snapshot_normal_query():
-    test_param = {
-        "geometry": {
-            "type": "Polygon",
-            "coordinates": [
-                [
-                    [
-                        84.92431640625,
-                        27.766190642387496
-                    ],
-                    [
-                        85.31982421875,
-                        27.766190642387496
-                    ],
-                    [
-                        85.31982421875,
-                        28.02592458049937
-                    ],
-                    [
-                        84.92431640625,
-                        28.02592458049937
-                    ],
-                    [
-                        84.92431640625,
-                        27.766190642387496
-                    ]
-                ]
-            ]
-        },
-        "outputType": "GeoJSON"
-    }
-    validated_params = RawDataCurrentParams(**test_param)
-    expected_query = """select ST_AsGeoJSON(t0.*) from (select
-                    osm_id ,version,tags::text as tags,changeset,timestamp::text,geom
-                    from
-                        nodes
-                    where
-                        ST_intersects(ST_GEOMFROMGEOJSON('{"coordinates": [[[84.92431640625, 27.766190642387496], [85.31982421875, 27.766190642387496], [85.31982421875, 28.02592458049937], [84.92431640625, 28.02592458049937], [84.92431640625, 27.766190642387496]]], "type": "Polygon"}'), geom)) t0 UNION ALL select ST_AsGeoJSON(t1.*) from (select
-            osm_id ,version,tags::text as tags,changeset,timestamp::text,geom
-            from
-                ways_line
-            where
-                ST_intersects(ST_GEOMFROMGEOJSON('{"coordinates": [[[84.92431640625, 27.766190642387496], [85.31982421875, 27.766190642387496], [85.31982421875, 28.02592458049937], [84.92431640625, 28.02592458049937], [84.92431640625, 27.766190642387496]]], "type": "Polygon"}'), geom)) t1 UNION ALL select ST_AsGeoJSON(t2.*) from (select
-            osm_id ,version,tags::text as tags,changeset,timestamp::text,geom
-            from
-                ways_poly
-            where
-                ST_intersects(ST_GEOMFROMGEOJSON('{"coordinates": [[[84.92431640625, 27.766190642387496], [85.31982421875, 27.766190642387496], [85.31982421875, 28.02592458049937], [84.92431640625, 28.02592458049937], [84.92431640625, 27.766190642387496]]], "type": "Polygon"}'), geom)) t2 UNION ALL select ST_AsGeoJSON(t3.*) from (select
-            osm_id ,version,tags::text as tags,changeset,timestamp::text,geom
-            from
-                relations
-            where
-                ST_intersects(ST_GEOMFROMGEOJSON('{"coordinates": [[[84.92431640625, 27.766190642387496], [85.31982421875, 27.766190642387496], [85.31982421875, 28.02592458049937], [84.92431640625, 28.02592458049937], [84.92431640625, 27.766190642387496]]], "type": "Polygon"}'), geom)) t3"""
-    query_result = raw_currentdata_extraction_query(
-        validated_params, None, dumps(dict(validated_params.geometry)))
-    assert query_result.encode('utf-8') == expected_query.encode('utf-8')
-
-
-def test_attribute_filter_rawdata():
-    test_param = {"geometry": {"type": "Polygon", "coordinates": [[[83.502574, 27.569073], [83.502574, 28.332758], [85.556417, 28.332758], [85.556417, 27.569073], [
-        83.502574, 27.569073]]]}, "outputType": "GeoJSON", "geometryType": ["polygon", "line"], "filters": {"attributes": {"line": ["name"]}, "tags": {"all_geometry": {"building": ["yes"]}}}}
-    validated_params = RawDataCurrentParams(**test_param)
-    expected_query = """select ST_AsGeoJSON(t0.*) from (select
-            osm_id , tags ->> 'name' as name , geom
-            from
-                ways_line
-            where
-                ST_intersects(ST_GEOMFROMGEOJSON('{"coordinates": [[[83.502574, 27.569073], [83.502574, 28.332758], [85.556417, 28.332758], [85.556417, 27.569073], [83.502574, 27.569073]]], "type": "Polygon"}'), geom) and (tags ->> 'building' = 'yes')) t0 UNION ALL select ST_AsGeoJSON(t1.*) from (select
-                osm_id , tags ->> 'name' as name , geom
-                from
-                    relations
-                where
-                    ST_intersects(ST_GEOMFROMGEOJSON('{"coordinates": [[[83.502574, 27.569073], [83.502574, 28.332758], [85.556417, 28.332758], [85.556417, 27.569073], [83.502574, 27.569073]]], "type": "Polygon"}'), geom) and (tags ->> 'building' = 'yes') and (geometrytype(geom)='MULTILINESTRING')) t1 UNION ALL select ST_AsGeoJSON(t2.*) from (select
-            osm_id ,version,tags::text as tags,changeset,timestamp::text,geom
-            from
-                ways_poly
-            where
-                (grid = 1187 OR grid = 1188) and ST_intersects(ST_GEOMFROMGEOJSON('{"coordinates": [[[83.502574, 27.569073], [83.502574, 28.332758], [85.556417, 28.332758], [85.556417, 27.569073], [83.502574, 27.569073]]], "type": "Polygon"}'), geom) and (tags ->> 'building' = 'yes')) t2 UNION ALL select ST_AsGeoJSON(t3.*) from (select
-            osm_id ,version,tags::text as tags,changeset,timestamp::text,geom
-            from
-                relations
-            where
-                ST_intersects(ST_GEOMFROMGEOJSON('{"coordinates": [[[83.502574, 27.569073], [83.502574, 28.332758], [85.556417, 28.332758], [85.556417, 27.569073], [83.502574, 27.569073]]], "type": "Polygon"}'), geom) and (tags ->> 'building' = 'yes') and (geometrytype(geom)='POLYGON' or geometrytype(geom)='MULTIPOLYGON')) t3"""
-    query_result = raw_currentdata_extraction_query(
-        validated_params, [[1187], [1188]], dumps(dict(validated_params.geometry)))
-    assert query_result.encode('utf-8') == expected_query.encode('utf-8')
-
-
-def test_osm_recency_query():
-    expected_insights_query = 'SELECT (NOW() - last_timestamp) AS "last_updated" FROM public.osm_element_history_state;'
-    assert check_last_updated_osm_insights() == expected_insights_query
-    expected_underpass_query = 'SELECT (NOW() - MAX(updated_at)) AS "last_updated" FROM public.changesets;'
-    assert check_last_updated_osm_underpass() == expected_underpass_query
-
-    test_incorrect_params = {
-        "dataSource": "random",
-        "dataOutput": "statistics"
-    }
-
-    with pytest.raises(PydanticError) as error:
-        DataRecencyParams(**test_incorrect_params)
-    assert error.type is PydanticError
-
-
 def test_user_statistics_recency_query():
-    expected_insights_query = 'SELECT (now() - max(timestamp)) FROM public.osm_element_history where changeset = (SELECT max(changeset) FROM public.all_changesets_stats);'
-    assert check_last_updated_user_statistics_insights() == expected_insights_query
-
+    expected_insights_query = 'SELECT (NOW() - MAX(updated_at)) AS "last_updated" FROM public.changesets;'
+    assert check_last_updated_changesets() == expected_insights_query
 
 def test_user_data_quality_recency_query():
-    expected_underpass_query = 'SELECT (now() - max(updated_at)) FROM public.changesets;'
-    assert check_last_updated_user_data_quality_underpass() == expected_underpass_query
+    expected_underpass_query = 'SELECT (NOW() - MAX(timestamp)) AS "last_updated" FROM public.validation;'
+    assert check_last_updated_validation() == expected_underpass_query

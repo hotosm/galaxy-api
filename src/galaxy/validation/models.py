@@ -25,7 +25,7 @@ from datetime import datetime, date, timedelta
 from pydantic import BaseModel as PydanticModel
 
 from pydantic import conlist
-from geojson_pydantic import Feature, FeatureCollection, Point, Polygon, MultiPolygon
+from geojson_pydantic import Feature, FeatureCollection, Point, Polygon
 from enum import Enum
 from area import area
 import re
@@ -150,7 +150,6 @@ class MapathonRequestParams(TimeStampParams):
 
     project_ids: List[int]
     hashtags: List[str]
-    source: Optional[str]
 
     @validator("hashtags", allow_reuse=True)
     def check_hashtag_filter(cls, value, values, **kwargs):
@@ -168,15 +167,6 @@ class MapathonRequestParams(TimeStampParams):
             raise ValueError("Hashtag Contains Duplicate entries")
 
         return value
-
-    @validator("source", allow_reuse=True)
-    def check_source(cls, value, **kwargs):
-        '''checks the either source  is supported or not '''
-        if value is None or value == "insights" or value == "underpass":
-            return value
-        else:
-            raise ValueError('Source ' + str(value) + " does not exist")
-
 
 class UsersListParams(BaseModel):
     user_names: List[str]
@@ -343,12 +333,6 @@ class DataQualityHashtagParams(TimeStampParams):
 
         return value
 
-
-class Source(Enum):
-    UNDERPASS = "underpass"
-    INSIGHT = "insights"
-
-
 class TrainingOrganisations(BaseModel):
     id: int
     name: str
@@ -422,25 +406,24 @@ class OrganizationOutputtype(Enum):
 
 
 class OrganizationHashtagParams(BaseModel):
-    hashtags: conlist(str, min_items=1)
+    hashtag: str
     frequency: Frequency
     output_type: OrganizationOutputtype
     start_date: Optional[date] = None
     end_date: Optional[date] = None
 
-    @validator("hashtags", allow_reuse=True)
+    @validator("hashtag", allow_reuse=True)
     def check_hashtag_string(cls, value, values, **kwargs):
         """Validates hashtags"""
         regex = re.compile(SPECIAL_CHARACTER)
-        for v in value:
-            v = v.strip()
-            if len(v) < 2:
-                raise ValueError(
-                    "Hash tag value " + v + " is not allowed")
+        value = value.strip()
+        if len(value) < 2:
+            raise ValueError(
+                "Hash tag value " + value + " is not allowed")
 
-            if (regex.search(v) is not None):
-                raise ValueError(
-                    "Hash tag contains special character or space : " + v + " ,Which is not allowed")
+        if (regex.search(value) is not None):
+            raise ValueError(
+                "Hash tag contains special character or space : " + value + " ,Which is not allowed")
         return value
 
     @validator("end_date", allow_reuse=True)
@@ -463,7 +446,7 @@ class OrganizationHashtag(BaseModel):
     end_date: date
     total_new_buildings: int
     total_unique_contributors: int
-    total_new_road_meters: int
+    total_new_road_km: int
     total_new_amenities: int
     total_new_places: int
 
@@ -473,14 +456,6 @@ class TeamMemberFunction(Enum):
 
     MANAGER = 1
     MEMBER = 2
-
-
-class RawDataOutputType (Enum):
-    GEOJSON = "GeoJSON"
-    KML = "KML"
-    SHAPEFILE = "shp"
-    MBTILES = "MBTILES"  # fully experimental for now
-
 
 class HashtagParams(BaseModel):
     hashtags: Optional[List[str]]
@@ -499,64 +474,6 @@ class HashtagParams(BaseModel):
                 raise ValueError(
                     "Hash tag contains special character or space : " + v + " ,Which is not allowed")
         return value
-
-
-RAWDATA_HISTORICAL_POLYGON_AREA = 100
-
-
-class RawDataHistoricalParams(HashtagParams):
-    from_timestamp: datetime
-    to_timestamp: datetime
-    geometry: MultiPolygon
-    output_type: Optional[RawDataOutputType]
-    # geometry_type : Optional[List[FeatureTypeRawData]] = None
-
-    @validator("geometry", allow_reuse=True)
-    def check_geometry_area(cls, value, values):
-        """Validates area of geometry"""
-        cd = json.loads(value.json())["coordinates"]
-        for x in range(len(cd)):
-            geom_cd = '{"type":"Polygon","coordinates":%s}' % cd[x]
-            area_m2 = area(geom_cd)
-
-            area_km2 = area_m2 * 1E-6
-            print(area_km2)
-            if area_km2 > RAWDATA_HISTORICAL_POLYGON_AREA:
-                raise ValueError(
-                    "Polygon Area %s km^2 is higher than 100 km^2" % area_km2)
-        return value
-
-    @validator("to_timestamp", allow_reuse=True)
-    def check_date_difference(cls, value, values, **kwargs):
-        """Validates    date difference between two values"""
-        start_date = values.get("from_timestamp")
-        hashtags = values.get("hashtags")
-        difference = value - start_date
-        if start_date > value:
-            raise ValueError("From and To timestamps are not in order")
-        if hashtags is not None or len(hashtags) != 0:
-            acceptedday = 365
-        else:
-            acceptedday = 180
-        if difference > timedelta(days=acceptedday):
-            raise ValueError(
-                f"""You can pass date interval up to maximum {acceptedday} Months""")
-        return value
-
-
-class GeometryTypeRawData (Enum):
-    POINT = "point"
-    LINESTRING = "linestring"
-    POLYGON = "polygon"
-    MULTILINESTRING = "multilinestring"
-    MULTIPOLYGON = "multipolygon"
-
-
-class OsmElementRawData(Enum):
-    NODES = "nodes"
-    WAYS = "ways"
-    RELATIONS = "relations"
-
 
 class SupportedFilters(Enum):
     TAGS = "tags"
@@ -579,74 +496,6 @@ class SupportedGeometryFilters(Enum):
         """Checks if the value is supported"""
         return value in cls._value2member_map_
 
-
-class RawDataCurrentParams(BaseModel):
-    output_type: Optional[RawDataOutputType] = None
-    file_name: Optional[str] = None
-    geometry: Union[Polygon, MultiPolygon]
-    filters: Optional[dict] = None
-    geometry_type: Optional[List[SupportedGeometryFilters]] = None
-
-    @validator("filters", allow_reuse=True)
-    def check_value(cls, value, values):
-        """Checks given fields"""
-        for key, v in value.items():
-            if SupportedFilters.has_value(key):  # check for tags or attributes
-                # check if value is of dict type or not for tags and attributes
-                if isinstance(v, dict):
-                    for k, val in v.items():
-                        # now checking either point line or polygon
-                        if SupportedGeometryFilters.has_value(k):
-                            if key == SupportedFilters.TAGS.value:  # if it is tag then value should be of dictionary
-                                if isinstance(val, dict):
-                                    # if it is dictionary it should be of type key:['value']
-                                    for osmkey, osmvalue in val.items():
-                                        if isinstance(osmvalue, list):
-                                            pass
-                                        else:
-                                            raise ValueError(
-                                                f"""Osm value --{osmvalue}-- should be inside List : {key}-{k}-{val}-{osmvalue}""")
-                                else:
-                                    raise ValueError(
-                                        f"""Type of {val} filter in {key} - {k} - {val} should be dictionary""")
-                            elif key == SupportedFilters.ATTRIBUTES.value:
-                                # if it is attributes then value should be of list i.e. "point":[]
-                                if isinstance(val, list):
-                                    pass
-                                else:
-                                    raise ValueError(
-                                        f"""Type of {val} filter in {key} - {k} - {val} should be list""")
-                        else:
-                            raise ValueError(
-                                f"""Value {k} for filter {key} - {k} is not supported""")
-                else:
-                    raise ValueError(
-                        f"""Value for filter {key} should be of dict Type""")
-            else:
-                raise ValueError(
-                    f"""Filter {key} is not supported. Supported filters are 'tags' and 'attributes'""")
-        return value
-
-    @validator("geometry", always=True)
-    def check_geometry_area(cls, value, values):
-        """Validates geom area_m2"""
-        area_m2 = area(json.loads(value.json()))
-        area_km2 = area_m2 * 1E-6
-
-        RAWDATA_CURRENT_POLYGON_AREA = int(config.get(
-            "API_CONFIG", "max_area", fallback=100000))
-
-        output_type = values.get("output_type")
-        if output_type:
-            # for mbtiles ogr2ogr does very worst job when area gets bigger we should write owr own or find better approach for larger area
-            if output_type is RawDataOutputType.MBTILES.value:
-                RAWDATA_CURRENT_POLYGON_AREA = 2  # we need to figure out how much tile we are generating before passing request on the basis of bounding box we can restrict user , right now relation contains whole country for now restricted to this area but can not query relation will take ages because that will intersect with country boundary : need to clip it
-        if area_km2 > RAWDATA_CURRENT_POLYGON_AREA:
-            raise ValueError(
-                f"""Polygon Area {int(area_km2)} Sq.KM is higher than Threshold : {RAWDATA_CURRENT_POLYGON_AREA} Sq.KM""")
-        return value
-
-
 class UserRole(Enum):
     ADMIN = 1
     STAFF = 2
@@ -658,23 +507,14 @@ class UserStatistics(BaseModel):
     modified_buildings: int
     added_highway: int
     modified_highway: int
-    added_highway_meters: float
-    modified_highway_meters: float
-
-
-class DataSource(str, Enum):
-    UNDERPASS = "underpass"
-    INSIGHTS = "insight"
-
+    added_highway_km: float
+    modified_highway_km: float
 
 class DataOutput(str, Enum):
     osm = "osm"
     mapathon_statistics = "mapathon_statistics"
     data_quality = "data_quality"
     user_statistics = "user_statistics"
-    raw_data = "raw_data"
-
 
 class DataRecencyParams(BaseModel):
-    data_source: DataSource
     data_output: DataOutput

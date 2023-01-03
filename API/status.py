@@ -23,7 +23,7 @@
 
 from fastapi import APIRouter
 from fastapi_versioning import version
-from src.galaxy.validation.models import DataOutput, DataSource, DataRecencyParams
+from src.galaxy.validation.models import DataOutput, DataRecencyParams
 from src.galaxy.app import Status
 router = APIRouter(prefix="/status")
 
@@ -37,7 +37,6 @@ def data_recency_status(params: DataRecencyParams):
         params (DataRecencyParams):
 
         {
-          "dataSource": "string" #the database from which the stats/data are got,
           "dataOutput": "string" #the kind of stats/data
         }
 
@@ -50,7 +49,6 @@ def data_recency_status(params: DataRecencyParams):
     Example Request:
 
         {
-          "dataSource": "underpass",
           "dataOutput": "mapathon_statistics"
         }
 
@@ -70,8 +68,5 @@ def data_recency_status(params: DataRecencyParams):
         result = db.get_user_statistics_recency()
     elif (params.data_output == DataOutput.data_quality.value):
         result = db.get_user_data_quality_recency()
-    elif params.data_output == DataOutput.raw_data.value:
-        result = db.get_raw_data_recency(
-        ) if params.data_source is DataSource.UNDERPASS.value else None
 
     return {"time_difference": str(result) if result else None}

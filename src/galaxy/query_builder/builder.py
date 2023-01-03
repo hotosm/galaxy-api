@@ -19,8 +19,7 @@
 
 from psycopg2 import sql
 from json import dumps
-import re
-from ..validation.models import Frequency, SupportedFilters, SupportedGeometryFilters
+from ..validation.models import Frequency
 HSTORE_COLUMN = "tags"
 
 
@@ -111,157 +110,68 @@ def create_changeset_query(params, conn, cur):
 
     return changeset_query, hashtag_filter, timestamp_filter
 
-
-def create_osm_history_query(changeset_query, with_username):
-    '''returns osm history query'''
-
-    column_names = [
-        f"(each({HSTORE_COLUMN})).key AS feature",
-        "action",
-        "count(distinct id) AS count",
-    ]
-    group_by_names = ["feature", "action"]
-
-    if with_username is True:
-        column_names.append("username")
-        group_by_names.extend(["user_id", "username"])
-
-    order_by = (["count DESC"]
-                if with_username is False else ["user_id", "action", "count"])
-    order_by = ", ".join(order_by)
-
-    columns = ", ".join(column_names)
-    group_by_columns = ", ".join(group_by_names)
-
-    query = f"""
-    WITH T1 AS({changeset_query})
-    SELECT {columns} FROM osm_element_history AS t2, t1
-    WHERE t1.changeset_id = t2.changeset
-    GROUP BY {group_by_columns} ORDER BY {order_by}
-    """
-
-    return query
-
-
-# def create_userstats_get_statistics_with_hashtags_query(params, con, cur):
-#     changeset_query, _, _ = create_changeset_query(params, con, cur)
-
-#     # Include user_id filter.
-#     changeset_query = f"{changeset_query} AND user_id = {params.user_id}"
-
-#     base_query = """
-#             SELECT (each(osh.tags)).key as feature, osh.action, count(distinct osh.id)
-#             FROM osm_element_history AS osh, T1
-#             WHERE osh.timestamp BETWEEN %s AND %s
-#             AND osh.uid = %s
-#             AND osh.type in ('way','relation')
-#             AND T1.changeset_id = osh.changeset
-#             GROUP BY feature, action
-#         """
-#     items = (params.from_timestamp, params.to_timestamp, params.user_id)
-#     base_query = cur.mogrify(base_query, items).decode()
-
-#     query = f"""
-#             WITH T1 AS (
-#                 {changeset_query}
-#             )
-#             {base_query}
-#         """
-#     return query
-
-
-# def create_UserStats_get_statistics_query(params, con, cur):
-#     query = """
-#             SELECT (each(tags)).key as feature, action, count(distinct id)
-#             FROM osm_element_history
-#             WHERE timestamp BETWEEN %s AND %s
-#             AND uid = %s
-#             AND type in ('way','relation')
-#             GROUP BY feature, action
-#         """
-
-#     items = (params.from_timestamp, params.to_timestamp, params.user_id)
-#     query = cur.mogrify(query, items)
-#     return query
-
-
 def create_userstats_get_statistics_with_hashtags_query(params, con, cur):
-    hashtag_filter = create_hashtag_filter_query(
-        params.project_ids, params.hashtags, cur, con, prefix=True)
+
+    filter_hashtags = create_hashtagfilter_underpass(params.hashtags, "hashtags")
     timestamp_filter = create_timestamp_filter_query(
         "created_at", params.from_timestamp, params.to_timestamp, cur, prefix=True)
     query = f"""
-    select
-        sum(added_buildings)::int as added_buildings,
-        sum(modified_buildings)::int as  modified_buildings,
-        sum(added_highway)::int as added_highway,
-        sum(modified_highway)::int as modified_highway,
-        sum(added_highway_meters)::float as added_highway_meters,
-        sum(modified_highway_meters)::float as modified_highway_meters
-    from
-        public.all_changesets_stats s
-    join public.osm_changeset c on
-        c.id = s.changeset
-    where
-        {timestamp_filter}
-        and c.user_id = {params.user_id} and ({hashtag_filter})"""
+    SELECT
+    sum((added->'building')::numeric) AS added_buildings,
+    sum((modified->'building')::numeric) AS modified_buildings,
+    sum((added->'highway')::numeric) AS added_highway,
+    sum((modified->'highway')::numeric) AS modified_highway,
+    sum((added->'highway_km')::numeric) AS added_highway_km,
+    sum((modified->'highway_km')::numeric) AS modified_highway_km
+    FROM changesets c
+    WHERE {timestamp_filter}
+    AND user_id = {params.user_id}
+    AND {filter_hashtags};
+    """
     return query
-
 
 def create_UserStats_get_statistics_query(params, con, cur):
     query = """
-    select
-        sum(added_buildings)::int as added_buildings,
-        sum(modified_buildings)::int as  modified_buildings,
-        sum(added_highway)::int as added_highway,
-        sum(modified_highway)::int as modified_highway,
-        sum(added_highway_meters)::float as added_highway_meters,
-        sum(modified_highway_meters)::float as modified_highway_meters
-    from
-        public.all_changesets_stats s
-    join public.osm_changeset c on
-        c.id = s.changeset
-    where
-        c.created_at between %s and %s
-        and c.user_id = %s"""
+    SELECT
+    sum((added->'building')::numeric) AS added_buildings,
+    sum((modified->'building')::numeric) AS modified_buildings,
+    sum((added->'highway')::numeric) AS added_highway,
+    sum((modified->'highway')::numeric) AS modified_highway,
+    sum((added->'highway_km')::numeric) AS added_highway_km
+    sum((modified->'highway_km')::numeric) AS modified_highway_km
+    FROM changesets
+    WHERE created_at BETWEEN %s AND %s
+    AND user_id = %s;
+    """
     items = (params.from_timestamp, params.to_timestamp, params.user_id)
     query = cur.mogrify(query, items)
     return query
 
-
 def create_users_contributions_query(params, changeset_query):
     '''returns user contribution query'''
 
-    # project_ids = ",".join([str(p) for p in params.project_ids])
     from_timestamp = params.from_timestamp.isoformat()
     to_timestamp = params.to_timestamp.isoformat()
 
     query = f"""
-    WITH T1 AS({changeset_query}),
-    T2 AS (
-        SELECT (each(tags)).key AS feature,
-            user_id,
-            username,
-            count(distinct id) AS count
-        FROM osm_element_history AS t2, t1
-        WHERE t1.changeset_id    = t2.changeset
-        GROUP BY feature, user_id, username
-    ),
-    T3 AS (
-        SELECT user_id,
-            username,
-            SUM(count) AS total_buildings
-        FROM T2
-        WHERE feature = 'building'
-        GROUP BY user_id, username
-    )
-    SELECT user_id,
-        username,
-        total_buildings,
-        public.editors_per_user(user_id,
-        '{from_timestamp}',
-        '{to_timestamp}') AS editors
-    FROM T3;
+        with t0 as (
+        SELECT user_id, array_agg(distinct (editor)) as editor
+            FROM changesets c
+            WHERE added->'building' is not null
+            and created_at BETWEEN '{from_timestamp}' AND '{to_timestamp}'
+            group by user_id
+        ),
+        t1 as (
+            SELECT added->'building' as added_buildings, user_id, username
+            FROM changesets c
+            INNER JOIN users u ON u.id = c.user_id
+            WHERE added->'building' is not null
+            and created_at BETWEEN {from_timestamp}' AND '{to_timestamp}'
+            group by user_id, username, added_buildings
+        )
+        select t1.user_id, username, sum(added_buildings::numeric) as total_buildings, editor from t1
+        inner join t0 on t0.user_id = t1.user_id
+        group by t1.user_id, username, editor;
     """
     return query
 
@@ -703,40 +613,39 @@ def generate_training_query(filter_query):
 
 
 def generate_organization_hashtag_reports(cur, params):
-    hashtags = []
-    for p in params.hashtags:
-        hashtags.append("name = '" + str(p.strip()).lower() + "'")
-    filter_hashtags = " or ".join(hashtags)
-    # filter_hashtags = cur.mogrify(sql.SQL(filter_hashtags), params.hashtags).decode()
-    t2_query = f"""select name as hashtag, type as frequency , start_date , end_date , total_new_buildings , total_uq_contributors as total_unique_contributors , total_new_road_m as total_new_road_meters,
-            total_new_amenity as total_new_amenities, total_new_places as total_new_places
-            from hashtag_stats join t1 on hashtag_id=t1.id
-            where type='{params.frequency}'"""
-    # month_time = """0:00:00"""
-    # week_time = """12:00:00"""
-    if params.end_date is not None or params.start_date is not None:
-        timestamp = []
-        time = f"""{"12" if params.frequency is Frequency.WEEKLY.value else "00" }"""
-        if params.start_date:
-            timestamp.append(
-                f"""start_date >= '{params.start_date}T{time}:00:00.000'::timestamp""")
-        if params.end_date:
-            timestamp.append(
-                f"""end_date <= '{params.end_date}T{time}:00:00.000'::timestamp""")
-        filter_timestamp = " and ".join(timestamp)
-        t2_query += f""" and {filter_timestamp}"""
-    query = f"""with t1 as (
-            select id, name
-            from hashtag
-            where {filter_hashtags}
-            ),
-            t2 as (
-                {t2_query}
-            )
-            select *
-            from t2
-            order by hashtag"""
-    # print(query)
+    if params.frequency == "w":
+        frequency = "week"
+        interval = "1 WEEK"
+    elif params.frequency == "m":
+        frequency = "month"
+        interval = "1 MONTH"
+    elif params.frequency == "q":
+        frequency = "quarter"
+        interval = "3 MONTH"
+    elif params.frequency == "y":
+        frequency = "year"
+        interval = "1 YEAR"
+    query = f"""
+    with t1 as (
+        select * from changesets where
+        closed_at BETWEEN '{params.start_date}' AND '{params.end_date}'
+    )
+    SELECT 
+        date_trunc('{frequency}', closed_at::date) AS "startDate",
+        date_trunc('{frequency}', closed_at::date) + interval '{interval}' AS "endDate",
+        COUNT(distinct (user_id)) AS "totalUniqueContributors",
+        coalesce(sum((added->'building')::numeric), 0) AS "totalNewBuildings",
+        coalesce(sum((added->'amenity')::numeric), 0) AS "totalNewAmenities",
+        coalesce(sum((added->'place')::numeric), 0) AS "totalNewPlaces",
+        coalesce(sum((added->'highway_km')::numeric), 0) AS "totalNewRoadKm",
+        '{params.frequency}' AS frequency,
+        '{params.hashtag}' AS hashtag
+        FROM t1 
+        WHERE '{params.hashtag}' = any(hashtags)
+        AND added IS NOT NULL OR modified IS NOT NULL
+        GROUP BY "startDate", "endDate"
+        ORDER BY "startDate" ASC;
+    """
     return query
 
 
@@ -862,488 +771,10 @@ def generate_list_teams_metadata(team_id):
 
     return query
 
-
-def raw_historical_data_extraction_query(cur, conn, params):
-    geometry_dump = dumps(dict(params.geometry))
-    geom_filter = f"ST_intersects(ST_GEOMFROMGEOJSON('{geometry_dump}'), geom)"
-    timestamp_filter = cur.mogrify(sql.SQL(
-        "created_at BETWEEN %s AND %s"), (params.from_timestamp, params.to_timestamp)).decode()
-    t1 = f"""select
-        id as changeset_id
-    from
-        osm_changeset
-    where
-        {geom_filter}
-        and ({timestamp_filter})"""
-    if params.hashtags:
-        hashtag_filter = create_hashtag_filter_query(
-            "", params.hashtags, cur, conn)
-        t1 += f"""and ({hashtag_filter})"""
-    query = f"""with t1 as(
-                {t1}
-            ),
-            t2 as (
-            select
-                *,
-                case
-                    when oeh.nds is not null then ST_AsGeoJSON(public.construct_geometry(oeh.nds,
-                    oeh.id,
-                    oeh."timestamp"))
-                    else ST_AsGeoJSON(ST_MakePoint(oeh.lon,oeh.lat))
-                end as geometry
-            from
-                osm_element_history oeh,
-                t1
-            where
-                oeh.changeset = t1.changeset_id
-                and oeh."action" != 'delete'
-                and oeh."type" != 'relation'
-                and oeh.version = (
-                    select
-                        max("version")
-                    from
-                        public.osm_element_history i
-                    where
-                        i.id = oeh.id and i.type = oeh.type
-                        and i."timestamp"< '{params.to_timestamp}'::timestamptz )
-                )
-            select
-                t2.id,
-                t2."type",
-                t2.tags::text as tags,
-                t2.changeset as changeset_id,
-                t2."timestamp"::text as created_at,
-                t2.uid as user_id,
-                t2."version" ,
-                t2."action" ,
-                t2.grid ,
-                t2.geometry
-            from
-                t2"""
-    if params.geometry_type:
-        geometry_type = []
-        for p in params.geometry_type:
-            geometry_type.append(f"""t2.tags?'{p}'""")
-        filter_geometry_type = " or ".join(geometry_type)
-        query += f"""
-        where
-            {filter_geometry_type}"""
-    # print(query)
-    return query
-
-
-# Rawdata extraction Block
-
-def get_grid_id_query(geometry_dump):
-
-    base_query = f"""select
-                        b.poly_id
-                    from
-                        grid b
-                    where
-                        ST_Intersects(ST_GEOMFROMGEOJSON('{geometry_dump}') ,
-                        b.geom)"""
-    return base_query
-
-
-def get_query_as_geojson(query_list, ogr_export=None):
-    table_base_query = []
-    if ogr_export:
-        table_base_query = query_list
-    else:
-        for i in range(len(query_list)):
-            table_base_query.append(
-                f"""select ST_AsGeoJSON(t{i}.*) from ({query_list[i]}) t{i}""")
-    final_query = " UNION ALL ".join(table_base_query)
-    return final_query
-
-
-def create_geom_filter(geom):
-    """generates geometry intersection filter - Rawdata extraction"""
-    geometry_dump = dumps(dict(geom))
-    return f"""ST_intersects(ST_GEOMFROMGEOJSON('{geometry_dump}'), geom)"""
-
-
-def format_file_name_str(input_str):
-    # Fixme I need to check every possible special character that can comeup on osm tags
-    input_str = re.sub("\s+", "-", input_str)  # putting - in every space  # noqa
-    input_str = re.sub(":", "-", input_str)  # putting - in every : value
-    input_str = re.sub("_", "-", input_str)  # putting - in every _ value
-
-    return input_str
-
-
-def remove_spaces(input_str):
-    # Fixme I need to check every possible special character that can comeup on osm tags
-    input_str = re.sub("\s+", "_", input_str)  # putting _ in every space # noqa
-    input_str = re.sub(":", "_", input_str)  # putting _ in every : value
-    return input_str
-
-
-def create_column_filter(columns, create_schema=False):
-    """generates column filter , which will be used to filter column in output will be used on select query - Rawdata extraction"""
-    if len(columns) > 0:
-        filter_col = []
-        filter_col.append('osm_id')
-        if create_schema:
-            schema = {}
-            schema['osm_id'] = 'int64'
-        for cl in columns:
-            if cl != '':
-                filter_col.append(
-                    f"""tags ->> '{cl.strip()}' as {remove_spaces(cl.strip())}""")
-                if create_schema:
-                    schema[remove_spaces(cl.strip())] = 'str'
-        filter_col.append('geom')
-        select_condition = " , ".join(filter_col)
-        if create_schema:
-            return select_condition, schema
-        return select_condition
-    else:
-        return """osm_id ,tags::text as tags,changeset,timestamp::text,geom"""  # this is default attribute that we will deliver to user if user defines his own attribute column then those will be appended with osm_id only
-
-
-def generate_tag_filter_query(filter):
-    incoming_filter = []
-    for key, value in filter.items():
-
-        if len(value) > 1:
-            v_l = []
-            for lil in value:
-                v_l.append(f""" '{lil.strip()}' """)
-            v_l_join = " , ".join(v_l)
-            value_tuple = f"""({v_l_join})"""
-
-            k = f""" '{key.strip()}' """
-            incoming_filter.append(
-                """tags ->> """ + k + """IN """ + value_tuple + """""")
-        elif len(value) == 1:
-            incoming_filter.append(
-                f"""tags ->> '{key.strip()}' = '{value[0].strip()}'""")
-        else:
-            incoming_filter.append(f"""tags ? '{key.strip()}'""")
-    tag_filter = " OR ".join(incoming_filter)
-    return tag_filter
-
-
-def extract_geometry_type_query(params, ogr_export=False):
-    """used for specifically focused on export tool , this will generate separate queries for line point and polygon can be used on other datatype support - Rawdata extraction"""
-
-    geom_filter = create_geom_filter(params.geometry)
-    select_condition = """osm_id ,tags::text as tags,changeset,timestamp::text,geom"""  # this is default attribute that we will deliver to user if user defines his own attribute column then those will be appended with osm_id only
-    schema = {'osm_id': 'int64', 'tags': 'str',
-              'changeset': 'int64', 'timestamp': 'str'}
-    query_point, query_line, query_poly = None, None, None
-    attribute_filter, master_attribute_filter, master_tag_filter, poly_attribute_filter, poly_tag_filter = None, None, None, None, None
-    point_schema, line_schema, poly_schema = None, None, None
-    tags, attributes, point_attribute_filter, line_attribute_filter, poly_attribute_filter, master_attribute_filter, point_tag_filter, line_tag_filter, poly_tag_filter, master_tag_filter = None, None, None, None, None, None, None, None, None, None
-    if params.filters:
-        tags, attributes, point_attribute_filter, line_attribute_filter, poly_attribute_filter, master_attribute_filter, point_tag_filter, line_tag_filter, poly_tag_filter, master_tag_filter = extract_attributes_tags(
-            params.filters)
-
-    if master_attribute_filter:  # if no specific point , line or poly filter is not passed master columns filter will be used , if master columns is also empty then above default select statement will be used
-        select_condition, schema = create_column_filter(
-            master_attribute_filter, create_schema=True)
-    if master_tag_filter:
-        attribute_filter = generate_tag_filter_query(master_tag_filter)
-    if params.geometry_type is None:  # fix me
-        params.geometry_type = ['point', 'line', 'polygon']
-
-    for type in params.geometry_type:
-        if type == SupportedGeometryFilters.POINT.value:
-            if point_attribute_filter:
-                select_condition, schema = create_column_filter(
-                    point_attribute_filter, create_schema=True)
-            query_point = f"""select
-                        {select_condition}
-                        from
-                            nodes
-                        where
-                            {geom_filter}"""
-            if point_tag_filter:
-                attribute_filter = generate_tag_filter_query(point_tag_filter)
-            if attribute_filter:
-                query_point += f""" and ({attribute_filter})"""
-            point_schema = schema
-
-            query_point = get_query_as_geojson(
-                [query_point], ogr_export=ogr_export)
-
-        if type == SupportedGeometryFilters.LINE.value:
-            query_line_list = []
-            if line_attribute_filter:
-                select_condition, schema = create_column_filter(
-                    line_attribute_filter, create_schema=True)
-            query_ways_line = f"""select
-                {select_condition}
-                from
-                    ways_line
-                where
-                    {geom_filter}"""
-            query_relations_line = f"""select
-                {select_condition}
-                from
-                    relations
-                where
-                    {geom_filter}"""
-            if line_tag_filter:
-                attribute_filter = generate_tag_filter_query(line_tag_filter)
-            if attribute_filter:
-                query_ways_line += f""" and ({attribute_filter})"""
-                query_relations_line += f""" and ({attribute_filter})"""
-            query_relations_line += """ and (geometrytype(geom)='MULTILINESTRING')"""
-            query_line_list.append(query_ways_line)
-            query_line_list.append(query_relations_line)
-            query_line = get_query_as_geojson(
-                query_line_list, ogr_export=ogr_export)
-            line_schema = schema
-
-        if type == SupportedGeometryFilters.POLYGON.value:
-            query_poly_list = []
-            if poly_attribute_filter:
-                select_condition, schema = create_column_filter(
-                    poly_attribute_filter, create_schema=True)
-            query_ways_poly = f"""select
-                {select_condition}
-                from
-                    ways_poly
-                where
-                    {geom_filter}"""
-            query_relations_poly = f"""select
-                {select_condition}
-                from
-                    relations
-                where
-                    {geom_filter}"""
-            if poly_tag_filter:
-                attribute_filter = generate_tag_filter_query(poly_tag_filter)
-            if attribute_filter:
-                query_ways_poly += f""" and ({attribute_filter})"""
-                query_relations_poly += f""" and ({attribute_filter})"""
-            query_relations_poly += """ and (geometrytype(geom)='POLYGON' or geometrytype(geom)='MULTIPOLYGON')"""
-            query_poly_list.append(query_ways_poly)
-            query_poly_list.append(query_relations_poly)
-            query_poly = get_query_as_geojson(
-                query_poly_list, ogr_export=ogr_export)
-            poly_schema = schema
-    return query_point, query_line, query_poly, point_schema, line_schema, poly_schema
-
-
-def extract_attributes_tags(filters):
-    tags = None
-    attributes = None
-    point_tag_filter = None
-    poly_tag_filter = None
-    line_tag_filter = None
-    master_tag_filter = None
-    point_attribute_filter = None
-    poly_attribute_filter = None
-    line_attribute_filter = None
-    master_attribute_filter = None
-    if filters:
-        for key, value in filters.items():
-            if key == SupportedFilters.TAGS.value:
-                if value:
-                    tags = value
-                    for k, v in value.items():
-                        if k == SupportedGeometryFilters.POINT.value:
-                            point_tag_filter = v
-                        if k == SupportedGeometryFilters.LINE.value:
-                            line_tag_filter = v
-                        if k == SupportedGeometryFilters.POLYGON.value:
-                            poly_tag_filter = v
-                        if k == SupportedGeometryFilters.ALLGEOM.value:
-                            master_tag_filter = v
-            if key == SupportedFilters.ATTRIBUTES.value:
-                if value:
-                    attributes = value
-                    for k, v in value.items():
-                        if k == SupportedGeometryFilters.POINT.value:
-                            point_attribute_filter = v
-                        if k == SupportedGeometryFilters.LINE.value:
-                            line_attribute_filter = v
-                        if k == SupportedGeometryFilters.POLYGON.value:
-                            poly_attribute_filter = v
-                        if k == SupportedGeometryFilters.ALLGEOM.value:
-                            master_attribute_filter = v
-
-    return tags, attributes, point_attribute_filter, line_attribute_filter, poly_attribute_filter, master_attribute_filter, point_tag_filter, line_tag_filter, poly_tag_filter, master_tag_filter
-
-
-def raw_currentdata_extraction_query(params, g_id, geometry_dump, ogr_export=False, select_all=False):
-    """Default function to support current snapshot extraction with all of the feature that galaxy has"""
-    geom_filter = f"""ST_intersects(ST_GEOMFROMGEOJSON('{geometry_dump}'), geom)"""
-    base_query = []
-
-    tags, attributes, point_attribute_filter, line_attribute_filter, poly_attribute_filter, master_attribute_filter, point_tag_filter, line_tag_filter, poly_tag_filter, master_tag_filter = None, None, None, None, None, None, None, None, None, None
-
-    point_select_condition = None
-    line_select_condition = None
-    poly_select_condition = None
-
-    point_tag = None
-    line_tag = None
-    poly_tag = None
-    master_tag = None
-    use_geomtype_in_relation = True
-
-    # query_table = []
-    if select_all:
-        select_condition = """osm_id,version,tags::text as tags,changeset,timestamp::text,geom"""   # FIXme have condition for displaying userinfo after user authentication
-    else:
-        select_condition = """osm_id ,version,tags::text as tags,changeset,timestamp::text,geom"""  # this is default attribute that we will deliver to user if user defines his own attribute column then those will be appended with osm_id only
-    point_select_condition = select_condition  # initializing default
-    line_select_condition = select_condition
-    poly_select_condition = select_condition
-
-    if params.filters:
-        tags, attributes, point_attribute_filter, line_attribute_filter, poly_attribute_filter, master_attribute_filter, point_tag_filter, line_tag_filter, poly_tag_filter, master_tag_filter = extract_attributes_tags(
-            params.filters)
-    if attributes:
-        if master_attribute_filter:
-            if len(master_attribute_filter) > 0:
-                select_condition = create_column_filter(
-                    master_attribute_filter)
-                # if master attribute is supplied it will be applied to other geom type as well even though value is supplied they will be ignored
-                point_select_condition = select_condition
-                line_select_condition = select_condition
-                poly_select_condition = select_condition
-        else:
-            if point_attribute_filter:
-                if len(point_attribute_filter) > 0:
-                    point_select_condition = create_column_filter(
-                        point_attribute_filter)
-            if line_attribute_filter:
-                if len(line_attribute_filter) > 0:
-                    line_select_condition = create_column_filter(
-                        line_attribute_filter)
-            if poly_attribute_filter:
-                if len(line_attribute_filter) > 0:
-                    poly_select_condition = create_column_filter(
-                        point_attribute_filter)
-    if tags:
-        if master_tag_filter:  # if master tag is supplied then other tags should be ignored and master tag will be used
-            master_tag = generate_tag_filter_query(master_tag_filter)
-            point_tag = master_tag
-            line_tag = master_tag
-            poly_tag = master_tag
-        else:
-            if point_tag_filter:
-                point_tag = generate_tag_filter_query(point_tag_filter)
-            if line_tag_filter:
-                line_tag = generate_tag_filter_query(line_tag_filter)
-            if poly_tag_filter:
-                poly_tag = generate_tag_filter_query(poly_tag_filter)
-
-# condition for geometry types
-    if params.geometry_type is None:
-        params.geometry_type = ["point", "line", "polygon"]
-    if SupportedGeometryFilters.ALLGEOM.value in params.geometry_type:
-        params.geometry_type = ["point", "line", "polygon"]
-    if SupportedGeometryFilters.POINT.value in params.geometry_type:
-        query_point = f"""select
-                    {point_select_condition}
-                    from
-                        nodes
-                    where
-                        {geom_filter}"""
-        if point_tag:
-            query_point += f""" and ({point_tag})"""
-        base_query.append(query_point)
-
-    if SupportedGeometryFilters.LINE.value in params.geometry_type:
-        query_ways_line = f"""select
-            {line_select_condition}
-            from
-                ways_line
-            where
-                {geom_filter}"""
-        if line_tag:
-            query_ways_line += f""" and ({line_tag})"""
-        base_query.append(query_ways_line)
-
-        if SupportedGeometryFilters.POLYGON.value in params.geometry_type:
-            if poly_select_condition == line_select_condition and poly_tag == line_tag:
-                use_geomtype_in_relation = False
-
-        if use_geomtype_in_relation:
-            query_relations_line = f"""select
-                {line_select_condition}
-                from
-                    relations
-                where
-                    {geom_filter}"""
-            if line_tag:
-                query_relations_line += f""" and ({line_tag})"""
-            query_relations_line += """ and (geometrytype(geom)='MULTILINESTRING')"""
-            base_query.append(query_relations_line)
-
-    if SupportedGeometryFilters.POLYGON.value in params.geometry_type:
-        if g_id:
-            grid_filter_base = [
-                f"""grid = {ind[0]}""" for ind in g_id]
-            grid_filter = " OR ".join(grid_filter_base)
-            where_clause = f"""({grid_filter}) and {geom_filter}"""
-        else:
-            where_clause = f"""{geom_filter}"""
-        query_ways_poly = f"""select
-            {poly_select_condition}
-            from
-                ways_poly
-            where
-                {where_clause}"""
-        if poly_tag:
-            query_ways_poly += f""" and ({poly_tag})"""
-        base_query.append(query_ways_poly)
-        query_relations_poly = f"""select
-            {select_condition}
-            from
-                relations
-            where
-                {geom_filter}"""
-        if poly_tag:
-            query_relations_poly += f""" and ({poly_tag})"""
-        if use_geomtype_in_relation:
-            query_relations_poly += """ and (geometrytype(geom)='POLYGON' or geometrytype(geom)='MULTIPOLYGON')"""
-        base_query.append(query_relations_poly)
-
-    if ogr_export:
-        # since query will be different for ogr exports and geojson exports because for ogr exports we don't need to grab each row in geojson
-        table_base_query = base_query
-    else:
-        table_base_query = []
-        for i in range(len(base_query)):
-            table_base_query.append(
-                f"""select ST_AsGeoJSON(t{i}.*) from ({base_query[i]}) t{i}""")
-    final_query = " UNION ALL ".join(table_base_query)
-    return final_query
-
-
-def check_last_updated_rawdata():
-    query = """select NOW()-importdate as last_updated from planet_osm_replication_status"""
-    return query
-
-
-def check_last_updated_mapathon_insights():
-    query = """SELECT (NOW() - last_timestamp) AS "last_updated" FROM public.osm_element_history_state;"""
-    return query
-
-
-def check_last_updated_osm_insights():
-    query = """SELECT (NOW() - last_timestamp) AS "last_updated" FROM public.osm_element_history_state;"""
-    return query
-
-
-def check_last_updated_user_statistics_insights():
-    query = """SELECT (now() - max(timestamp)) FROM public.osm_element_history where changeset = (SELECT max(changeset) FROM public.all_changesets_stats);"""
-    return query
-
-
-def check_last_updated_osm_underpass():
+def check_last_updated_changesets():
     query = """SELECT (NOW() - MAX(updated_at)) AS "last_updated" FROM public.changesets;"""
     return query
 
-
-def check_last_updated_user_data_quality_underpass():
-    query = """SELECT (now() - max(updated_at)) FROM public.changesets;"""
+def check_last_updated_validation():
+    query = """SELECT (NOW() - MAX(timestamp)) AS "last_updated" FROM public.validation;"""
     return query

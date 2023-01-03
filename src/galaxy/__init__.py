@@ -1,4 +1,4 @@
-from .app import Mapathon, Database, Output, DataQuality, RawData
+from .app import Mapathon, Database, Output, DataQuality
 from .config import config
 
 
@@ -7,6 +7,5 @@ __all__ = [
     'Database',
     'Output',
     'DataQuality',
-    'config',
-    'RawData'
+    'config'
 ]

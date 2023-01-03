@@ -44,45 +44,11 @@ else:
         "logging config is not supported , Supported fields are : debug,error,warning,info , Logging to default :debug")
     level = logging.DEBUG
 
-logging.getLogger("fiona").propagate = False  # disable fiona logging
 logging.basicConfig(format='%(asctime)s - %(message)s', level=level)
-logging.getLogger('boto3').propagate = False  # disable boto3 logging
 
 logger = logging.getLogger('galaxy')
 
-export_path = config.get('API_CONFIG', 'export_path', fallback=None)
-if export_path is None:
-    export_path = "exports/"
-if export_path.endswith("/") is False:
-    export_path = f"""{export_path}/"""
-
 shp_limit = int(config.get('API_CONFIG', 'shp_limit', fallback=4096))
-
-
-AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, BUCKET_NAME = None, None, None
-# check either to use connection pooling or not
-use_connection_pooling = config.getboolean(
-    "API_CONFIG", "use_connection_pooling", fallback=False)
-
-# check either to use s3 raw data exports file uploading or not
-file_upload_method = config.get(
-    "EXPORT_UPLOAD", "FILE_UPLOAD_METHOD", fallback='disk').lower()
-if file_upload_method == "s3":
-    use_s3_to_upload = True
-    try:
-        AWS_ACCESS_KEY_ID = config.get("EXPORT_UPLOAD", "AWS_ACCESS_KEY_ID")
-        AWS_SECRET_ACCESS_KEY = config.get(
-            "EXPORT_UPLOAD", "AWS_SECRET_ACCESS_KEY")
-    except Exception as ex:
-        logging.debug(ex)
-        logging.debug("No aws credentials supplied")
-    BUCKET_NAME = config.get(
-        "EXPORT_UPLOAD", "BUCKET_NAME", fallback="exports-stage.hotosm.org")
-elif file_upload_method not in ["s3", "disk"]:
-    logging.error(
-        "value not supported for file_upload_method ,switching to default disk method")
-    use_s3_to_upload = False
-
 
 def get_db_connection_params(dbIdentifier: str) -> dict:
     """Return a python dict that can be passed to psycopg2 connections
@@ -96,7 +62,7 @@ def get_db_connection_params(dbIdentifier: str) -> dict:
 
     """
 
-    ALLOWED_SECTION_NAMES = ('INSIGHTS', 'TM', 'UNDERPASS', 'RAW_DATA')
+    ALLOWED_SECTION_NAMES = ('TM', 'UNDERPASS')
 
     if dbIdentifier not in ALLOWED_SECTION_NAMES:
         logging.error(
